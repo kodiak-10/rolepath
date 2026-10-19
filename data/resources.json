@@ -1,0 +1,731 @@
+[
+  {
+    "id": "res001",
+    "title": "Python 官方中文教程",
+    "skills": [
+      "Python"
+    ],
+    "type": "官方文档",
+    "difficulty": "入门",
+    "minutes": 60,
+    "language": "中文",
+    "url": "https://docs.python.org/zh-cn/3/tutorial/",
+    "description": "Python 基础语法、流程控制、函数、模块。",
+    "practice": "使用 Python 读取 CSV，并计算两列数值的统计结果。"
+  },
+  {
+    "id": "res002",
+    "title": "MySQL 8.4 官方参考手册",
+    "skills": [
+      "SQL"
+    ],
+    "type": "官方文档",
+    "difficulty": "基础-进阶",
+    "minutes": 75,
+    "language": "英文",
+    "url": "https://dev.mysql.com/doc/refman/8.4/en/",
+    "description": "SQL SELECT、WHERE、JOIN、GROUP BY、聚合函数等参考。",
+    "practice": "在样例订单表上查询每个品类订单数和销售额；用给定答案比对。"
+  },
+  {
+    "id": "res003",
+    "title": "SQLBolt 交互式 SQL 练习",
+    "skills": [
+      "SQL"
+    ],
+    "type": "交互课程",
+    "difficulty": "入门",
+    "minutes": 60,
+    "language": "英文",
+    "url": "https://sqlbolt.com/",
+    "description": "逐步练习 SQL SELECT、过滤、JOIN、聚合。",
+    "practice": "完成分组统计关卡，提交可运行的 SQL 和输出截图。"
+  },
+  {
+    "id": "res004",
+    "title": "Pandas 官方入门教程",
+    "skills": [
+      "数据分析",
+      "Python"
+    ],
+    "type": "官方教程",
+    "difficulty": "基础",
+    "minutes": 75,
+    "language": "英文",
+    "url": "https://pandas.pydata.org/docs/getting_started/intro_tutorials/index.html",
+    "description": "DataFrame、读取文件、分组、数据处理。",
+    "practice": "使用数据表计算转化率或分组平均值，写出三条业务观察。"
+  },
+  {
+    "id": "res005",
+    "title": "Pandas GroupBy 用户指南",
+    "skills": [
+      "数据分析",
+      "Python"
+    ],
+    "type": "官方文档",
+    "difficulty": "基础-进阶",
+    "minutes": 45,
+    "language": "英文",
+    "url": "https://pandas.pydata.org/docs/user_guide/groupby.html",
+    "description": "分组、聚合、转换与过滤。",
+    "practice": "对样例数据按日期分组并计算指标变化。"
+  },
+  {
+    "id": "res006",
+    "title": "Microsoft Excel 帮助与学习",
+    "skills": [
+      "Excel"
+    ],
+    "type": "官方文档",
+    "difficulty": "入门",
+    "minutes": 45,
+    "language": "中文/多语言",
+    "url": "https://support.microsoft.com/zh-cn/excel",
+    "description": "Excel 公式、筛选、表格、数据透视表。",
+    "practice": "从订单表制作按月份的销售额透视表。"
+  },
+  {
+    "id": "res007",
+    "title": "Atlassian：Product requirements document",
+    "skills": [
+      "PRD",
+      "需求分析"
+    ],
+    "type": "实践指南",
+    "difficulty": "基础",
+    "minutes": 60,
+    "language": "英文",
+    "url": "https://www.atlassian.com/agile/product-management/requirements",
+    "description": "产品需求文档、需求背景、范围、用户故事与验收标准。",
+    "practice": "针对一个真实痛点撰写 1 页 PRD，含目标、边界和验收条件。"
+  },
+  {
+    "id": "res008",
+    "title": "Atlassian：User stories",
+    "skills": [
+      "需求分析",
+      "PRD"
+    ],
+    "type": "实践指南",
+    "difficulty": "基础",
+    "minutes": 45,
+    "language": "英文",
+    "url": "https://www.atlassian.com/agile/project-management/user-stories",
+    "description": "用户故事的表达、拆解和验收。",
+    "practice": "选定一个功能，写出三条用户故事和可测试的验收标准。"
+  },
+  {
+    "id": "res009",
+    "title": "OpenAI Prompt engineering 指南",
+    "skills": [
+      "LLM"
+    ],
+    "type": "官方文档",
+    "difficulty": "基础",
+    "minutes": 60,
+    "language": "英文",
+    "url": "https://platform.openai.com/docs/guides/prompt-engineering",
+    "description": "模型指令、结构化提示、迭代验证。",
+    "practice": "对同一个输出任务设计两个 Prompt，记录评测差异。"
+  },
+  {
+    "id": "res010",
+    "title": "LangChain 检索与 RAG 文档",
+    "skills": [
+      "RAG",
+      "LLM"
+    ],
+    "type": "官方文档",
+    "difficulty": "基础-进阶",
+    "minutes": 75,
+    "language": "英文",
+    "url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "description": "检索、Embedding、向量库和检索增强生成流程。",
+    "practice": "上传一份文档，检查检索 Top-K 是否包含答案证据。"
+  },
+  {
+    "id": "res011",
+    "title": "LangGraph 官方概览",
+    "skills": [
+      "Agent",
+      "LLM"
+    ],
+    "type": "官方文档",
+    "difficulty": "进阶",
+    "minutes": 75,
+    "language": "英文",
+    "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+    "description": "Agent 状态、工具调用、持久化与执行控制。",
+    "practice": "设计带查询工具和异常分支的 Agent 流程图。"
+  },
+  {
+    "id": "res012",
+    "title": "Google Analytics 帮助中心",
+    "skills": [
+      "运营指标",
+      "数据分析"
+    ],
+    "type": "官方文档",
+    "difficulty": "基础",
+    "minutes": 50,
+    "language": "中文/多语言",
+    "url": "https://support.google.com/analytics/",
+    "description": "流量来源、事件、转化与分析指标定义。",
+    "practice": "为一个产品设计指标树，说明每个指标的计算口径。"
+  },
+  {
+    "id": "res013",
+    "title": "Nielsen Norman Group：User Research",
+    "skills": [
+      "用户研究",
+      "需求分析"
+    ],
+    "type": "研究指南",
+    "difficulty": "基础",
+    "minutes": 50,
+    "language": "英文",
+    "url": "https://www.nngroup.com/articles/which-ux-research-methods/",
+    "description": "用户研究方法选择及其使用条件。",
+    "practice": "针对实习求职问题设计五条中立的访谈提纲。"
+  },
+  {
+    "id": "res014",
+    "title": "Nielsen Norman Group：Competitive Analysis",
+    "skills": [
+      "竞品分析"
+    ],
+    "type": "研究指南",
+    "difficulty": "基础",
+    "minutes": 50,
+    "language": "英文",
+    "url": "https://www.nngroup.com/articles/competitive-usability-evaluations/",
+    "description": "对比竞品体验与可用性评估的切入方法。",
+    "practice": "选择两款同类产品，制作相同任务下的体验对照表。"
+  },
+  {
+    "id": "res015",
+    "title": "Google Looker Studio 文档",
+    "skills": [
+      "数据可视化",
+      "数据分析"
+    ],
+    "type": "官方文档",
+    "difficulty": "基础",
+    "minutes": 55,
+    "language": "中文/多语言",
+    "url": "https://cloud.google.com/looker/docs/studio",
+    "description": "数据连接、可视化与仪表盘入门。",
+    "practice": "使用样例数据制作一张指标趋势图并解释异常点。"
+  },
+  {
+    "id": "bili001",
+    "title": "产品经理快速入门",
+    "skills": [
+      "需求分析",
+      "PRD",
+      "原型设计",
+      "项目协作",
+      "用户研究"
+    ],
+    "type": "B站课程",
+    "difficulty": "入门",
+    "minutes": 45,
+    "language": "中文",
+    "url": "https://www.bilibili.com/video/BV1nv411e7zd/",
+    "description": "覆盖需求整理、原型、文档和项目协作的基础方法。旧课不作为当前 AI 工具指南。",
+    "practice": "观看指定部分，记录要点并完成对应练习。",
+    "platform": "B站",
+    "creator": "黑马程序员",
+    "published": "2021-01-29",
+    "checked_at": "2026-10-18",
+    "verification": "已通过 B 站公开接口核对 UP 主、标题、章节与时长；未逐集观看或验证播放",
+    "focus": {
+      "需求分析": "01. 需求池讲解；03. 功能清单讲解与制作",
+      "PRD": "08. PRD文档讲解及示例",
+      "原型设计": "13. 原型及软件介绍；15. 使用墨刀制作一个静态页面",
+      "项目协作": "01. 项目管理是什么；10. 需求评审会",
+      "用户研究": "07. 产品经理需要了解业务和用户"
+    },
+    "quality_basis": "目录明确覆盖所标技能；仅安排相关章节，不要求刷完整套课",
+    "freshness_note": "基础方法可参考；工具界面与平台规则请以当前版本为准",
+    "source_title": "黑马程序员_产品经理快速入门，如何才能成为一名产品经理的教程",
+    "chapters": {
+      "需求分析": [
+        {
+          "title": "01. 需求池讲解",
+          "seconds": 884,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=42"
+        },
+        {
+          "title": "03. 功能清单讲解与制作",
+          "seconds": 614,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=44"
+        }
+      ],
+      "PRD": [
+        {
+          "title": "08. PRD文档讲解及示例",
+          "seconds": 945,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=49"
+        }
+      ],
+      "原型设计": [
+        {
+          "title": "13. 原型及软件介绍",
+          "seconds": 859,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=37"
+        },
+        {
+          "title": "15. 使用墨刀制作一个静态页面",
+          "seconds": 1286,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=39"
+        }
+      ],
+      "项目协作": [
+        {
+          "title": "01. 项目管理是什么",
+          "seconds": 848,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=25"
+        },
+        {
+          "title": "10. 需求评审会",
+          "seconds": 729,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=51"
+        }
+      ],
+      "用户研究": [
+        {
+          "title": "07. 产品经理需要了解业务和用户",
+          "seconds": 1041,
+          "url": "https://www.bilibili.com/video/BV1nv411e7zd/?p=20"
+        }
+      ]
+    },
+    "minutes_by_skill": {
+      "需求分析": 40,
+      "PRD": 31,
+      "原型设计": 51,
+      "项目协作": 42,
+      "用户研究": 33
+    }
+  },
+  {
+    "id": "bili002",
+    "title": "如何做好竞品分析",
+    "skills": [
+      "竞品分析"
+    ],
+    "type": "B站课程",
+    "difficulty": "入门",
+    "minutes": 30,
+    "language": "中文",
+    "url": "https://www.bilibili.com/video/BV1jP411H7t8/",
+    "description": "比较产品时先明确目标与用户任务，再选择分析维度。",
+    "practice": "观看指定部分，记录要点并完成对应练习。",
+    "platform": "B站",
+    "creator": "黑马产品经理",
+    "published": "2022-09-20",
+    "checked_at": "2026-10-18",
+    "verification": "已通过 B 站公开接口核对 UP 主、标题、章节与时长；未逐集观看或验证播放",
+    "focus": {
+      "竞品分析": "如何做好竞品分析"
+    },
+    "quality_basis": "目录明确覆盖所标技能；仅安排相关章节，不要求刷完整套课",
+    "freshness_note": "基础方法可参考；工具界面与平台规则请以当前版本为准",
+    "source_title": "产品经理必知的100个问题！如何做好竞品分析",
+    "chapters": {
+      "竞品分析": [
+        {
+          "title": "如何做好竞品分析",
+          "seconds": 528,
+          "url": "https://www.bilibili.com/video/BV1jP411H7t8/?p=1"
+        }
+      ]
+    },
+    "minutes_by_skill": {
+      "竞品分析": 24
+    }
+  },
+  {
+    "id": "bili003",
+    "title": "产品经理基础：产品运营",
+    "skills": [
+      "用户运营",
+      "运营指标",
+      "内容营销",
+      "数据分析"
+    ],
+    "type": "B站课程",
+    "difficulty": "入门",
+    "minutes": 60,
+    "language": "中文",
+    "url": "https://www.bilibili.com/video/BV1QL411A7q6/",
+    "description": "包含用户生命周期、内容运营及转化相关章节；不覆盖海外平台规则。",
+    "practice": "观看指定部分，记录要点并完成对应练习。",
+    "platform": "B站",
+    "creator": "黑马产品经理",
+    "published": "2022-03-09",
+    "checked_at": "2026-10-18",
+    "verification": "已通过 B 站公开接口核对 UP 主、标题、章节与时长；未逐集观看或验证播放",
+    "focus": {
+      "用户运营": "03.用户生命周期&产品生命周期；12.流失挽回",
+      "运营指标": "09.活跃的定义&指标；11.留存的定义和流失的定义",
+      "内容营销": "10.社区化和内容运营；13.转化-产品变现",
+      "数据分析": "09.活跃的定义&指标；11.留存的定义和流失的定义"
+    },
+    "quality_basis": "目录明确覆盖所标技能；仅安排相关章节，不要求刷完整套课",
+    "freshness_note": "基础方法可参考；工具界面与平台规则请以当前版本为准",
+    "source_title": "产品经理基础入门课程 | 必备技能之【产品运营】",
+    "chapters": {
+      "用户运营": [
+        {
+          "title": "03.用户生命周期&产品生命周期",
+          "seconds": 857,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=3"
+        },
+        {
+          "title": "12.流失挽回",
+          "seconds": 407,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=12"
+        }
+      ],
+      "运营指标": [
+        {
+          "title": "09.活跃的定义&指标",
+          "seconds": 1574,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=9"
+        },
+        {
+          "title": "11.留存的定义和流失的定义",
+          "seconds": 1748,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=11"
+        }
+      ],
+      "内容营销": [
+        {
+          "title": "10.社区化和内容运营",
+          "seconds": 1704,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=10"
+        },
+        {
+          "title": "13.转化-产品变现",
+          "seconds": 1679,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=13"
+        }
+      ],
+      "数据分析": [
+        {
+          "title": "09.活跃的定义&指标",
+          "seconds": 1574,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=9"
+        },
+        {
+          "title": "11.留存的定义和流失的定义",
+          "seconds": 1748,
+          "url": "https://www.bilibili.com/video/BV1QL411A7q6/?p=11"
+        }
+      ]
+    },
+    "minutes_by_skill": {
+      "用户运营": 37,
+      "运营指标": 71,
+      "内容营销": 72,
+      "数据分析": 71
+    }
+  },
+  {
+    "id": "bili004",
+    "title": "C端内容项目实战（五）",
+    "skills": [
+      "产品设计"
+    ],
+    "type": "B站课程",
+    "difficulty": "入门",
+    "minutes": 60,
+    "language": "中文",
+    "url": "https://www.bilibili.com/video/BV1K3411K73f/",
+    "description": "内容项目的运营后台设计：账号、权限、日志与数据统计。本条仅选择账号管理产品设计相关章节。",
+    "practice": "观看指定部分，记录要点并完成对应练习。",
+    "platform": "B站",
+    "creator": "黑马产品经理",
+    "published": "2022-04-28",
+    "checked_at": "2026-10-18",
+    "verification": "已通过 B 站公开接口核对 UP 主、标题、章节与时长；未逐集观看或验证播放",
+    "focus": {
+      "产品设计": "06.运营端注册功能需求分析；07.运营端账号管理设计思路；08.运营端账号管理产品设计"
+    },
+    "quality_basis": "目录明确覆盖所标技能；仅安排相关章节，不要求刷完整套课",
+    "freshness_note": "基础方法可参考；工具界面与平台规则请以当前版本为准",
+    "source_title": "产品经理零基础入门，必备实战项目！C端内容项目（五）",
+    "chapters": {
+      "产品设计": [
+        {
+          "title": "06.运营端注册功能需求分析",
+          "seconds": 1318,
+          "url": "https://www.bilibili.com/video/BV1K3411K73f/?p=6"
+        },
+        {
+          "title": "07.运营端账号管理设计思路",
+          "seconds": 820,
+          "url": "https://www.bilibili.com/video/BV1K3411K73f/?p=7"
+        },
+        {
+          "title": "08.运营端账号管理产品设计",
+          "seconds": 748,
+          "url": "https://www.bilibili.com/video/BV1K3411K73f/?p=8"
+        }
+      ]
+    },
+    "minutes_by_skill": {
+      "产品设计": 64
+    }
+  },
+  {
+    "id": "bili005",
+    "title": "Coze 智能体入门与项目实战",
+    "skills": [
+      "Agent",
+      "LLM",
+      "RAG",
+      "AIGC",
+      "视频生产"
+    ],
+    "type": "B站课程",
+    "difficulty": "入门",
+    "minutes": 60,
+    "language": "中文",
+    "url": "https://www.bilibili.com/video/BV12omoB4ExF/",
+    "description": "从提示词和知识库到智能体工作流的可视化实操；需要使用课程对应工具。",
+    "practice": "观看指定部分，记录要点并完成对应练习。",
+    "platform": "B站",
+    "creator": "黑马程序员",
+    "published": "2025-12-15",
+    "checked_at": "2026-10-18",
+    "verification": "已通过 B 站公开接口核对 UP 主、标题、章节与时长；未逐集观看或验证播放",
+    "focus": {
+      "Agent": "第1章-01-Agent的入门指南；第1章-02-Coze零代码开发智能体；第1章-03-Agent案例实践演示",
+      "LLM": "第2章-01-什么是提示词Prompt；第2章-02-Coze中如何应用提示词",
+      "RAG": "第3章-01-RAG基本原理的讲解；第3章-02-RAG知识库构建的基本流程；第3章-03-英雄联盟助手知识库构建；第3章-04-英雄联盟助手RAG的应用",
+      "AIGC": "第5章-06-历史人物视频工作流基本流程；第5章-07-基于人物名称进行提示词及图片生成；第5章-08-根据提示词及图片制作对应视频",
+      "视频生产": "第5章-08-根据提示词及图片制作对应视频；第5章-09-根据视频数据获取时间线；第5章-10-根据时间线制作视频草稿；第5章-11-根据视频草稿生成draft_id；第5章-12-利用剪映等软件生成最终视频"
+    },
+    "quality_basis": "目录明确覆盖所标技能；仅安排相关章节，不要求刷完整套课",
+    "freshness_note": "基础方法可参考；工具界面与平台规则请以当前版本为准",
+    "source_title": "黑马程序员全网最全Coze智能体入门到项目实战全套教程，从AI Agent开发入门到6大AI智能体实战项目，涵盖提示词Prompt、RAG、Bot发布微信公众号",
+    "chapters": {
+      "Agent": [
+        {
+          "title": "第1章-01-Agent的入门指南",
+          "seconds": 904,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=2"
+        },
+        {
+          "title": "第1章-02-Coze零代码开发智能体",
+          "seconds": 643,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=3"
+        },
+        {
+          "title": "第1章-03-Agent案例实践演示",
+          "seconds": 728,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=4"
+        }
+      ],
+      "LLM": [
+        {
+          "title": "第2章-01-什么是提示词Prompt",
+          "seconds": 438,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=5"
+        },
+        {
+          "title": "第2章-02-Coze中如何应用提示词",
+          "seconds": 683,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=6"
+        }
+      ],
+      "RAG": [
+        {
+          "title": "第3章-01-RAG基本原理的讲解",
+          "seconds": 594,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=8"
+        },
+        {
+          "title": "第3章-02-RAG知识库构建的基本流程",
+          "seconds": 491,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=9"
+        },
+        {
+          "title": "第3章-03-英雄联盟助手知识库构建",
+          "seconds": 439,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=10"
+        },
+        {
+          "title": "第3章-04-英雄联盟助手RAG的应用",
+          "seconds": 459,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=11"
+        }
+      ],
+      "AIGC": [
+        {
+          "title": "第5章-06-历史人物视频工作流基本流程",
+          "seconds": 369,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=20"
+        },
+        {
+          "title": "第5章-07-基于人物名称进行提示词及图片生成",
+          "seconds": 1125,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=21"
+        },
+        {
+          "title": "第5章-08-根据提示词及图片制作对应视频",
+          "seconds": 1241,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=22"
+        }
+      ],
+      "视频生产": [
+        {
+          "title": "第5章-08-根据提示词及图片制作对应视频",
+          "seconds": 1241,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=22"
+        },
+        {
+          "title": "第5章-09-根据视频数据获取时间线",
+          "seconds": 652,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=23"
+        },
+        {
+          "title": "第5章-10-根据时间线制作视频草稿",
+          "seconds": 637,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=24"
+        },
+        {
+          "title": "第5章-11-根据视频草稿生成draft_id",
+          "seconds": 684,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=25"
+        },
+        {
+          "title": "第5章-12-利用剪映等软件生成最终视频",
+          "seconds": 282,
+          "url": "https://www.bilibili.com/video/BV12omoB4ExF/?p=26"
+        }
+      ]
+    },
+    "minutes_by_skill": {
+      "Agent": 53,
+      "LLM": 34,
+      "RAG": 49,
+      "AIGC": 61,
+      "视频生产": 74
+    }
+  },
+  {
+    "id": "bili006",
+    "title": "提示词工程：使用准则与迭代（中英字幕）",
+    "skills": [
+      "提示词工程"
+    ],
+    "type": "视频课程",
+    "difficulty": "入门",
+    "minutes": 45,
+    "language": "英文讲解/中文字幕",
+    "platform": "B站",
+    "creator": "GitHubDaily（非官方字幕）；讲师 Andrew Ng、Iza Fulford",
+    "published": "2023-04-29",
+    "url": "https://www.bilibili.com/video/BV1s24y1F7eq/",
+    "description": "通过明确指令与迭代实验改善提示词。",
+    "practice": "针对同一任务比较两版提示词。",
+    "focus": {
+      "提示词工程": "使用准则与工程迭代；不涵盖完整模型评测体系"
+    },
+    "chapters": {
+      "提示词工程": [
+        {
+          "title": "02. 使用准则（吴恩达 x Open AI ChatGPT 提示工程教程）",
+          "seconds": 1056,
+          "url": "https://www.bilibili.com/video/BV1pM411G7kM/"
+        },
+        {
+          "title": "03. 工程迭代（吴恩达 x Open AI ChatGPT 提示工程教程）",
+          "seconds": 799,
+          "url": "https://www.bilibili.com/video/BV1Pc411T7RD/"
+        }
+      ]
+    },
+    "checked_at": "2026-10-18",
+    "verification": "核对译者项目及 B站公开接口中的合集章节、作者、时长，未验证视频播放。",
+    "quality_basis": "译者提供来源、字幕和配套代码，可追溯原课",
+    "freshness_note": "2023 年课程，示例接口可能过时；参考提示设计方法。",
+    "source_url": "https://github.com/GitHubDaily/ChatGPT-Prompt-Engineering-for-Developers-in-Chinese"
+  },
+  {
+    "id": "ref021",
+    "title": "MDN：Web 开发基础",
+    "skills": [
+      "HTML",
+      "前端开发"
+    ],
+    "creator": "MDN",
+    "url": "https://developer.mozilla.org/zh-CN/docs/Learn_web_development",
+    "description": "Web 入门学习路径，包含 HTML、CSS 和 JavaScript 基础。",
+    "focus": {
+      "HTML": "从 HTML 基础开始，制作一个包含标题、链接和表单的页面。",
+      "前端开发": "从 HTML 基础开始，制作一个包含标题、链接和表单的页面。"
+    },
+    "minutes": 60,
+    "language": "中文",
+    "type": "官方学习资料",
+    "difficulty": "基础",
+    "platform": "官方站点",
+    "practice": "从 HTML 基础开始，制作一个包含标题、链接和表单的页面。",
+    "checked_at": "2026-10-18",
+    "verification": "已核对官方公开页面；未登录或完成全部课程。",
+    "quality_basis": "原机构公开资料，范围和出处可核对",
+    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。"
+  },
+  {
+    "id": "ref022",
+    "title": "Anthropic：智能体评测方法",
+    "skills": [
+      "模型评测"
+    ],
+    "creator": "Anthropic",
+    "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "description": "智能体评测的任务、结果、评分器及回归测试设计。",
+    "focus": {
+      "模型评测": "阅读评分器类型与评测设计章节，为一个任务写出可检查的成功与失败标准。"
+    },
+    "minutes": 45,
+    "language": "英文",
+    "type": "官方学习资料",
+    "difficulty": "基础",
+    "platform": "官方站点",
+    "practice": "阅读评分器类型与评测设计章节，为一个任务写出可检查的成功与失败标准。",
+    "checked_at": "2026-10-18",
+    "verification": "已核对官方公开页面；未登录或完成全部课程。",
+    "quality_basis": "原机构公开资料，范围和出处可核对",
+    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。"
+  },
+  {
+    "id": "ref023",
+    "title": "HubSpot：内容营销课程",
+    "skills": [
+      "内容营销"
+    ],
+    "creator": "HubSpot Academy",
+    "url": "https://academy.hubspot.com/courses/content-marketing",
+    "description": "内容策略与内容营销方法，包含学习视频和测验。",
+    "focus": {
+      "内容营销": "先学习内容营销策略相关部分，写一个内容目标和受众说明。"
+    },
+    "minutes": 60,
+    "language": "英文",
+    "type": "官方学习资料",
+    "difficulty": "基础",
+    "platform": "官方站点",
+    "practice": "先学习内容营销策略相关部分，写一个内容目标和受众说明。",
+    "checked_at": "2026-10-18",
+    "verification": "已核对官方公开页面；未登录或完成全部课程。",
+    "quality_basis": "原机构公开资料，范围和出处可核对",
+    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。"
+  }
+]

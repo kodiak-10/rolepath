@@ -1,0 +1,86 @@
+[
+  {
+    "id": "q001",
+    "title": "为大模型产品定义失败案例及评价标准",
+    "skills": [
+      "LLM",
+      "AIGC",
+      "数据分析"
+    ],
+    "kind": "场景题",
+    "source_type": "公开面经回忆题（非官方真题）",
+    "source": "牛客 · Stella_Chiara",
+    "url": "https://www.nowcoder.com/feed/main/detail/61c381949652427ba390e4a5e9b93d4f",
+    "published": "2025-10-29",
+    "summary": "参考原帖中的模型效果评估问题，练习说明评价口径与案例分类。",
+    "minutes": 40,
+    "deliverable": "先到原帖阅读题目，再写出评价维度、失败样例分类和复核方法；不是标准答案。",
+    "checked_at": "2026-10-18"
+  },
+  {
+    "id": "q002",
+    "title": "判断大模型产品的商业化路径",
+    "skills": [
+      "需求分析",
+      "内容营销",
+      "LLM"
+    ],
+    "kind": "场景题",
+    "source_type": "公开面经回忆题（非官方真题）",
+    "source": "牛客 · Stella_Chiara",
+    "url": "https://www.nowcoder.com/feed/main/detail/61c381949652427ba390e4a5e9b93d4f",
+    "published": "2025-10-29",
+    "summary": "参考原帖关于 AI 产品盈利模式的提问，练习从用户问题推导商业价值。",
+    "minutes": 40,
+    "deliverable": "给出目标用户、付费动机、成本与待验证假设；请先阅读原题。",
+    "checked_at": "2026-10-18"
+  },
+  {
+    "id": "q003",
+    "title": "小样本图像任务的产品方案讨论",
+    "skills": [
+      "多模态"
+    ],
+    "kind": "场景题",
+    "source_type": "公开面经回忆题（非官方真题）",
+    "source": "牛客 · 商汤产品面经原帖",
+    "url": "https://www.nowcoder.com/discuss/353156008090476544",
+    "published": "2020届面经",
+    "summary": "原帖包含少量图片条件下的模型应用讨论，适合练习识别数据限制。",
+    "minutes": 40,
+    "deliverable": "到原帖阅读小数据集场景，列出限制、方案和验证办法；旧面经不代表当前招聘题。",
+    "checked_at": "2026-10-18"
+  },
+  {
+    "id": "q004",
+    "title": "两数之和",
+    "skills": [
+      "算法与数据结构"
+    ],
+    "kind": "算法题",
+    "source_type": "平台练习题（非企业真题）",
+    "source": "力扣 LeetCode",
+    "url": "https://leetcode.cn/problems/two-sum/",
+    "published": "以原站为准",
+    "summary": "练习数组查找与哈希表；仅在 JD 明确涉及算法与数据结构时安排。",
+    "minutes": 45,
+    "deliverable": "独立手写代码，在原站测试，并记录时间与空间复杂度。",
+    "checked_at": "2026-10-18"
+  },
+  {
+    "id": "q005",
+    "title": "超过经理收入的员工",
+    "skills": [
+      "SQL"
+    ],
+    "kind": "SQL笔试练习",
+    "source_type": "平台练习题（非企业真题）",
+    "source": "力扣 LeetCode",
+    "url": "https://leetcode.cn/problems/employees-earning-more-than-their-managers/",
+    "published": "以原站为准",
+    "summary": "使用员工与上级之间的关联关系练习查询。",
+    "minutes": 35,
+    "deliverable": "在原站阅读表结构、独立编写 SQL 并测试，记录关联条件。",
+    "checked_at": "2026-10-18"
+  }
+]
