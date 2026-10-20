@@ -1,6 +1,7 @@
 """Per-browser Supabase authentication. No shared clients or administrator keys."""
 import base64
 import json
+import re
 from urllib.parse import urlparse
 
 
@@ -23,6 +24,26 @@ def new_client(url, key):
     validate_public_config(url, key)
     from supabase import create_client
     return create_client(url, key)
+
+
+def send_email_code(client, email):
+    email = email.strip()
+    if len(email) > 254 or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', email):
+        raise ValueError('请填写完整的邮箱地址。')
+    client.auth.sign_in_with_otp({
+        'email': email, 'options': {'should_create_user': True},
+    })
+    return email
+
+
+def verify_email_code(client, email, code):
+    code = code.strip()
+    if not code or not code.isascii() or not code.isdigit():
+        raise ValueError('请输入邮件中的数字验证码。')
+    result = client.auth.verify_otp({'email': email, 'token': code, 'type': 'email'})
+    if not result.session or not result.user:
+        raise ValueError('验证未完成，请重新获取验证码。')
+    return result
 
 
 def require_login():
@@ -72,26 +93,46 @@ def require_login():
                 st.rerun()
         return client, user.id
     st.title('登录 RolePath')
-    st.write('登录后查看自己的笔记、学习计划与打卡记录。')
-    action = st.radio('账户操作', ['登录', '注册'], horizontal=True)
-    with st.form('account_login', clear_on_submit=True):
-        email = st.text_input('邮箱', max_chars=254)
-        password = st.text_input('密码', type='password', max_chars=128)
-        submitted = st.form_submit_button(action)
-    if submitted:
-        if not email.strip() or not password:
-            st.error('请填写邮箱和密码。')
-        else:
+    st.write('用邮箱验证码登录，无需设置密码。首次验证成功后创建账号。')
+    st.caption('同一邮箱对应同一份笔记、学习计划和打卡记录。关闭或刷新页面后可能需要重新登录，已保存的记录不会因此删除。')
+    pending_email = st.session_state.get('_otp_email')
+    if not pending_email:
+        with st.form('account_send_code'):
+            email = st.text_input('邮箱', max_chars=254)
+            submitted = st.form_submit_button('发送验证码')
+        if submitted:
             try:
-                credentials = {'email': email.strip(), 'password': password}
-                if action == '注册':
-                    client.auth.sign_up(credentials)
-                    if client.auth.get_session():
-                        st.rerun()
-                    st.success('注册申请已提交，请查收确认邮件后登录。')
-                else:
-                    client.auth.sign_in_with_password(credentials)
-                    st.rerun()
+                confirmed_email = send_email_code(client, email)
+            except ValueError as exc:
+                st.error(str(exc))
             except Exception:
-                st.error('暂未完成，请检查邮箱、密码及邮箱验证状态，或稍后重试。')
+                st.error('验证码发送失败，请检查邮箱地址，或稍后重试。若持续失败，请联系网站管理员检查邮件服务。')
+            else:
+                st.session_state['_otp_email'] = confirmed_email
+                st.rerun()
+    else:
+        st.info('验证码已发送至 ' + pending_email + '，请查看收件箱和垃圾邮件。')
+        with st.form('account_verify_code', clear_on_submit=True):
+            code = st.text_input('邮箱验证码', max_chars=10, type='password')
+            submitted = st.form_submit_button('验证并登录')
+        if submitted:
+            try:
+                verify_email_code(client, pending_email, code)
+            except ValueError as exc:
+                st.error(str(exc))
+            except Exception:
+                st.error('验证失败：验证码可能不正确或已过期，请重新获取后再试。')
+            else:
+                st.session_state.pop('_otp_email', None)
+                st.rerun()
+        if st.button('重新发送验证码'):
+            try:
+                send_email_code(client, pending_email)
+            except Exception:
+                st.error('重新发送失败，请稍后再试；频繁请求会被邮件服务限制。')
+            else:
+                st.success('验证码已重新发送，请使用最新邮件中的验证码。')
+        if st.button('更换邮箱'):
+            st.session_state.pop('_otp_email', None)
+            st.rerun()
     st.stop()
