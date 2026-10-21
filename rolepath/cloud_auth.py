@@ -83,14 +83,7 @@ def require_login():
             st.error('账户已变化，请重新登录。')
             st.stop()
         st.session_state['_account_id'] = user.id
-        with st.sidebar:
-            st.caption('已登录：' + (user.email or '个人账户'))
-            if st.button('退出登录', key='account_logout'):
-                try:
-                    client.auth.sign_out()
-                finally:
-                    st.session_state.clear()
-                st.rerun()
+        st.session_state['_account_email'] = user.email or '个人账户'
         return client, user.id
     st.title('登录 RolePath')
     st.write('用邮箱验证码登录，无需设置密码。首次验证成功后创建账号。')

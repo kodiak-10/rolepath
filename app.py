@@ -7,7 +7,7 @@ from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
-from rolepath.cloud_settings import cloud_mode, render_model_settings
+from rolepath.cloud_settings import cloud_mode
 
 from rolepath.catalog import ALL_SKILLS, load_resources, load_roles
 from rolepath.db import connect, recent_plan, save_plan, set_task_status, tasks_for, log_study, study_stats
@@ -24,16 +24,13 @@ from rolepath.notes_ui import render_notes
 
 if not cloud_mode():
     load_dotenv()
-st.set_page_config(page_title='RolePath · 实习成长助手', page_icon='🧭', layout='wide')
+from rolepath.ui import apply_style, render_header, go_to, render_home
+st.set_page_config(page_title='RolePath · 我的成长空间', page_icon='◈', layout='wide', initial_sidebar_state='collapsed')
+apply_style()
 if cloud_mode():
     from rolepath.cloud_auth import require_login
     require_login()
-
-st.markdown('''<style>
-.block-container {padding-top: 1.7rem; max-width: 1180px}
-[data-testid="stMetric"] {border: 1px solid #e1e7eb; border-radius: 12px; padding: 12px}
-div[data-testid="stAlert"] {border-radius: 10px}
-</style>''', unsafe_allow_html=True)
+render_header()
 
 ROLES = load_roles()
 RESOURCES = load_resources()
@@ -42,20 +39,7 @@ RESOURCES = load_resources()
 def get_retriever(mode: str, catalog_version: str):
     return build_retriever(RESOURCES, mode)
 
-with st.sidebar:
-    st.header('RolePath · V0.1')
-    st.caption('你的个人学习空间 · 记录保存在云端账户' if cloud_mode() else '你的岗位准备与学习空间 · 资料保存在本机')
-    st.divider()
-    if cloud_mode():
-        render_model_settings()
-    st.write('**模型状态**')
-    st.write('LLM：' + ('✅ API 已配置' if is_configured() else '◻ 未配置，使用规则解析'))
-    with st.expander('高级设置'):
-        retrieval_mode = st.radio('资料查找方式', (['关键词查找（快速）'] if cloud_mode() else ['关键词查找（快速）','语义查找（首次需加载模型）']), horizontal=False)
-        st.caption('当前云端版本支持关键词查找，尚未启用语义查找。' if cloud_mode() else '关键词查找匹配文字；语义查找用于寻找意思相近的段落。')
-    retriever_name = 'dense' if retrieval_mode.startswith('语义') else 'lexical'
-    st.divider()
-    st.caption('笔记、计划、打卡与分析记录按登录账户隔离。' if cloud_mode() else '当前没有账户与权限隔离，请仅在本机测试，不要直接公开部署或上传他人隐私资料。')
+retriever_name = st.session_state.get('_retriever_mode', 'lexical')
 
 try:
     retriever = get_retriever(retriever_name, hashlib.sha256(json.dumps(RESOURCES, ensure_ascii=False).encode()).hexdigest())
@@ -72,43 +56,22 @@ if 'jd_result' not in st.session_state:
 if 'last_plan_id' not in st.session_state:
     st.session_state.last_plan_id = None
 
-st.title('RolePath')
-st.markdown('**从职业探索到第一份实习：看清岗位要求、检查能力证据、制定可执行任务。**')
-st.caption('粘贴任意岗位 JD 开始准备。未配置模型时，只能做不完整的关键词初筛；任务完成不代表能力已经验证。')
+PAGES = ['我的空间', '岗位分析', '课程与题目', '学习计划', '学习任务', '学习笔记', '资料问答']
+st.session_state.setdefault('page', PAGES[0])
+st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
+st.session_state.setdefault('_prefer_bili', True)
+st.session_state.jd_text = st.session_state['_jd_draft']
+page = st.radio('工作空间导航', PAGES, key='page', horizontal=True, label_visibility='collapsed')
+st.write('')
 
-explore_tab, jd_tab, courses_tab, learning_tab, task_tab, notes_tab, debug_tab = st.tabs(['🧭 探索方向','📄 解析岗位 JD','📚 课程与题目','🗓️ 学习路径','✅ 学习任务','📝 学习笔记','🔎 资料问答'])
+if page == '我的空间':
+    render_home(ROLES)
 
-with explore_tab:
-    st.subheader('还没有目标岗位？先探索实际工作内容')
-    st.write('下面三个岗位是**教学演示方向**，不是实时招聘信息，也不代表所有公司的统一技能标准。')
-    st.info('支持粘贴其他岗位 JD。规则解析有覆盖边界；LLM 可提取词库外要求，未找到课程的技能会明确标出。')
-    con = connect()
-    previous = recent_plan(con)
-    con.close()
-    if previous and st.button('恢复最近计划的 JD', key='restore_jd'):
-        text = json.loads(previous['meta']).get('jd', '')
-        if text:
-            st.session_state.jd_text = text
-            st.session_state.jd_result = json.loads(previous['meta']).get('parsed') or parse_jd(text)
-            st.info('已恢复保存时的分析。若要使用最新解析规则，请在「解析岗位 JD」重新解析。')
-    for role in ROLES:
-        with st.container(border=True):
-            col_a, col_b = st.columns([4, 1])
-            with col_a:
-                st.markdown(f"**{role['name']}** · {role['kind']}")
-                st.write(role['description'])
-                st.caption('示例技能：' + ' · '.join(role['skills']))
-            with col_b:
-                if st.button('分析这个方向', key=f"select_{role['id']}", use_container_width=True):
-                    st.session_state.jd_text = role['demo_jd']
-                    st.session_state.jd_result = parse_jd(role['demo_jd'])
-                    st.success('已载入演示岗位。切换到「解析岗位 JD」查看，并可替换为真实 JD。')
-
-with jd_tab:
+if page == '岗位分析':
     st.subheader('把目标 JD 变成可检查的能力要求')
     st.write('直接粘贴 JD，或上传 TXT / MD / PDF、PNG / JPG / HEIC 图片。推荐使用真实岗位，解析结果会保留原文证据。')
     uploaded_jd = st.file_uploader('上传岗位 JD（可选）', type=UPLOAD_TYPES, key='jd_upload')
-    st.text_area('岗位 JD 原文', key='jd_text', height=210, placeholder='粘贴岗位名称、职责、任职要求、优先条件和实习时间…')
+    st.text_area('岗位 JD 原文', key='jd_text', on_change=lambda: st.session_state.update(_jd_draft=st.session_state.jd_text), height=210, placeholder='粘贴岗位名称、职责、任职要求、优先条件和实习时间…')
     parse_mode = st.selectbox('解析方式', ['关键词初筛（不完整，无需 API）','LLM 结构化抽取（需 API Key）'], index=1 if is_configured() else 0)
     if st.button('解析岗位要求', type='primary', key='do_parse'):
         try:
@@ -129,6 +92,9 @@ with jd_tab:
             st.error(f'无法解析该 JD：{exc}')
     parsed = st.session_state.jd_result
     if parsed:
+        next_a, next_b = st.columns(2)
+        next_a.button('查看匹配课程 →', on_click=go_to, args=('课程与题目',), use_container_width=True)
+        next_b.button('制定学习计划 →', on_click=go_to, args=('学习计划',), use_container_width=True)
         st.caption('解析方式：' + parsed['mode'])
         if parsed['mode'].startswith('规则'):
             st.warning('下面只是词库命中，不是完整岗位分析，也不是重要性排名。完整拆解需要配置模型；请逐条核对下面的 JD 原文。')
@@ -161,9 +127,9 @@ with jd_tab:
                     parsed['requirements'].append(dict(skill=skill.strip(), evidence=evidence.strip(), priority=priority, parser='人工补充'))
                     st.rerun()
 
-with courses_tab:
+if page == '课程与题目':
     st.subheader('按 JD 选择课程与有来源的题目')
-    prefer_bili = st.checkbox('相关性相同时优先 B 站', value=True, key='prefer_bili')
+    prefer_bili = st.checkbox('相关性相同时优先 B 站', value=st.session_state['_prefer_bili'], key='prefer_bili', on_change=lambda: st.session_state.update(_prefer_bili=st.session_state['prefer_bili']))
     st.caption('先匹配能力范围，再按具体要求的相关性排序，不按作者加权。当前是经过目录核查的资源库，不是实时全网搜索；没有匹配项时明确留空。课程质量依据目录与出处，未逐集评审。')
     parsed = st.session_state.jd_result
     if not parsed:
@@ -192,11 +158,11 @@ with courses_tab:
                     st.write(q['summary'])
         st.info('题目只提供简要说明与原站入口，未提供企业内部题库；面经是作者回忆，不代表任何公司的当前考试内容。')
 
-with learning_tab:
+if page == '学习计划':
     st.subheader('能力证据与个性化学习计划')
     parsed = st.session_state.jd_result
     if not parsed or not parsed['requirements']:
-        st.info('先去「探索方向」载入一个演示 JD，或在「解析岗位 JD」中提交真实 JD。')
+        st.info('先去「我的空间」载入一个演示 JD，或在「岗位分析」中提交真实 JD。')
     else:
         col_a, col_b = st.columns([3, 2])
         with col_a:
@@ -217,7 +183,7 @@ with learning_tab:
         st.markdown('**当前能力证据（未经技能测验）**')
         st.dataframe([{'技能':a['skill'],'JD要求':a['priority'],'状态':a['status']} for a in evaluated], hide_index=True, use_container_width=True)
         if st.button('生成并保存学习路径', type='primary', key='make_plan'):
-            tasks,summary=plan_tasks(evaluated,retriever,hours,days,prefer_bili=st.session_state.prefer_bili)
+            tasks,summary=plan_tasks(evaluated,retriever,hours,days,prefer_bili=st.session_state['_prefer_bili'])
             if not tasks:
                 st.error('没有可安排的任务：请检查课程缺口或增加时间预算。未覆盖原有计划。')
             else:
@@ -227,7 +193,8 @@ with learning_tab:
                     st.session_state.last_plan_id=pid
                 finally:
                     conn.close()
-                st.success(f'已保存 {len(tasks)} 个任务。到「学习任务」可标记完成。')
+                st.success(f'已保存 {len(tasks)} 个任务。')
+                st.button('开始学习 →', on_click=go_to, args=('学习任务',))
         conn=connect()
         try:
             latest=recent_plan(conn)
@@ -252,13 +219,13 @@ with learning_tab:
                 with st.expander('每日学习安排（较长任务分天完成）'):
                     st.dataframe(sessions, hide_index=True)
 
-with task_tab:
+if page == '学习任务':
     st.subheader('执行任务 · 保存进度')
     conn=connect()
     try:
         latest=recent_plan(conn)
         if not latest:
-            st.info('目前还没有学习计划。去「学习路径」创建。')
+            st.info('目前还没有学习计划。去「学习计划」创建。')
         else:
             tasks=tasks_for(conn,latest['id'])
             stats = study_stats(conn, latest['id'])
@@ -314,10 +281,10 @@ with task_tab:
     finally:
         conn.close()
 
-with notes_tab:
+if page == '学习笔记':
     render_notes(st.session_state.jd_result)
 
-with debug_tab:
+if page == '资料问答':
     st.subheader('向你的学习资料提问')
     st.write('从你上传的笔记和资料中查找依据。例如：我记录过哪些面试问题？提示词评测需要注意什么？这里与「学习笔记」共用资料；学习笔记负责汇总，这里回答具体问题。')
     st.caption('无需 API Key 就能查找相关段落；生成带来源的回答需要配置 API Key。')
@@ -371,4 +338,4 @@ with debug_tab:
         con.close()
 
 st.divider()
-st.caption('RolePath V0.1 · 仅供学习与产品测试 · 规则识别、课程索引与能力状态都需要人工校验。')
+st.caption('RolePath · 让每一次学习，都靠近想去的方向。　｜　学习建议请结合原始资料核对。')
