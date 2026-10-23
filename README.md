@@ -1,88 +1,221 @@
 <div align="center">
 
 # RolePath
-### 把职业方向，变成每天可执行的一步。
 
-面向首次实习求职者与大一、大二学生的 AI 职业探索与学习空间。
+### From career curiosity to a clear next step.
 
-[体验 RolePath](https://rolepath-kodiak.streamlit.app/) · [产品能力](#从岗位到行动) · [部署说明](#运行与部署) · [数据与隐私](#数据与隐私)
+An AI-assisted career exploration and learning workspace for students preparing for their first internship.
+
+**Understand the role · Find relevant resources · Build a plan · Learn with evidence**
+
+[Launch RolePath](https://rolepath-kodiak.streamlit.app/) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
+
+**Status:** actively developed MVP · **Interface:** English / 简体中文 · **AI access:** bring your own API key
 
 </div>
 
 ---
 
-## 从岗位到行动
+## Overview
 
-面对一份岗位描述，你需要的不只是一个技能清单，而是知道：为什么要学、从哪里开始、学完留下什么。
+A job description tells a student what an employer expects. It rarely explains where to begin, which learning resources are relevant, or what a useful first project should demonstrate.
 
-RolePath 将岗位分析、带出处的课程和练习、学习计划、打卡与笔记汇总连接在同一个工作空间中。
+RolePath connects those steps in one workspace. Users can explore example roles, analyze a real job description, review source-linked courses and practice material, create a time-budgeted learning plan, and keep notes and progress records. A note assistant accepts natural-language instructions to summarize, explain, compare or ask questions about selected learning materials.
 
-| 环节 | 你能做什么 |
+The product is designed primarily for first-time internship applicants and first- and second-year university students. Its intended scope spans job families rather than a single employer or specialist role. The current resource catalog is finite: accepting a job description does **not** mean every requirement has a matching course.
+
+RolePath separates three things that are easy to confuse: **what a role asks for, what a learner has evidence of, and what the learner has marked complete.** A checked task is a progress record, not a certification of competence.
+
+## The learning journey
+
+| Stage | User action | Result |
+| --- | --- | --- |
+| Explore | Review example roles or bring a real vacancy | A starting direction grounded in actual work |
+| Understand | Paste or upload the job description | Requirements with source evidence and eligibility constraints |
+| Find resources | Review matched lessons and practice sources | Relevant material, provenance and visible coverage gaps |
+| Plan | Describe prior experience and choose a time budget | A saved sequence of learning, review and practice tasks |
+| Learn | Complete tasks, record study time and upload notes | Check-ins, reflections and accumulated learning material |
+| Reflect | Give the note assistant a specific instruction | A saved response linked to the selected source passages |
+| Return | Search saved history and reopen a plan | Continuity across learning sessions within the same account |
+
+## Product capabilities
+
+### Job analysis with traceable evidence
+
+Users can paste a job description or upload a supported document or image. AI-assisted extraction identifies explicit requirements and connects them to the source text. The interface separates skill requirements from conditions such as education or internship availability, and supports manual additions grounded in an exact source excerpt.
+
+Without an API key, a limited keyword scan is available. It is explicitly presented as an incomplete first pass, not a substitute for semantic analysis. The three home-page role examples are demonstrations, not live recruitment listings.
+
+### Courses and practice with identifiable sources
+
+Course matching uses the requirements extracted from the job description and the metadata of resources already in the catalog. Where available, recommendations point to specific chapters and provide creator, publication, study-time and verification information.
+
+Bilibili can be preferred when relevance is equal. Creators do not receive a universal ranking bonus. Practice materials distinguish original question sources, public interview recollections and learning exercises. An interview recollection is not represented as an official or current company exam.
+
+The catalog is not a live search engine. Missing matches are shown as gaps; the planner does not invent course URLs to fill them. Catalog and provenance checks also do not imply that every lesson has received an independent quality review.
+
+### Learning plans constrained by available time
+
+Users provide weekly study hours, a preparation period and optional evidence of prior work. The planner orders requirements, selects available learning material and allocates tasks across days within the total time budget. Longer tasks can span multiple daily sessions.
+
+The current scheduling logic is rule-based. It uses self-reported experience and mentions in submitted material as evidence indicators, without treating either as proof of mastery. Plans show scheduled work, missing resources and skills that do not fit the available budget.
+
+### Notes as an interactive learning workspace
+
+Users can select one or several saved notes and ask the assistant to:
+
+- Summarize a topic or compare multiple notes.
+- Explain an unfamiliar concept in simpler language.
+- Generate clearly labeled practice questions from the material.
+- Review an interpretation and identify points that need checking.
+- Ask a follow-up question when the available material is insufficient.
+
+Responses use references to supplied passages. The application validates reference identifiers and attaches the corresponding original text; it rejects invalid structured output rather than saving it as a verified result. This validates citation structure, **not the factual correctness of every model interpretation**.
+
+Documents and images are converted to text before analysis. The current assistant does not directly interpret the original images. Handwriting, formulas and diagrams therefore require particular care. A separate **Ask materials** page retrieves relevant passages for focused questions.
+
+### Personal history and bilingual presentation
+
+Saved plans, check-ins, note text and accepted note analyses are available through the user's account. The History page supports searching and resuming a selected plan. Unsaved drafts, standalone job analyses and a complete persistent chat transcript are not automatically included in history.
+
+The interface opens in English and provides a **Language / 语言** selector for Simplified Chinese. Language switching preserves the current page and inputs. Original job descriptions, notes, course titles and quotations retain their source language. AI responses are not automatically translated merely because the interface language changes.
+
+## What the AI does—and what the application does
+
+| Responsibility | Current implementation |
 | --- | --- |
-| 探索方向 | 从工作内容理解岗位，也可以输入自己的目标 JD |
-| 拆解要求 | 用 AI 提取具体能力，保留原文依据；关键词初筛明确标注覆盖边界 |
-| 选择资源 | 按要求匹配已收录的课程章节和练习，查看出处与缺口 |
-| 制定计划 | 根据可用时间与能力证据，安排学习和实践任务 |
-| 积累成果 | 保存笔记、记录打卡，用自然语言要求助手总结、解释或出题 |
-| 回看成长 | 搜索已保存的计划、笔记和分析，继续此前的学习 |
+| Interpret explicit job requirements | LLM extraction with source-reference validation; limited keyword mode without AI |
+| Explain and organize selected notes | Instruction-driven LLM responses grounded in supplied text |
+| Answer questions about documents | Passage retrieval followed by an optional LLM answer |
+| Select courses and practice | Catalog matching and relevance rules |
+| Allocate study time | Deterministic scheduling within a user-defined budget |
+| Store progress and enforce ownership | Application storage and database access policies |
+| Verify proficiency or automatically replan | Not implemented |
 
-## 设计原则
+This division keeps model-generated interpretation separate from storage, resource provenance and scheduling. The current release is an assisted learning workflow; it is not an autonomous career adviser that can verify skills or guarantee hiring outcomes.
 
-**先行动，后配置。** 首页只呈现方向、进度和下一步。个人 AI 配置放在设置页。
+## Architecture
 
-**信息有出处。** 区分原始题库、公开面经与练习说明；缺少资源时显示缺口，不生成虚构链接。
+```text
+Streamlit workspace
+  ├── English / Chinese presentation
+  ├── Email-code sign-in → Supabase Auth
+  ├── Job analysis → keyword parser / user-configured LLM
+  ├── Resource catalog → matching → time-budgeted planner
+  ├── Document ingestion → text extraction / OCR → passage retrieval
+  └── Note assistant → source-reference validation → saved report
 
-**记录属于账户。** 云端记录按登录用户隔离。前端隐藏信息不能替代数据库权限检查。
+Persistence
+  ├── Local personal use: SQLite
+  └── Hosted multi-user use: Supabase + row-level access policies
+```
 
-**清晰优先。** 使用轻量玻璃效果、深绿主色和明确的聚焦反馈；尊重减少动态效果的系统设置。
+| Layer | Main components |
+| --- | --- |
+| Interface | Streamlit, custom CSS, explicit translation catalog |
+| Model integration | OpenAI-compatible client for supported Alibaba Cloud Model Studio endpoints |
+| Retrieval | Keyword retrieval; optional BGE / Chroma integration in the codebase |
+| Documents | PDF text extraction and image OCR |
+| Image processing | macOS Vision locally; Tesseract with Chinese / English language packages on Linux |
+| Authentication | Supabase email OTP and server-side session verification |
+| Storage | SQLite locally; authenticated Supabase storage for the hosted application |
 
-## AI 在哪里发挥作用
+The base dependency file covers the standard keyword-retrieval path. Optional dense retrieval requires its additional packages and model assets; it is not a prerequisite for the default experience.
 
-接入用户自己的百炼 API 后，可进行岗位语义分析、按指令整理学习笔记、回答资料问题并核对来源。API 配置仅在当前服务会话保留，刷新或重新登录后可能需要再次填写；不跨设备同步。
+## Data, accounts and AI credentials
 
-课程匹配和计划排期目前主要由程序规则完成。图片先识别为文字，再交给模型分析；手写、公式与图表仍需核对。自动批改能力、完整对话历史和动态重排尚未完成。
+Cloud mode requires authentication before private workspace data is loaded. The Supabase schema uses user ownership and row-level access policies. Application-level filtering is not a replacement for those policies, and a new deployment should verify isolation with two separate accounts.
 
-## 数据与隐私
+The browser can retain Supabase session credentials for up to seven days. Restored sessions are verified on the server. Browser storage restrictions, private browsing and different browsers can affect continuity; credentials are not shared across browsers or devices.
 
-- 邮箱验证码登录；同一邮箱对应同一账户。
-- 云端使用 Supabase，并通过行级权限隔离用户记录。
-- AI Key 不写入数据库，不提交到仓库，不作为浏览器长期存储内容。
-- 点击 AI 分析时，选中的资料及相关岗位文本会发给用户配置的模型服务商。
-- 已保存的计划、笔记文字、打卡和分析可回看；未保存的输入与独立 JD 分析不会自动成为历史记录。
-- 登录保持实现使用浏览器本地会话凭据，并在服务端重新验证；不同浏览器、微信内置浏览器与无痕模式不会共享登录。
+AI access follows a **bring-your-own-key** model:
 
-## 运行与部署
+- Each user supplies their own supported Model Studio endpoint, API key and model name.
+- API usage is charged to that user's provider account.
+- The key remains in the current application session; it is not written to the application database or browser's persistent session storage.
+- A new session may require entering the key again.
+- When an AI operation is requested, the relevant selected text and context are sent to the configured provider.
 
-### 本机运行
+Do not commit `.env`, session tokens, private keys, local databases or personal documents. A Supabase publishable/anon key is used with authentication and access policies; an administrator or service-role key must not be used in the visitor client. This repository does not claim an independent security audit.
+
+## Run locally
+
+Use a Python environment compatible with the pinned dependency ranges. Local development has been exercised with Python 3.13.
 
 ```bash
+git clone https://github.com/kodiak-10/rolepath.git
+cd rolepath
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-本机数据保存在 SQLite，仅适合个人使用。云端多用户部署应使用 `cloud_app.py`，不能直接公开本机数据库。
+The local entry point stores records in `.rolepath.sqlite3` in the working directory and is intended for personal use. It does not provide cloud account isolation.
 
-### Streamlit Community Cloud
+For optional local AI access, create an untracked `.env` file:
 
-1. 使用仓库中的 `requirements.txt` 与 `packages.txt` 安装依赖。
-2. 在独立 Supabase 项目执行 `deploy/supabase.sql`，配置 `deploy/public_config.json` 中的项目 URL 与 publishable key。
-3. 配置 SMTP 与邮箱验证码模板 `deploy/email_otp.html`，设置站点 URL。
-4. 部署入口选 `cloud_app.py`，随后验证注册、登录、账户隔离与数据保存。
+```dotenv
+LLM_API_KEY=your-own-api-key
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL=qwen-plus
+LLM_ENABLE_THINKING=false
+```
 
-不要上传 `.env`、私有密钥、原始笔记或本机数据库。禁止将 Supabase 管理员密钥用于访客登录客户端。
+Use an endpoint and model available to your own provider account. These example values do not provision a model or supply credits. On macOS, image OCR requires the Swift / Vision runtime; on Linux, install the system OCR packages listed in `packages.txt`.
 
-## 当前边界
+## Deployment
 
-这是持续迭代的产品原型。课程库尚不能覆盖所有岗位；任务打卡代表用户自报，不等于能力评测。免费托管可能休眠。浏览器的隐私设置可能阻止登录保持，部署后需在实际设备验证。
+The hosted entry point is **`cloud_app.py`**, which enables cloud mode before loading the application.
+
+1. Create a Supabase project for your deployment and apply [`deploy/supabase.sql`](deploy/supabase.sql).
+2. Replace the project URL and publishable/anon key in `deploy/public_config.json` with your project's public configuration. Do not reuse another deployment's backend.
+3. Configure email delivery and the email OTP template in Supabase. The email must include the numeric token (`{{ .Token }}`) used by the application's verification form. Set the appropriate site URL.
+4. Deploy the repository to Streamlit Community Cloud with `cloud_app.py` as the entry point. Keep `requirements.txt` and `packages.txt` available at the repository root.
+5. Verify email-code delivery, sign-in, sign-out, session restoration, two-account data isolation and saved-history access before inviting users.
+6. Users connect their own AI service from **Account & settings → AI settings**. Local `.env` credentials are not automatically shared with hosted users.
+
+Free hosting does not make model usage free, and hosting availability should not be treated as a production service guarantee.
+
+## Repository guide
+
+| Path | Purpose |
+| --- | --- |
+| `app.py` / `cloud_app.py` | Personal and authenticated cloud entry points |
+| `rolepath/ui.py`, `i18n.py`, `translations.json` | Workspace presentation and interface languages |
+| `rolepath/cloud_auth.py`, `browser_session.py` | Email sign-in and browser session restoration |
+| `rolepath/cloud_store.py`, `db.py` | Hosted and local persistence |
+| `rolepath/jd.py`, `llm.py`, `evidence.py` | Requirement extraction, model requests and evidence indicators |
+| `rolepath/matching.py`, `planner.py` | Resource selection and daily task allocation |
+| `rolepath/knowledge.py`, `image_text.py` | Ingestion, passage retrieval and OCR |
+| `rolepath/notes.py`, `notes_ui.py` | Instruction-driven note analysis and saved reports |
+| `data/` | Role examples, course metadata and practice sources |
+| `deploy/` | Database schema and public backend configuration |
+
+## Current limitations and development direction
+
+RolePath is an actively developed MVP. The following are deliberate boundaries of the current implementation, not completed capabilities:
+
+- Resource coverage is limited and requires continued editorial work across job families.
+- Source-reference checks cannot eliminate unsupported model interpretations or OCR errors.
+- Course matching and planning are not yet an adaptive LLM-driven learning policy.
+- Check-ins and completion are self-reported; automated assessment of code, answers or portfolio work is not available.
+- The note assistant has bounded input and conversation lengths. Larger collections require smaller selections.
+- English interface support does not translate the underlying Chinese catalog or all model outputs.
+- Actual mobile and embedded-browser behavior needs deployment-specific verification.
+
+Future work should strengthen resource quality, evidence-based feedback and learning continuity before expanding claims about automation. Neither career suitability nor interview readiness should be inferred from task completion alone.
+
+## Feedback
+
+Use the repository's [Issues](https://github.com/kodiak-10/rolepath/issues) to report a reproducible problem or a resource mismatch. Include the affected page, expected behavior and a sanitized example. Never include API keys, verification codes, session tokens or private notes.
 
 ---
 
-<div align="center">RolePath · Your next chapter starts with one clear step.</div>
+<div align="center">
 
-### Interface language / 界面语言
+**RolePath** — Understand the work. Build the evidence. Take the next step.
 
-RolePath opens in English. Use **Language / 语言** at the top to switch to 简体中文. The selected language is included in the page URL (`?lang=zh` or `?lang=en`). Switching languages preserves the current page and inputs; job descriptions, notes, course titles and source quotations remain in their original language. AI output follows the existing analysis instructions and is not automatically translated.
+[Open the workspace](https://rolepath-kodiak.streamlit.app/) · [阅读中文版](README.zh-CN.md)
 
-默认英文，可在页面顶部切换简体中文。切换语言不会修改已保存记录；原始资料和课程出处保持原文。
+</div>
