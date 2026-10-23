@@ -7,10 +7,10 @@ from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
-from rolepath.cloud_settings import cloud_mode
+from rolepath.cloud_settings import cloud_mode, render_model_settings
 
 from rolepath.catalog import ALL_SKILLS, load_resources, load_roles
-from rolepath.db import connect, recent_plan, save_plan, set_task_status, tasks_for, log_study, study_stats
+from rolepath.db import connect, recent_plan, all_plans, save_plan, set_task_status, tasks_for, log_study, study_stats
 from rolepath.evidence import assess
 from rolepath.ingest import read_upload
 from rolepath.image_text import UPLOAD_TYPES
@@ -35,7 +35,7 @@ render_header()
 ROLES = load_roles()
 RESOURCES = load_resources()
 
-@st.cache_resource(show_spinner='初始化检索器中…')
+@st.cache_resource(show_spinner='正在准备学习资源…')
 def get_retriever(mode: str, catalog_version: str):
     return build_retriever(RESOURCES, mode)
 
@@ -46,7 +46,7 @@ try:
     retrieval_ok = True
 except Exception as exc:
     retrieval_ok = False
-    st.error(f'检索器初始化失败：{exc}')
+    st.error('学习资源暂时无法加载，请稍后刷新。')
     st.stop()
 
 if 'jd_text' not in st.session_state:
@@ -56,7 +56,9 @@ if 'jd_result' not in st.session_state:
 if 'last_plan_id' not in st.session_state:
     st.session_state.last_plan_id = None
 
-PAGES = ['我的空间', '岗位分析', '课程与题目', '学习计划', '学习任务', '学习笔记', '资料问答']
+PAGES = ['我的空间', '岗位分析', '课程与题目', '学习计划', '学习任务', '学习笔记', '资料问答', '历史记录']
+if st.session_state.get('page') == 'AI 设置':
+    PAGES.append('AI 设置')
 st.session_state.setdefault('page', PAGES[0])
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
 st.session_state.setdefault('_prefer_bili', True)
@@ -191,6 +193,7 @@ if page == '学习计划':
                 try:
                     pid=save_plan(conn,parsed['raw'].splitlines()[0][:100],tasks,{'hours_per_week':hours,'days':days,'jd':parsed['raw'],'summary':summary,'retrieval':retriever_name,'parsed':parsed})
                     st.session_state.last_plan_id=pid
+                    st.session_state['_selected_plan_id']=pid
                 finally:
                     conn.close()
                 st.success(f'已保存 {len(tasks)} 个任务。')
@@ -223,7 +226,9 @@ if page == '学习任务':
     st.subheader('执行任务 · 保存进度')
     conn=connect()
     try:
-        latest=recent_plan(conn)
+        plans = all_plans(conn)
+        selected_id = st.session_state.get('_selected_plan_id')
+        latest = next((p for p in plans if p['id'] == selected_id), plans[0] if plans else None)
         if not latest:
             st.info('目前还没有学习计划。去「学习计划」创建。')
         else:
@@ -334,6 +339,58 @@ if page == '资料问答':
                     st.error(f'真实 API 请求失败：{exc}')
         elif not chunks:
             st.info('还没有资料，请先上传笔记或文档。')
+    finally:
+        con.close()
+
+
+
+
+if page == 'AI 设置':
+    st.subheader('连接你的 AI 服务')
+    st.write('由你自己的百炼账户提供智能分析。学习记录和 AI 配置分开保存。')
+    if cloud_mode():
+        render_model_settings()
+    else:
+        st.info('本机版本从本地环境配置读取 AI 服务。')
+
+if page == '历史记录':
+    from rolepath.ui import restore_plan
+    from rolepath.notes import reports
+    st.subheader('每一步，都有记录')
+    st.caption('查看已保存的学习计划、打卡与笔记分析。未保存的输入不在这里。')
+    query = st.text_input('搜索历史记录', placeholder='输入岗位名称、笔记名称或分析指令…').strip().casefold()
+    con = connect()
+    try:
+        plans = all_plans(con)
+        docs = get_documents(con)
+        saved_reports = reports(con)
+        st.markdown('**学习计划与打卡**')
+        visible_plans = [p for p in plans if query in p['target'].casefold()]
+        if not visible_plans:
+            st.caption('暂无匹配的已保存计划。')
+        for p in visible_plans:
+            with st.expander(str(p['created_at']) + ' · ' + p['target']):
+                rows = tasks_for(con, p['id'])
+                st.write(f"已完成 {sum(t['status']=='已完成' for t in rows)} / {len(rows)} 个任务")
+                logs = study_stats(con,p['id'])['logs']
+                if logs:
+                    st.dataframe([{'日期':x['day'],'学习内容':x['title'],'分钟':x['minutes'],'心得':x['reflection']} for x in logs], hide_index=True)
+                st.button('继续这份计划', key='history_'+p['id'], on_click=restore_plan, args=(dict(p),))
+        st.markdown('**已保存笔记**')
+        matched = [d for d in docs if query in d['filename'].casefold()]
+        if matched:
+            st.dataframe([{'名称':d['filename'],'保存时间':d['created_at']} for d in matched],hide_index=True)
+        else:
+            st.caption('暂无匹配的已保存笔记。')
+        st.markdown('**分析与汇总**')
+        matched_reports = [(rid,r) for rid,r in saved_reports if query in (r.get('instruction','')+' '+ ' '.join(x['filename'] for x in r['sources'])).casefold()]
+        if not matched_reports:
+            st.caption('暂无匹配的已保存分析。')
+        for rid, report in matched_reports:
+            with st.expander(report['created_at']+' · '+(report.get('instruction') or '笔记总结')):
+                for item in report['items']:
+                    st.write(item['kind']+'：'+item['text'])
+                st.caption('完整引用可在学习笔记的已保存分析中查看。')
     finally:
         con.close()
 

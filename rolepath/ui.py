@@ -10,7 +10,7 @@ from .jd import parse_jd
 def apply_style():
     st.markdown('''<style>
     :root {--rp-ink:#172d30;--rp-teal:#126859;--rp-line:#dce7e2}
-    .stApp {background:#f6f8f5;color:var(--rp-ink)}
+    .stApp {background:radial-gradient(ellipse at 8% 0%,#dcece480,transparent 48%),radial-gradient(ellipse at 96% 30%,#dce7f280,transparent 45%),#f6f8f5;color:var(--rp-ink)}
     .block-container {max-width:1180px;padding:2.5rem 2rem 2rem}
     h1,h2,h3 {letter-spacing:-.035em;color:var(--rp-ink)!important}
     [data-testid="stHeader"] {background:transparent}
@@ -44,6 +44,24 @@ def apply_style():
     .rp-chip {display:inline-block;background:#eaf1eb;color:#446458;border-radius:6px;font-size:12px;padding:4px 8px;margin:0 5px 7px 0}
     @media(max-width:700px){.block-container{padding:1.5rem 1rem}.rp-hero{padding:28px 22px;min-height:210px}.rp-hero h1{font-size:30px;max-width:100%}.rp-hero p{max-width:100%}.rp-orbit{opacity:.25}.rp-brand{font-size:22px}}
     @media(prefers-reduced-motion:reduce){.stButton button{transition:none}.stButton button:hover{transform:none}}
+    [data-testid="stTextInput"] [data-baseweb="input"],
+    [data-testid="stTextArea"] [data-baseweb="textarea"],
+    [data-testid="stSelectbox"] [data-baseweb="select"]>div,
+    [data-testid="stMultiSelect"] [data-baseweb="select"]>div {
+      background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.95);
+      border-radius:16px;box-shadow:inset 0 1px 0 #fff,0 4px 20px #203f3110;
+      -webkit-backdrop-filter:blur(20px) saturate(135%);backdrop-filter:blur(20px) saturate(135%);
+      transition:box-shadow .18s,border-color .18s;
+    }
+    [data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
+    [data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within {
+      border-color:#5b9b89;box-shadow:0 0 0 3px #12685920,0 6px 24px #203f3110;
+    }
+    [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea {background:transparent!important;color:#172d30}
+    [data-testid="stTextInput"] input::placeholder,[data-testid="stTextArea"] textarea::placeholder {color:#64766f;opacity:1}
+    [data-testid="stRadio"]>div[role="radiogroup"] {background:#ffffffa6;border:1px solid #fff;box-shadow:0 4px 20px #203f310a;backdrop-filter:blur(18px)}
+    @media(prefers-reduced-transparency:reduce){[data-baseweb="input"],[data-baseweb="textarea"],[data-baseweb="select"]>div {background:#fff!important;backdrop-filter:none!important}}
+    @media(prefers-reduced-motion:reduce){[data-baseweb="input"],[data-baseweb="textarea"] {transition:none!important}}
     </style>''', unsafe_allow_html=True)
 
 
@@ -61,12 +79,10 @@ def render_header():
             if cloud_mode():
                 st.caption(st.session_state.get('_account_email', '个人账户'))
                 st.caption('学习记录保存在你的账户中。')
-                render_model_settings()
+                st.button('AI 服务设置', on_click=go_to, args=('AI 设置',), use_container_width=True)
                 if st.button('退出登录', key='account_logout'):
-                    try:
-                        st.session_state['_account_client'].auth.sign_out()
-                    finally:
-                        st.session_state.clear()
+                    from .browser_session import logout
+                    logout()
                     st.rerun()
             else:
                 st.caption('本机个人空间')
@@ -88,6 +104,7 @@ def restore_plan(plan):
     st.session_state['_jd_draft'] = text
     st.session_state.jd_text = text
     st.session_state.jd_result = meta.get('parsed') or parse_jd(text)
+    st.session_state['_selected_plan_id'] = plan['id']
     go_to('学习任务')
 
 

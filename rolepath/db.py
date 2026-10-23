@@ -88,3 +88,10 @@ def study_stats(conn, plan_id, today=None):
     week_start = today-timedelta(days=today.weekday())
     return dict(streak=streak, days=len(days), minutes=sum(r['minutes'] for r in valid),
         week_minutes=sum(r['minutes'] for r in valid if date.fromisoformat(r['day']) >= week_start), logs=[dict(r) for r in rows])
+
+
+def all_plans(conn):
+    if getattr(conn, 'cloud', False):
+        rows = conn.rows('plans')
+        return [{**r, 'meta': json.dumps(r['meta'], ensure_ascii=False)} for r in sorted(rows, key=lambda r:(r['created_at'],r['id']), reverse=True)]
+    return list(conn.execute('SELECT * FROM plans ORDER BY created_at DESC, rowid DESC'))

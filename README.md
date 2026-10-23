@@ -1,19 +1,82 @@
+<div align="center">
+
 # RolePath
+### 把职业方向，变成每天可执行的一步。
 
-Career exploration and study planning for students seeking internships.
+面向首次实习求职者与大一、大二学生的 AI 职业探索与学习空间。
 
-## Cloud setup
+[体验 RolePath](https://rolepath-kodiak.streamlit.app/) · [产品能力](#从岗位到行动) · [部署说明](#运行与部署) · [数据与隐私](#数据与隐私)
 
-Deploy `cloud_app.py` with Python 3.13 and the included requirements.txt and packages.txt.
-Use a dedicated Supabase project; run deploy/supabase.sql once. Set the project URL and publishable key in deploy/public_config.json. Never use an administrator key.
-Configure verified email signup with a production SMTP service and set the Auth Site URL to the deployed app address before opening registration.
+</div>
 
-Each authenticated account owns its plans, tasks, study logs, document text and analysis reports. PostgreSQL row-level policies enforce account separation. The application uses the signed-in user's token for all database operations.
+---
 
-AI calls use each visitor's own Alibaba Bailian API configuration, retained only in the current session. No operator API key or local personal records are included. Refreshing requires login again; saved records remain in the database.
+## 从岗位到行动
 
-Images are processed with server-side OCR on Linux; original images are not retained. Handwriting and diagrams can be inaccurate. The cloud deployment currently supports keyword retrieval only. Resource coverage is limited to the included catalog.
+面对一份岗位描述，你需要的不只是一个技能清单，而是知道：为什么要学、从哪里开始、学完留下什么。
 
-## Release validation
+RolePath 将岗位分析、带出处的课程和练习、学习计划、打卡与笔记汇总连接在同一个工作空间中。
 
-Database account isolation checked with temporary transactional test users and rolled back. Public signup, Linux OCR and the deployed site must be verified separately before launch.
+| 环节 | 你能做什么 |
+| --- | --- |
+| 探索方向 | 从工作内容理解岗位，也可以输入自己的目标 JD |
+| 拆解要求 | 用 AI 提取具体能力，保留原文依据；关键词初筛明确标注覆盖边界 |
+| 选择资源 | 按要求匹配已收录的课程章节和练习，查看出处与缺口 |
+| 制定计划 | 根据可用时间与能力证据，安排学习和实践任务 |
+| 积累成果 | 保存笔记、记录打卡，用自然语言要求助手总结、解释或出题 |
+| 回看成长 | 搜索已保存的计划、笔记和分析，继续此前的学习 |
+
+## 设计原则
+
+**先行动，后配置。** 首页只呈现方向、进度和下一步。个人 AI 配置放在设置页。
+
+**信息有出处。** 区分原始题库、公开面经与练习说明；缺少资源时显示缺口，不生成虚构链接。
+
+**记录属于账户。** 云端记录按登录用户隔离。前端隐藏信息不能替代数据库权限检查。
+
+**清晰优先。** 使用轻量玻璃效果、深绿主色和明确的聚焦反馈；尊重减少动态效果的系统设置。
+
+## AI 在哪里发挥作用
+
+接入用户自己的百炼 API 后，可进行岗位语义分析、按指令整理学习笔记、回答资料问题并核对来源。API 配置仅在当前服务会话保留，刷新或重新登录后可能需要再次填写；不跨设备同步。
+
+课程匹配和计划排期目前主要由程序规则完成。图片先识别为文字，再交给模型分析；手写、公式与图表仍需核对。自动批改能力、完整对话历史和动态重排尚未完成。
+
+## 数据与隐私
+
+- 邮箱验证码登录；同一邮箱对应同一账户。
+- 云端使用 Supabase，并通过行级权限隔离用户记录。
+- AI Key 不写入数据库，不提交到仓库，不作为浏览器长期存储内容。
+- 点击 AI 分析时，选中的资料及相关岗位文本会发给用户配置的模型服务商。
+- 已保存的计划、笔记文字、打卡和分析可回看；未保存的输入与独立 JD 分析不会自动成为历史记录。
+- 登录保持实现使用浏览器本地会话凭据，并在服务端重新验证；不同浏览器、微信内置浏览器与无痕模式不会共享登录。
+
+## 运行与部署
+
+### 本机运行
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+本机数据保存在 SQLite，仅适合个人使用。云端多用户部署应使用 `cloud_app.py`，不能直接公开本机数据库。
+
+### Streamlit Community Cloud
+
+1. 使用仓库中的 `requirements.txt` 与 `packages.txt` 安装依赖。
+2. 在独立 Supabase 项目执行 `deploy/supabase.sql`，配置 `deploy/public_config.json` 中的项目 URL 与 publishable key。
+3. 配置 SMTP 与邮箱验证码模板 `deploy/email_otp.html`，设置站点 URL。
+4. 部署入口选 `cloud_app.py`，随后验证注册、登录、账户隔离与数据保存。
+
+不要上传 `.env`、私有密钥、原始笔记或本机数据库。禁止将 Supabase 管理员密钥用于访客登录客户端。
+
+## 当前边界
+
+这是持续迭代的产品原型。课程库尚不能覆盖所有岗位；任务打卡代表用户自报，不等于能力评测。免费托管可能休眠。浏览器的隐私设置可能阻止登录保持，部署后需在实际设备验证。
+
+---
+
+<div align="center">RolePath · Your next chapter starts with one clear step.</div>
