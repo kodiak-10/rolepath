@@ -80,3 +80,9 @@ streamlit run app.py
 ---
 
 <div align="center">RolePath · Your next chapter starts with one clear step.</div>
+
+### Interface language / 界面语言
+
+RolePath opens in English. Use **Language / 语言** at the top to switch to 简体中文. The selected language is included in the page URL (`?lang=zh` or `?lang=en`). Switching languages preserves the current page and inputs; job descriptions, notes, course titles and source quotations remain in their original language. AI output follows the existing analysis instructions and is not automatically translated.
+
+默认英文，可在页面顶部切换简体中文。切换语言不会修改已保存记录；原始资料和课程出处保持原文。
