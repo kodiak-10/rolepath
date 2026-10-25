@@ -30,7 +30,7 @@ def model_setting(name):
 
 def valid_model_endpoint(value):
     p = urlparse(value)
-    return p.scheme == 'https' and (not p.username) and (not p.password) and (not p.port) and (not p.query) and (not p.fragment) and (p.path.rstrip('/') == '/compatible-mode/v1') and (p.hostname in ('dashscope.aliyuncs.com', 'dashscope-intl.aliyuncs.com') or (p.hostname or '').endswith('.maas.aliyuncs.com'))
+    return p.scheme == 'https' and (not p.username) and (not p.password) and (not p.port) and (not p.query) and (not p.fragment) and (p.path.rstrip('/') == '/compatible-mode/v1') and (p.hostname in ('dashscope.aliyuncs.com', 'dashscope-intl.aliyuncs.com', 'maas.qianwenaiapi.com') or (p.hostname or '').endswith('.maas.aliyuncs.com'))
 
 def render_model_settings():
     from .i18n import t as tr
@@ -42,16 +42,16 @@ def render_model_settings():
     configured = bool(model_setting('LLM_API_KEY'))
     st.caption(tr('AI：已配置（当前会话）') if configured else tr('AI：当前会话尚未配置'))
     with st.expander(tr('我的 AI 配置')):
-        st.caption(tr('模型调用费用由你的 API 账户承担。Key 仅保留在本次登录会话，不写入数据库；退出后清除。点击分析时，所选文字会发送给阿里云百炼。'))
+        st.caption(tr('模型调用费用由你的 API 账户承担。Key 仅保留在本次登录会话，不写入数据库；退出后清除。点击分析时，所选文字会发送给下方接口对应的 AI 服务商。'))
         with st.form('visitor_model_form'):
-            key = st.text_input(tr('百炼 API Key'), type='password', placeholder=tr('已保存；留空保留当前 Key') if configured else tr('填写你自己的 API Key'), key='ui_c90909bc9819')
+            key = st.text_input(tr('千问 / 百炼 API Key'), type='password', placeholder=tr('已保存；留空保留当前 Key') if configured else tr('填写你自己的 API Key'), key='ui_c90909bc9819')
             endpoint = st.text_input(tr('OpenAI 兼容地址'), value=model_setting('LLM_BASE_URL') or 'https://dashscope.aliyuncs.com/compatible-mode/v1', key='ui_a07e09d0ca7f')
             model = st.text_input(tr('模型名称'), value=model_setting('LLM_MODEL') or 'qwen-plus', key='ui_15af5bc2b434')
             submit = st.form_submit_button(tr('应用配置'))
         if submit:
             key = key.strip() or model_setting('LLM_API_KEY')
             if not valid_model_endpoint(endpoint.strip()) or not key.strip() or (not model.strip()):
-                st.error(tr('请填写有效的百炼地址、Key 和模型名称。'))
+                st.error(tr('请填写有效的千问或百炼地址、Key 和模型名称。'))
             else:
                 st.session_state.update({'visitor_LLM_API_KEY': key.strip(), 'visitor_LLM_BASE_URL': endpoint.strip(), 'visitor_LLM_MODEL': model.strip(), 'visitor_LLM_ENABLE_THINKING': 'false'})
                 st.success(tr('配置已应用到当前会话。'))

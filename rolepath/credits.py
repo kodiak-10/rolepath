@@ -89,7 +89,7 @@ def task_notice():
     if managed_ai():
         import streamlit as st
         from .i18n import t
-        st.caption(t('本次 AI 任务使用 1 次额度。失败不扣次；首次验证邮箱赠送 1 次。所选内容将发送给阿里云千问。'))
+        st.caption(t('本次 AI 任务使用 1 次额度。失败不扣次；首次验证邮箱赠送 1 次。所选内容将发送给平台配置的 AI 服务商。'))
 
 
 def render_credits():

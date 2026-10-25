@@ -15,8 +15,8 @@ The existing BYOK service remains active until the operator explicitly switches 
 
 ```toml
 ROLEPATH_AI_MODE = "managed"
-LLM_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-LLM_MODEL = "YOUR_TESTED_QWEN_MODEL"
+LLM_BASE_URL = "https://maas.qianwenaiapi.com/compatible-mode/v1"
+LLM_MODEL = "qwen3.7-plus"
 LLM_API_KEY = "YOUR_SERVER_KEY"
 LLM_ENABLE_THINKING = "false"
 SUPABASE_SERVICE_ROLE_KEY = "YOUR_SERVER_ONLY_SERVICE_ROLE_KEY"
@@ -29,8 +29,10 @@ Never put this key in public_config.json or a browser component.
 
 4. Run public/synthetic JD and note fixtures against Qwen. Measure input/output
    tokens, latency, validation failures and retry costs. Do not use private notes
-   for a benchmark without specific permission. No cost benchmark has been run
-   for this rollout yet; **no selling price is approved**.
+   for a benchmark without specific permission. Two synthetic live tasks (JD extraction and note assistance) passed with
+   `qwen3.7-plus` on Qianwen AI Platform. They consumed 812 input and 673 output
+   tokens in total; this small functional check is not a pricing benchmark.
+   **No selling price is approved**.
 5. Check the English and Chinese UI and an end-to-end free trial before activation.
 
 ## Semantics and limits
@@ -68,3 +70,13 @@ AppID, currency and amount checks, and idempotent order settlement.
 Keep merchant private keys and APIv3 keys in server secrets. Never ask users to
 paste them into chat or commit them. Finish model-cost measurements before setting
 pack prices, then complete a real payment/reconciliation test before opening sales.
+
+## Verified provider configuration
+
+The Qianwen AI Platform pay-as-you-go endpoint is
+`https://maas.qianwenaiapi.com/compatible-mode/v1`. Its API keys and endpoints
+must stay paired; do not substitute a DashScope URL for a Qianwen Platform key.
+
+Sources: [Qianwen Platform API key guide](https://platform.qianwenai.com/docs/api-reference/preparation/api-key)
+and [Qwen Code authentication guide](https://qwenlm.github.io/qwen-code-docs/en/users/configuration/auth/).
+The application accepts this exact host in addition to the existing Bailian hosts.

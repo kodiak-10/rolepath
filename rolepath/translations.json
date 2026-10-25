@@ -289,5 +289,9 @@
   "本小时尝试次数较多，请稍后再试。": "You have reached the hourly attempt limit. Please try again later.",
   "今日 AI 服务额度已用完，请明天再试。": "The daily AI service limit has been reached. Please try again tomorrow.",
   "请先完成邮箱验证后再使用 AI。": "Verify your email before using AI.",
-  "额度处理尚未确认，请查看使用记录；若显示处理中，请勿重复提交。": "Credit settlement has not been confirmed. Check Usage; do not resubmit while a task is processing."
+  "额度处理尚未确认，请查看使用记录；若显示处理中，请勿重复提交。": "Credit settlement has not been confirmed. Check Usage; do not resubmit while a task is processing.",
+  "模型调用费用由你的 API 账户承担。Key 仅保留在本次登录会话，不写入数据库；退出后清除。点击分析时，所选文字会发送给下方接口对应的 AI 服务商。": "Your API account pays for model calls. Your key is kept only in this signed-in session and cleared on sign-out. Selected text is sent to the AI provider at the endpoint below.",
+  "千问 / 百炼 API Key": "Qianwen / Bailian API key",
+  "请填写有效的千问或百炼地址、Key 和模型名称。": "Enter a valid Qianwen or Bailian endpoint, API key and model name.",
+  "本次 AI 任务使用 1 次额度。失败不扣次；首次验证邮箱赠送 1 次。所选内容将发送给平台配置的 AI 服务商。": "This AI task uses 1 credit. Failed tasks are not charged. Your first verified account receives 1 free credit. Selected content is sent to the platform’s configured AI provider."
 }
