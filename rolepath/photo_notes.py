@@ -28,14 +28,17 @@ def prepare_photo(data, name):
     return 'data:image/jpeg;base64,' + base64.b64encode(out.getvalue()).decode('ascii')
 
 
-def analyze_photos(photos, instruction, language='zh'):
+def analyze_photos(photos, instruction, language='zh', history=None):
     if not 1 <= len(photos) <= 4:
         raise ValueError('每次请选择 1–4 张照片。')
     if not isinstance(instruction, str) or len(instruction) > 3000:
         raise ValueError('指令最多 3000 字。')
+    history = history or []
+    if len(history) > 6 or len(json.dumps(history, ensure_ascii=False)) > 16000:
+        raise ValueError('对话过长，请开始新对话。')
     content = [{'type': 'text', 'text': json.dumps({
         'instruction': instruction.strip() or '整理并解释这些笔记，指出看不清的部分。',
-        'response_language': language, 'files': [p[0] for p in photos]}, ensure_ascii=False)}]
+        'response_language': language, 'conversation': history, 'files': [p[0] for p in photos]}, ensure_ascii=False)}]
     for index, (name, data) in enumerate(photos):
         content += [{'type': 'text', 'text': f'Image P{index + 1}'},
                     {'type': 'image_url', 'image_url': {'url': prepare_photo(data, name)}}]

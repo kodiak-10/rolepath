@@ -52,7 +52,9 @@ if 'jd_result' not in st.session_state:
     st.session_state.jd_result = None
 if 'last_plan_id' not in st.session_state:
     st.session_state.last_plan_id = None
-PAGES = ['我的空间', '岗位分析', '课程与题目', '学习计划', '学习任务', '学习笔记', '资料问答', '历史记录']
+PAGES = ['我的空间', '岗位分析', '课程与题目', '学习计划', '学习任务', '学习笔记', '历史记录']
+if st.session_state.get('page') == '资料问答':
+    st.session_state['page'] = '学习笔记'
 if st.session_state.get('page') == 'AI 设置':
     PAGES.append('AI 设置')
 st.session_state.setdefault('page', PAGES[0])
@@ -278,58 +280,6 @@ if page == '学习任务':
         conn.close()
 if page == '学习笔记':
     render_notes(st.session_state.jd_result)
-if page == '资料问答':
-    st.subheader(tr('向你的学习资料提问'))
-    st.write(tr('从你上传的笔记和资料中查找依据。例如：我记录过哪些面试问题？提示词评测需要注意什么？这里与「学习笔记」共用资料；学习笔记负责汇总，这里回答具体问题。'))
-    st.caption(tr('无需 API Key 就能查找相关段落；生成带来源的回答需要配置 API Key。'))
-    st.caption(tr('照片请使用学习笔记中的照片助手；核对并保存文字后，这里也可以检索。') if cloud_mode() else tr('支持多张 PNG、JPG、HEIC/HEIF 照片，每张最多 5MB。图片在运行服务上识别文字，请在学习笔记中核对识别结果；暂不理解纯图表，手写文字可能有误。'))
-    knowledge_file = st.file_uploader(tr('上传个人学习资料 / 官方文档（单份 ≤5MB，PDF ≤40页）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), accept_multiple_files=True, key='knowledge_file')
-    if st.button(tr('保存资料'), key='import_knowledge', disabled=not knowledge_file):
-        con = connect()
-        try:
-            for file in knowledge_file:
-                try:
-                    with st.spinner(tr('正在读取 ') + file.name + '…'):
-                        pages = pages_from_upload(file)
-                        _, count = save_document(con, file.name, pages)
-                    st.success(file.name + (tr('：已保存。') if count else tr('：已存在，未重复保存。')))
-                except Exception as exc:
-                    st.error(file.name + tr('：未保存，') + str(exc))
-        finally:
-            con.close()
-    con = connect()
-    try:
-        docs = get_documents(con)
-        chunks = get_chunks(con)
-        st.caption(tr('当前有 {0} 份资料，与学习笔记共用。', len(docs)))
-        for doc in docs:
-            d1, d2 = st.columns([5, 1])
-            d1.write(f"📄 {doc['filename']}")
-            if d2.button(tr('删除'), key=f"del_{doc['id']}"):
-                delete_document(con, doc['id'])
-                st.rerun()
-        doc_question = st.text_input(tr('向上传的知识库提问'), value='', placeholder=tr('这份文档讲了什么？'), key='document_question')
-        if retriever_name == 'dense':
-            doc_hits = search_dense(con, doc_question, retriever, top_k=4)
-        else:
-            doc_hits = search_lexical(con, doc_question, top_k=4)
-        if doc_question.strip() and chunks:
-            for h in doc_hits:
-                with st.expander(tr('{0} · 第{1}页 · 相关原文', h.filename, h.page)):
-                    st.write(h.text)
-            task_notice()
-            if st.button(tr('根据资料回答'), key='answer_document', disabled=not is_configured()):
-                try:
-                    answer = run_ai_task('document', lambda: answer_from_document(doc_question, doc_hits)) if doc_hits else answer_from_document(doc_question, doc_hits)
-                    st.markdown(answer['answer'])
-                    st.caption(answer['mode'])
-                    
-                except Exception as exc:
-                    st.error(tr('真实 API 请求失败：{0}', exc))
-        elif not chunks:
-            st.info(tr('还没有资料，请先上传笔记或文档。'))
-    finally:
-        con.close()
 if page == 'AI 设置':
     if not managed_ai():
         st.subheader(tr('连接你的 AI 服务'))
@@ -378,5 +328,7 @@ if page == '历史记录':
                 st.caption(tr('完整引用可在学习笔记的已保存分析中查看。'))
     finally:
         con.close()
+from rolepath.note_chat_ui import render_open_note_chat
+render_open_note_chat(st.session_state.jd_result)
 st.divider()
 st.caption(tr('RolePath · 让每一次学习，都靠近想去的方向。\u3000｜\u3000学习建议请结合原始资料核对。'))

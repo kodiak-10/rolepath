@@ -72,7 +72,7 @@ Users can select one or several saved notes and ask the assistant to:
 
 Responses use references to supplied passages. The application validates reference identifiers and attaches the corresponding original text; it rejects invalid structured output rather than saving it as a verified result. This validates citation structure, **not the factual correctness of every model interpretation**.
 
-The photo note assistant sends 1–4 original photos and the user’s instruction to the configured vision-capable Qwen model in one task. It returns a transcription, explicit uncertainty notes, and an answer for one credit. Users review and edit the text before saving it to their notes. Original photos are not stored permanently by RolePath. Legacy cloud OCR ingestion is disabled; previously saved OCR text is not silently repaired. Handwriting accuracy still requires checking against the original image. A separate **Ask materials** page retrieves relevant passages for focused questions.
+The photo note assistant sends 1–4 original photos and the user’s instruction to the configured vision-capable Qwen model in one task. It returns a transcription, explicit uncertainty notes, and an answer for one credit. Users review and edit the text before saving it to their notes. Original photos are not stored permanently by RolePath. Legacy cloud OCR ingestion is disabled; previously saved OCR text is not silently repaired. Handwriting accuracy still requires checking against the original image. Conversation now opens in a dedicated window. Notes stay in a compact material library, while source selection, reviewed photo text and saved insights open only when needed. A global **Ask** action opens the same window from any page.
 
 ### Personal history and bilingual presentation
 

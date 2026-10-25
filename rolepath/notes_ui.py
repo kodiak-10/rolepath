@@ -1,97 +1,88 @@
-from .i18n import t as tr, label, table, formatter
+"""A quiet material library. Conversation opens in its own window."""
+from html import escape
 import streamlit as st
-from .image_text import is_image
+from .i18n import t as tr
 from .db import connect
-from .knowledge import pages_from_upload, save_document, get_documents
-from .notes import note_inventory, summarize_notes, save_report, reports, export_report
-from .llm import is_configured
-from .cloud_settings import cloud_mode
-from .credits import run_ai_task, task_notice
+from .knowledge import pages_from_upload, save_document, get_documents, get_chunks, delete_document
+from .notes import reports, export_report
+from .image_text import is_image
+from .note_chat_ui import open_note_chat
+
+
+def open_document(doc):
+    @st.dialog(doc['filename'], width='large')
+    def view():
+        con = connect()
+        try:
+            if is_image(doc['filename']):
+                st.warning(tr('这是旧版自动识别的文字，请对照原图核对。'))
+            for row in get_chunks(con):
+                if row['document_id'] == doc['id']:
+                    st.text(row['content'])
+            with st.popover(tr('管理资料')):
+                confirm = st.checkbox(tr('确认删除这份资料及其关联分析。'), key='delete_confirm_' + doc['id'])
+                if st.button(tr('删除资料'), key='delete_note_' + doc['id'], disabled=not confirm):
+                    delete_document(con, doc['id'])
+                    st.rerun()
+        finally:
+            con.close()
+    view()
+
+
+def open_reports():
+    @st.dialog(tr('历史分析'), width='large')
+    def view():
+        con = connect()
+        try:
+            saved = reports(con)
+            if not saved:
+                st.caption(tr('还没有分析记录，开始一次对话后会显示在这里。'))
+            for rid, report in saved:
+                with st.expander(report.get('instruction') or report['created_at']):
+                    st.caption(report['created_at'])
+                    for item in report['items']:
+                        st.write(item['text'])
+                        with st.expander(tr('查看出处')):
+                            source = next(r for r in report['sources'] if r['id'] == item['source_id'])
+                            st.caption(source['filename'])
+                            st.text(item['quote'])
+                    st.download_button(tr('下载这份汇总'), export_report(report), file_name='rolepath-notes.md',
+                                       mime='text/markdown', key='download_' + rid)
+        finally:
+            con.close()
+    view()
+
 
 def render_notes(parsed):
-    st.subheader(tr('学习笔记 · 学习助手'))
-    st.caption((tr('笔记保存到你的云端账户。') if cloud_mode() else tr('笔记保存在本机。')) + tr('可在资料问答检索和删除。点击发送指令后，所选笔记和当前 JD 将发送给配置的模型服务商。'))
-    st.caption(tr('手写照片请使用下方照片笔记助手。旧版自动识别的文字可能不准确，不会自动修复。'))
+    st.markdown('<div class="rp-library-heading"><div class="rp-kicker">YOUR LEARNING LIBRARY</div><h1>' + tr('学习笔记') + '</h1><p>' + tr('把零散的学习，变成自己的积累。') + '</p></div>', unsafe_allow_html=True)
+    chat, upload, history, space = st.columns([1.25, 1.1, 1.1, 2.5])
+    if chat.button(tr('与笔记对话'), type='primary', icon=':material/chat_bubble_outline:', key='open_note_chat', use_container_width=True):
+        open_note_chat(parsed)
     con = connect()
     try:
-        from .photo_notes_ui import render_photo_notes
-        render_photo_notes(con)
-        st.divider()
-        st.markdown('### ' + tr('已保存的文字笔记'))
-        upload = st.file_uploader(tr('上传学习笔记'), type=['txt', 'md', 'pdf'], accept_multiple_files=True, key='study_note_upload')
-        if st.button(tr('保存学习笔记'), key='save_study_note', disabled=not upload):
-            for file in upload:
-                try:
-                    with st.spinner(tr('正在读取 ') + file.name + '…'):
-                        _, n = save_document(con, file.name, pages_from_upload(file))
-                    st.success(file.name + (tr('：已保存。') if n else tr('：已存在，未重复保存。')))
-                except Exception as exc:
-                    st.error(file.name + tr('：未保存，') + str(exc))
-        docs = get_documents(con)
-        labels = {d['id']: d['filename'] + ' · ' + d['id'][:8] for d in docs}
-        if any(is_image(d['filename']) for d in docs):
-            st.warning(tr('旧版照片识别的文字尚未核对，默认不选中。请重新上传原图，使用上方照片助手。'))
-        selected = st.multiselect(tr('选择要分析的笔记（可多选汇总）'), list(labels), default=[d['id'] for d in docs if not is_image(d['filename'])], format_func=labels.get, key='notes_selected')
-        requirements = parsed['requirements'] if parsed else []
-        rows, assessed = note_inventory(con, selected, requirements)
-        st.caption(tr('已选 {0} 份笔记、{1} 个片段。以下为词语提及检查，不是智能总结或能力评分。', len(selected), len(rows)))
-        if assessed:
-            st.dataframe(table([{'岗位技能': r['skill'], '笔记证据': r['status']} for r in assessed]), hide_index=True)
-        if not is_configured():
-            st.info(tr('尚未配置 LLM API Key：上传、保存、原文查看和检索可用；智能分析与跨笔记汇总尚不可用。'))
-        st.info(tr('下方文字助手只读取已保存的文字。需要直接理解照片时，请使用上方照片笔记助手。'))
-        scope = tuple(sorted(selected))
-        if st.session_state.get('note_chat_scope') != scope:
-            st.session_state.note_chat_scope = scope
-            st.session_state.note_chat = []
-        chat = st.session_state.setdefault('note_chat', [])
-        if st.button(tr('开始新对话'), key='new_note_chat'):
-            st.session_state.note_chat = []
-            chat = []
-        for turn in chat:
-            with st.chat_message(turn['role']):
-                st.write(turn['content'])
-        instruction = st.text_area(tr('你想让助手做什么？'), key='note_instruction', max_chars=3000, placeholder=tr('例如：用简单的话解释这页笔记；根据笔记出三道题，先别给答案；检查我下面这段理解是否正确。留空则总结全部笔记。'))
-        if len(chat) >= 6:
-            st.info(tr('当前对话已完成 3 次回答，请开始新对话后继续。历史分析仍保存在下方。'))
-        task_notice()
-        if st.button(tr('发送指令'), key='summarize_notes', disabled=not rows or not is_configured() or len(chat) >= 6):
-            try:
-                with st.spinner(tr('正在分析笔记并核对引用，多份笔记可能需要 1–3 分钟…')):
-                    def analyze_and_save():
-                        result = summarize_notes(rows, parsed['raw'] if parsed else '', instruction, chat.copy())
-                        save_report(con, result)
-                        return result
-                    report = run_ai_task('notes', analyze_and_save)
-                    answer = '\n\n'.join((item['kind'] + '：' + item['text'] for item in report['items']))
-                    chat.extend([{'role': 'user', 'content': instruction.strip() or '总结全部所选笔记'}, {'role': 'assistant', 'content': answer}])
-                with st.chat_message('assistant'):
-                    st.write(answer)
-                st.success(tr('分析已保存。请对照引用核查模型结论。'))
-            except Exception as exc:
-                from openai import APITimeoutError
-                if isinstance(exc, APITimeoutError):
-                    st.error(tr('模型服务响应超时，未生成或保存汇总；已上传的笔记仍在。请稍后重试。'))
-                else:
-                    st.error(tr('分析未完成：{0}', exc))
-        with st.expander(tr('查看所选笔记原文与出处')):
-            for row in rows:
-                st.caption(tr('{0} · 第{1}页 · [{2}]', row['filename'], row['page'], row['id']))
-                st.text(row['content'])
-        st.markdown(tr('**已保存的分析与汇总**'))
-        for rid, report in reports(con):
-            with st.expander(report['created_at'] + ' · ' + str(len({r['document_id'] for r in report['sources']})) + tr(' 份笔记')):
-                st.caption(tr('这是当时的笔记与 JD 分析记录，不代表当前岗位结论，也不代表能力已验证。'))
-                st.write(tr('指令：') + report.get('instruction', '总结全部所选笔记'))
-                if report.get('jd'):
-                    with st.expander(tr('分析时使用的 JD')):
-                        st.text(report['jd'])
-                sources = {r['id']: r for r in report['sources']}
-                for item in report['items']:
-                    st.write(item['kind'] + '：' + item['text'])
-                    source = sources[item['source_id']]
-                    st.caption(tr('{0} · 第{1}页 · [{2}]', source['filename'], source['page'], source['id']))
-                    st.text(tr('原文：') + item['quote'])
-                st.download_button(tr('下载这份汇总'), export_report(report), file_name='学习笔记汇总.md', mime='text/markdown', key='download_' + rid)
+        with upload, st.popover(tr('添加资料'), icon=':material/add:', use_container_width=True):
+            st.caption(tr('文档保存在资料库；照片在对话窗口中添加。'))
+            files = st.file_uploader(tr('上传文档'), type=['txt','md','pdf'], accept_multiple_files=True, key='study_note_upload')
+            if st.button(tr('保存资料'), key='save_study_note', disabled=not files, use_container_width=True):
+                for file in files:
+                    try:
+                        save_document(con, file.name, pages_from_upload(file))
+                        st.success(tr('已保存：{0}', file.name))
+                    except Exception as exc:
+                        st.error(str(exc))
+        if history.button(tr('历史分析'), icon=':material/history:', key='open_note_reports', use_container_width=True):
+            open_reports()
+        docs = [dict(d) for d in get_documents(con)]
+        st.write('')
+        if not docs:
+            st.markdown('<div class="rp-library-empty"><span>↗</span><h3>' + tr('你的知识，从这里开始。') + '</h3><p>' + tr('添加一份文档，或打开对话发送照片。') + '</p></div>', unsafe_allow_html=True)
+        for doc in docs:
+            with st.container(key='note_row_' + doc['id']):
+                title, action = st.columns([7, 1])
+                with title:
+                    st.markdown('<div class="rp-note-name">' + escape(doc['filename']) + '</div>', unsafe_allow_html=True)
+                    st.caption(tr('旧照片文字 · 待核对') if is_image(doc['filename']) else tr('已保存的资料'))
+                if action.button(tr('打开'), key='view_note_' + doc['id'], use_container_width=True):
+                    open_document(doc)
     finally:
         con.close()
