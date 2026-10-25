@@ -138,9 +138,14 @@ if page == '课程与题目':
                 st.write(tr('JD 原文：') + r['evidence'])
                 if not group['courses']:
                     st.warning(tr('当前没有核验过的匹配课程，不自动安排无来源学习任务。'))
-                if prefer_domestic and group['courses'] and not any(reviewed_domestic(h.resource) for h in group['courses']):
-                    st.caption(tr('这项能力暂无已核查的国内来源，以下为补充参考。'))
-                for hit in group['courses'][:3]:
+                visible_courses = group['courses']
+                if prefer_domestic:
+                    domestic_courses = [h for h in group['courses'] if reviewed_domestic(h.resource)]
+                    if domestic_courses:
+                        visible_courses = domestic_courses
+                    elif group['courses']:
+                        st.caption(tr('这项能力暂无已核查的国内来源，以下为补充参考。'))
+                for hit in visible_courses[:3]:
                     c = hit.resource
                     st.markdown(f"**[{c['title']}]({c['url']})**")
                     st.write(tr('对应学习内容：') + c.get('focus', {}).get(r['skill'], c['description']))
