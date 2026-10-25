@@ -6,6 +6,7 @@ from .knowledge import pages_from_upload, save_document, get_documents
 from .notes import note_inventory, summarize_notes, save_report, reports, export_report
 from .llm import is_configured
 from .cloud_settings import cloud_mode
+from .credits import run_ai_task, task_notice
 
 def render_notes(parsed):
     st.subheader(tr('学习笔记 · 学习助手'))
@@ -47,11 +48,15 @@ def render_notes(parsed):
         instruction = st.text_area(tr('你想让助手做什么？'), key='note_instruction', max_chars=3000, placeholder=tr('例如：用简单的话解释这页笔记；根据笔记出三道题，先别给答案；检查我下面这段理解是否正确。留空则总结全部笔记。'))
         if len(chat) >= 6:
             st.info(tr('当前对话已完成 3 次回答，请开始新对话后继续。历史分析仍保存在下方。'))
+        task_notice()
         if st.button(tr('发送指令'), key='summarize_notes', disabled=not rows or not is_configured() or len(chat) >= 6):
             try:
                 with st.spinner(tr('正在分析笔记并核对引用，多份笔记可能需要 1–3 分钟…')):
-                    report = summarize_notes(rows, parsed['raw'] if parsed else '', instruction, chat.copy())
-                    save_report(con, report)
+                    def analyze_and_save():
+                        result = summarize_notes(rows, parsed['raw'] if parsed else '', instruction, chat.copy())
+                        save_report(con, result)
+                        return result
+                    report = run_ai_task('notes', analyze_and_save)
                     answer = '\n\n'.join((item['kind'] + '：' + item['text'] for item in report['items']))
                     chat.extend([{'role': 'user', 'content': instruction.strip() or '总结全部所选笔记'}, {'role': 'assistant', 'content': answer}])
                 with st.chat_message('assistant'):

@@ -23,6 +23,12 @@ def client():
     return OpenAI(**kwargs)
 
 def _message(content, system, max_tokens=1000):
+    from .cloud_settings import managed_ai
+    from .credits import _usage
+    if managed_ai() and _usage.get() is None:
+        raise RuntimeError('Managed AI requires a reserved task.')
+    if len(content) + len(system) > 50000:
+        raise ValueError('This task exceeds the AI input limit.')
     options = {}
     thinking = model_setting('LLM_ENABLE_THINKING').strip().lower()
     if thinking:
@@ -31,6 +37,8 @@ def _message(content, system, max_tokens=1000):
         options['extra_body'] = {'enable_thinking': thinking == 'true'}
     result = client().chat.completions.create(model=model_setting('LLM_MODEL'),temperature=0,
         messages=[{'role':'system','content':system},{'role':'user','content':content}],max_tokens=max_tokens, **options)
+    from .credits import record_usage
+    record_usage(result.usage.model_dump() if result.usage else None)
     if result.choices[0].finish_reason == 'length':
         raise ValueError('模型输出达到长度上限，结果不完整；请减少输入或调整输出预算。')
     if not (result.choices[0].message.content or '').strip():

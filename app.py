@@ -7,7 +7,8 @@ import hashlib
 from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
-from rolepath.cloud_settings import cloud_mode, render_model_settings
+from rolepath.cloud_settings import cloud_mode, managed_ai, render_model_settings
+from rolepath.credits import run_ai_task, task_notice
 from rolepath.catalog import ALL_SKILLS, load_resources, load_roles
 from rolepath.db import connect, recent_plan, all_plans, save_plan, set_task_status, tasks_for, log_study, study_stats
 from rolepath.evidence import assess
@@ -58,7 +59,8 @@ st.session_state.setdefault('page', PAGES[0])
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
 st.session_state.setdefault('_prefer_bili', True)
 st.session_state.jd_text = st.session_state['_jd_draft']
-page = st.radio(tr('工作空间导航'), PAGES, key='page', horizontal=True, label_visibility='collapsed', format_func=formatter())
+page_labels = {value: tr('使用额度') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
+page = st.radio(tr('工作空间导航'), PAGES, key='page', horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
 st.write('')
 if page == '我的空间':
     render_home(ROLES)
@@ -67,7 +69,8 @@ if page == '岗位分析':
     st.write(tr('直接粘贴 JD，或上传 TXT / MD / PDF、PNG / JPG / HEIC 图片。推荐使用真实岗位，解析结果会保留原文证据。'))
     uploaded_jd = st.file_uploader(tr('上传岗位 JD（可选）'), type=UPLOAD_TYPES, key='jd_upload')
     st.text_area(tr('岗位 JD 原文'), key='jd_text', on_change=lambda: st.session_state.update(_jd_draft=st.session_state.jd_text), height=210, placeholder=tr('粘贴岗位名称、职责、任职要求、优先条件和实习时间…'))
-    parse_mode = st.selectbox(tr('解析方式'), ['关键词初筛（不完整，无需 API）', 'LLM 结构化抽取（需 API Key）'], index=1 if is_configured() else 0, format_func=formatter(), key='ui_ace9d4ab6562')
+    parse_mode = st.selectbox(tr('解析方式'), ['关键词初筛（不完整，无需 API）', 'LLM 结构化抽取（需 API Key）'], index=1 if is_configured() else 0, format_func=(lambda value: tr('AI 深度分析') if value.startswith('LLM') else tr('关键词预览')) if managed_ai() else formatter(), key='ui_ace9d4ab6562')
+    task_notice()
     if st.button(tr('解析岗位要求'), type='primary', key='do_parse'):
         try:
             jd_text = read_upload(uploaded_jd) if uploaded_jd else st.session_state.jd_text
@@ -77,7 +80,7 @@ if page == '岗位分析':
             elif parse_mode.startswith('LLM'):
                 if not is_configured():
                     raise ValueError('LLM 未配置：请填写 API Key 和模型名称，或选择不完整的关键词初筛。')
-                st.session_state.jd_result = parse_jd_with_llm(jd_text)
+                st.session_state.jd_result = run_ai_task('jd', lambda: parse_jd_with_llm(jd_text))
             else:
                 st.session_state.jd_result = parse_jd(jd_text)
         except Exception as exc:
@@ -314,9 +317,10 @@ if page == '资料问答':
             for h in doc_hits:
                 with st.expander(tr('{0} · 第{1}页 · 相关原文', h.filename, h.page)):
                     st.write(h.text)
+            task_notice()
             if st.button(tr('根据资料回答'), key='answer_document', disabled=not is_configured()):
                 try:
-                    answer = answer_from_document(doc_question, doc_hits)
+                    answer = run_ai_task('document', lambda: answer_from_document(doc_question, doc_hits)) if doc_hits else answer_from_document(doc_question, doc_hits)
                     st.markdown(answer['answer'])
                     st.caption(answer['mode'])
                     
@@ -327,8 +331,9 @@ if page == '资料问答':
     finally:
         con.close()
 if page == 'AI 设置':
-    st.subheader(tr('连接你的 AI 服务'))
-    st.write(tr('由你自己的百炼账户提供智能分析。学习记录和 AI 配置分开保存。'))
+    if not managed_ai():
+        st.subheader(tr('连接你的 AI 服务'))
+        st.write(tr('由你自己的百炼账户提供智能分析。学习记录和 AI 配置分开保存。'))
     if cloud_mode():
         render_model_settings()
     else:

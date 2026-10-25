@@ -219,3 +219,11 @@ Use the repository's [Issues](https://github.com/kodiak-10/rolepath/issues) to r
 [Open the workspace](https://rolepath-kodiak.streamlit.app/) · [阅读中文版](README.zh-CN.md)
 
 </div>
+
+## Managed AI rollout
+
+A server-managed Qwen service and one-credit trial ledger are under development.
+The implementation is opt-in and has **not been activated in the public app**.
+Database isolation, live model costs and payment settlement still require end-to-end
+verification. The current public app continues to use personal API credentials.
+No payments are collected. See [the rollout checklist](deploy/MANAGED_AI.md).

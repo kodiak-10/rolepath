@@ -1,13 +1,30 @@
-from .i18n import t as tr, label, table, formatter
 import os
 from urllib.parse import urlparse
 
 def cloud_mode():
     return os.getenv('ROLEPATH_CLOUD') == '1'
 
+def server_setting(name):
+    """Read server secrets only; never return them to a widget or browser component."""
+    value = os.getenv(name, '')
+    if value:
+        return value
+    if cloud_mode():
+        import streamlit as st
+        try:
+            return str(st.secrets.get(name, ''))
+        except FileNotFoundError:
+            return ''
+    return ''
+
+def managed_ai():
+    return cloud_mode() and server_setting('ROLEPATH_AI_MODE') == 'managed'
+
 def model_setting(name):
     if not cloud_mode():
         return os.getenv(name, '')
+    if managed_ai():
+        return server_setting(name)
     import streamlit as st
     return st.session_state.get('visitor_' + name, '')
 
@@ -16,6 +33,11 @@ def valid_model_endpoint(value):
     return p.scheme == 'https' and (not p.username) and (not p.password) and (not p.port) and (not p.query) and (not p.fragment) and (p.path.rstrip('/') == '/compatible-mode/v1') and (p.hostname in ('dashscope.aliyuncs.com', 'dashscope-intl.aliyuncs.com') or (p.hostname or '').endswith('.maas.aliyuncs.com'))
 
 def render_model_settings():
+    from .i18n import t as tr
+    if managed_ai():
+        from .credits import render_credits
+        render_credits()
+        return
     import streamlit as st
     configured = bool(model_setting('LLM_API_KEY'))
     st.caption(tr('AI：已配置（当前会话）') if configured else tr('AI：当前会话尚未配置'))
