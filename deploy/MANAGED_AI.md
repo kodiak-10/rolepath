@@ -1,14 +1,23 @@
-# Managed AI rollout (not activated by default)
+# Managed AI deployment
 
 RolePath can reserve one credit for an AI task on the server, store the validated
 result with its usage record, and return the credit when generation or validation
 fails. A verified Supabase user receives one credit on the first reservation.
-The existing BYOK service remains active until the operator explicitly switches modes.
+New self-hosted deployments default to BYOK until the operator explicitly switches modes.
+The RolePath hosted deployment has been configured for managed mode and restarted.
+Its ledger passed nine database assertions with rolled-back synthetic fixtures.
+The signed-in browser trial verified the first credit, a successful synthetic JD,
+a zero balance, blocked repeat use, saved result history, and login restoration
+after refresh. Payment collection is disabled.
 
 ## Before enabling
 
-1. Back up the database and apply `managed_ai.sql` after the existing schema.
-2. Test the database with two real test identities: each can read only its own
+1. Back up the database and apply `managed_ai.sql` once after the existing schema. It adds credit objects
+   without replacing existing policies; rerunning an existing migration fails rather
+   than silently replacing its access rules.
+2. Run [the transactional ledger checks](check_managed_ai.sql) in the SQL editor.
+   Its synthetic identities and ledger rows are rolled back after the checks.
+   Also verify the browser flow with two real test identities: each can read only its own
    wallet/results, neither can modify a balance or invoke accounting functions.
    Concurrent reservations must allow only one pending operation per account.
 3. Add the following to **Streamlit Secrets**, not the GitHub repository:

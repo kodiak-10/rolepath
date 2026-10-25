@@ -10,7 +10,7 @@ An AI-assisted career exploration and learning workspace for students preparing 
 
 [Launch RolePath](https://rolepath-kodiak.streamlit.app/) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
 
-**Status:** actively developed MVP · **Interface:** English / 简体中文 · **AI access:** bring your own API key
+**Status:** actively developed MVP · **Interface:** English / 简体中文 · **AI access:** managed Qwen trial; optional self-hosted BYOK
 
 </div>
 
@@ -100,7 +100,7 @@ This division keeps model-generated interpretation separate from storage, resour
 Streamlit workspace
   ├── English / Chinese presentation
   ├── Email-code sign-in → Supabase Auth
-  ├── Job analysis → keyword parser / user-configured LLM
+  ├── Job analysis → keyword parser / configured Qwen service
   ├── Resource catalog → matching → time-budgeted planner
   ├── Document ingestion → text extraction / OCR → passage retrieval
   └── Note assistant → source-reference validation → saved report
@@ -128,13 +128,16 @@ Cloud mode requires authentication before private workspace data is loaded. The 
 
 The browser can retain Supabase session credentials for up to seven days. Restored sessions are verified on the server. Browser storage restrictions, private browsing and different browsers can affect continuity; credentials are not shared across browsers or devices.
 
-AI access follows a **bring-your-own-key** model:
+The hosted app is configured for a **managed Qwen trial**:
 
-- Each user supplies their own supported Model Studio endpoint, API key and model name.
-- API usage is charged to that user's provider account.
-- The key remains in the current application session; it is not written to the application database or browser's persistent session storage.
-- A new session may require entering the key again.
-- When an AI operation is requested, the relevant selected text and context are sent to the configured provider.
+- The operator supplies the model service; visitors do not enter an API key.
+- Each verified account receives one free AI task. A successful task uses one credit; failed generation or validation returns the reservation.
+- Usage and validated results are stored under the signed-in account. History, saved notes and check-ins remain free.
+- Model credentials and the privileged accounting key stay in server secrets. Ordinary learning-data access continues to use the user's JWT and row-level access policies.
+- Selected text and context are sent to the configured Qianwen AI Platform endpoint when the user requests an AI operation.
+- Credit packs and payment collection are not available. Model costs are paid by the operator.
+
+Self-hosted deployments can keep the optional BYOK mode instead: each visitor's key stays only in their current application session. Local `.env` credentials are never implicitly shared with cloud visitors.
 
 Do not commit `.env`, session tokens, private keys, local databases or personal documents. A Supabase publishable/anon key is used with authentication and access policies; an administrator or service-role key must not be used in the visitor client. This repository does not claim an independent security audit.
 
@@ -173,7 +176,7 @@ The hosted entry point is **`cloud_app.py`**, which enables cloud mode before lo
 3. Configure email delivery and the email OTP template in Supabase. The email must include the numeric token (`{{ .Token }}`) used by the application's verification form. Set the appropriate site URL.
 4. Deploy the repository to Streamlit Community Cloud with `cloud_app.py` as the entry point. Keep `requirements.txt` and `packages.txt` available at the repository root.
 5. Verify email-code delivery, sign-in, sign-out, session restoration, two-account data isolation and saved-history access before inviting users.
-6. Users connect their own AI service from **Account & settings → AI settings**. Local `.env` credentials are not automatically shared with hosted users.
+6. To provide managed AI, follow [`deploy/MANAGED_AI.md`](deploy/MANAGED_AI.md): apply the separate credit migration and configure server secrets. The credit migration is applied once; it does not replace existing access policies. Otherwise keep the default BYOK mode. Local `.env` credentials are not automatically shared with hosted users.
 
 Free hosting does not make model usage free, and hosting availability should not be treated as a production service guarantee.
 
@@ -222,8 +225,13 @@ Use the repository's [Issues](https://github.com/kodiak-10/rolepath/issues) to r
 
 ## Managed AI rollout
 
-A server-managed Qwen service and one-credit trial ledger are under development.
-The implementation is opt-in and has **not been activated in the public app**.
-Database isolation, live model costs and payment settlement still require end-to-end
-verification. The current public app continues to use personal API credentials.
-No payments are collected. See [the rollout checklist](deploy/MANAGED_AI.md).
+The hosted deployment has been configured for a limited managed-AI pilot using
+`qwen3.7-plus`. The Qwen JD and note workflows passed two live synthetic checks,
+and the cloud ledger passed nine database assertions covering reservations,
+refunds, replay handling and account isolation. The signed-in browser trial also passed: the account started with one credit,
+a synthetic JD returned a validated result, the balance became zero, and a second
+request was blocked. The completed result remained available in usage history,
+and refreshing the page preserved the login.
+
+No payments are collected and no selling price has been set. The functional checks
+are not a cost benchmark or a full security audit. See [the rollout checklist](deploy/MANAGED_AI.md).

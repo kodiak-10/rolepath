@@ -24,9 +24,7 @@ alter table public.rp_ai_daily enable row level security;
 revoke all on public.rp_ai_wallets, public.rp_ai_runs, public.rp_ai_daily from anon, authenticated;
 grant select on public.rp_ai_wallets, public.rp_ai_runs to authenticated;
 grant all on public.rp_ai_wallets, public.rp_ai_runs, public.rp_ai_daily to service_role;
-drop policy if exists ai_wallet_owner on public.rp_ai_wallets;
 create policy ai_wallet_owner on public.rp_ai_wallets for select to authenticated using(auth.uid()=user_id);
-drop policy if exists ai_run_owner on public.rp_ai_runs;
 create policy ai_run_owner on public.rp_ai_runs for select to authenticated using(auth.uid()=user_id);
 
 create or replace function public.rp_ai_reserve(p_user uuid,p_id uuid,p_task text,p_daily_limit integer)
