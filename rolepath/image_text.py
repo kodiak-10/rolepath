@@ -18,6 +18,9 @@ def read_image(data, name):
         raise ValueError('图片为空或超过 5MB')
     if not is_image(name):
         raise ValueError('不支持此图片格式')
+    from .cloud_settings import cloud_mode
+    if cloud_mode():
+        raise ValueError('线上照片请到「学习笔记 → 照片笔记助手」直接看图；旧版自动识别已停用，避免保存乱码。')
     if platform.system() != 'Darwin':
         return read_image_linux(data)
     script = Path(__file__).parent / 'native' / 'recognize_text.swift'

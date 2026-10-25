@@ -42,7 +42,7 @@ RolePath separates three things that are easy to confuse: **what a role asks for
 
 ### Job analysis with traceable evidence
 
-Users can paste a job description or upload a supported document or image. AI-assisted extraction identifies explicit requirements and connects them to the source text. The interface separates skill requirements from conditions such as education or internship availability, and supports manual additions grounded in an exact source excerpt.
+Users can paste a job description or upload a supported text document. In the hosted app, photos go through the photo note assistant for review before their text is used as a JD. AI-assisted extraction identifies explicit requirements and connects them to the source text. The interface separates skill requirements from conditions such as education or internship availability, and supports manual additions grounded in an exact source excerpt.
 
 Without an API key, a limited keyword scan is available. It is explicitly presented as an incomplete first pass, not a substitute for semantic analysis. The three home-page role examples are demonstrations, not live recruitment listings.
 
@@ -72,7 +72,7 @@ Users can select one or several saved notes and ask the assistant to:
 
 Responses use references to supplied passages. The application validates reference identifiers and attaches the corresponding original text; it rejects invalid structured output rather than saving it as a verified result. This validates citation structure, **not the factual correctness of every model interpretation**.
 
-Documents and images are converted to text before analysis. The current assistant does not directly interpret the original images. Handwriting, formulas and diagrams therefore require particular care. A separate **Ask materials** page retrieves relevant passages for focused questions.
+The photo note assistant sends 1–4 original photos and the user’s instruction to the configured vision-capable Qwen model in one task. It returns a transcription, explicit uncertainty notes, and an answer for one credit. Users review and edit the text before saving it to their notes. Original photos are not stored permanently by RolePath. Legacy cloud OCR ingestion is disabled; previously saved OCR text is not silently repaired. Handwriting accuracy still requires checking against the original image. A separate **Ask materials** page retrieves relevant passages for focused questions.
 
 ### Personal history and bilingual presentation
 

@@ -66,8 +66,8 @@ if page == '我的空间':
     render_home(ROLES)
 if page == '岗位分析':
     st.subheader(tr('把目标 JD 变成可检查的能力要求'))
-    st.write(tr('直接粘贴 JD，或上传 TXT / MD / PDF、PNG / JPG / HEIC 图片。推荐使用真实岗位，解析结果会保留原文证据。'))
-    uploaded_jd = st.file_uploader(tr('上传岗位 JD（可选）'), type=UPLOAD_TYPES, key='jd_upload')
+    st.write(tr('粘贴 JD 或上传 TXT / MD / PDF。照片请先在学习笔记的照片助手中转录并核对，再粘贴到这里。') if cloud_mode() else tr('直接粘贴 JD，或上传 TXT / MD / PDF、PNG / JPG / HEIC 图片。推荐使用真实岗位，解析结果会保留原文证据。'))
+    uploaded_jd = st.file_uploader(tr('上传岗位 JD（可选）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), key='jd_upload')
     st.text_area(tr('岗位 JD 原文'), key='jd_text', on_change=lambda: st.session_state.update(_jd_draft=st.session_state.jd_text), height=210, placeholder=tr('粘贴岗位名称、职责、任职要求、优先条件和实习时间…'))
     parse_mode = st.selectbox(tr('解析方式'), ['关键词初筛（不完整，无需 API）', 'LLM 结构化抽取（需 API Key）'], index=1 if is_configured() else 0, format_func=(lambda value: tr('AI 深度分析') if value.startswith('LLM') else tr('关键词预览')) if managed_ai() else formatter(), key='ui_ace9d4ab6562')
     task_notice()
@@ -162,7 +162,7 @@ if page == '学习计划':
         with col_a:
             claimed = st.multiselect(tr('你认为自己接触过哪些技能？（仅作自述，不视为已掌握）'), list(dict.fromkeys(ALL_SKILLS + [r['skill'] for r in parsed['requirements']])), key='ui_eb570ab6ba05')
             notes = st.text_area(tr('项目经历、学习成果或作品说明（可选）'), height=130, placeholder=tr('例：我做过RAG知识库问答项目，记录了检索结果；尚未做系统评测。'), key='ui_bf3afc2595b1')
-            upload_evidence = st.file_uploader(tr('上传自己的项目文档或学习笔记（可选）'), type=UPLOAD_TYPES, key='profile_upload')
+            upload_evidence = st.file_uploader(tr('上传自己的项目文档或学习笔记（可选）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), key='profile_upload')
             if upload_evidence:
                 try:
                     notes = notes + '\n' + read_upload(upload_evidence)[:18000]
@@ -282,8 +282,8 @@ if page == '资料问答':
     st.subheader(tr('向你的学习资料提问'))
     st.write(tr('从你上传的笔记和资料中查找依据。例如：我记录过哪些面试问题？提示词评测需要注意什么？这里与「学习笔记」共用资料；学习笔记负责汇总，这里回答具体问题。'))
     st.caption(tr('无需 API Key 就能查找相关段落；生成带来源的回答需要配置 API Key。'))
-    st.caption(tr('支持多张 PNG、JPG、HEIC/HEIF 照片，每张最多 5MB。图片在运行服务上识别文字，请在学习笔记中核对识别结果；暂不理解纯图表，手写文字可能有误。'))
-    knowledge_file = st.file_uploader(tr('上传个人学习资料 / 官方文档（单份 ≤5MB，PDF ≤40页）'), type=UPLOAD_TYPES, accept_multiple_files=True, key='knowledge_file')
+    st.caption(tr('照片请使用学习笔记中的照片助手；核对并保存文字后，这里也可以检索。') if cloud_mode() else tr('支持多张 PNG、JPG、HEIC/HEIF 照片，每张最多 5MB。图片在运行服务上识别文字，请在学习笔记中核对识别结果；暂不理解纯图表，手写文字可能有误。'))
+    knowledge_file = st.file_uploader(tr('上传个人学习资料 / 官方文档（单份 ≤5MB，PDF ≤40页）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), accept_multiple_files=True, key='knowledge_file')
     if st.button(tr('保存资料'), key='import_knowledge', disabled=not knowledge_file):
         con = connect()
         try:

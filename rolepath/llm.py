@@ -27,7 +27,9 @@ def _message(content, system, max_tokens=1000):
     from .credits import _usage
     if managed_ai() and _usage.get() is None:
         raise RuntimeError('Managed AI requires a reserved task.')
-    if len(content) + len(system) > 50000:
+    text_length = len(content) if isinstance(content, str) else sum(
+        len(part.get('text', '')) for part in content if part.get('type') == 'text')
+    if text_length + len(system) > 50000:
         raise ValueError('This task exceeds the AI input limit.')
     options = {}
     thinking = model_setting('LLM_ENABLE_THINKING').strip().lower()

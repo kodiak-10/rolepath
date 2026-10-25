@@ -11,10 +11,13 @@ from .credits import run_ai_task, task_notice
 def render_notes(parsed):
     st.subheader(tr('学习笔记 · 学习助手'))
     st.caption((tr('笔记保存到你的云端账户。') if cloud_mode() else tr('笔记保存在本机。')) + tr('可在资料问答检索和删除。点击发送指令后，所选笔记和当前 JD 将发送给配置的模型服务商。'))
-    st.caption(tr('支持多张 PNG、JPG、HEIC/HEIF 照片，每张最多 5MB。照片在运行服务上识别文字；请先核对下方识别原文，再进行智能分析。手写和复杂排版可能有识别错误。'))
-    upload = st.file_uploader(tr('上传学习笔记'), type=UPLOAD_TYPES, accept_multiple_files=True, key='study_note_upload')
+    st.caption(tr('手写照片请使用下方照片笔记助手。旧版自动识别的文字可能不准确，不会自动修复。'))
     con = connect()
     try:
+        from .photo_notes_ui import render_photo_notes
+        render_photo_notes(con)
+        st.divider()
+        upload = st.file_uploader(tr('上传学习笔记'), type=['txt', 'md', 'pdf'], accept_multiple_files=True, key='study_note_upload')
         if st.button(tr('保存学习笔记'), key='save_study_note', disabled=not upload):
             for file in upload:
                 try:
