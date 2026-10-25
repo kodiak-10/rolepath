@@ -1,6 +1,6 @@
 from .i18n import t as tr, label, table, formatter
 import streamlit as st
-from .image_text import UPLOAD_TYPES
+from .image_text import is_image
 from .db import connect
 from .knowledge import pages_from_upload, save_document, get_documents
 from .notes import note_inventory, summarize_notes, save_report, reports, export_report
@@ -17,6 +17,7 @@ def render_notes(parsed):
         from .photo_notes_ui import render_photo_notes
         render_photo_notes(con)
         st.divider()
+        st.markdown('### ' + tr('已保存的文字笔记'))
         upload = st.file_uploader(tr('上传学习笔记'), type=['txt', 'md', 'pdf'], accept_multiple_files=True, key='study_note_upload')
         if st.button(tr('保存学习笔记'), key='save_study_note', disabled=not upload):
             for file in upload:
@@ -28,7 +29,9 @@ def render_notes(parsed):
                     st.error(file.name + tr('：未保存，') + str(exc))
         docs = get_documents(con)
         labels = {d['id']: d['filename'] + ' · ' + d['id'][:8] for d in docs}
-        selected = st.multiselect(tr('选择要分析的笔记（可多选汇总）'), list(labels), default=list(labels), format_func=labels.get, key='notes_selected')
+        if any(is_image(d['filename']) for d in docs):
+            st.warning(tr('旧版照片识别的文字尚未核对，默认不选中。请重新上传原图，使用上方照片助手。'))
+        selected = st.multiselect(tr('选择要分析的笔记（可多选汇总）'), list(labels), default=[d['id'] for d in docs if not is_image(d['filename'])], format_func=labels.get, key='notes_selected')
         requirements = parsed['requirements'] if parsed else []
         rows, assessed = note_inventory(con, selected, requirements)
         st.caption(tr('已选 {0} 份笔记、{1} 个片段。以下为词语提及检查，不是智能总结或能力评分。', len(selected), len(rows)))
@@ -36,7 +39,7 @@ def render_notes(parsed):
             st.dataframe(table([{'岗位技能': r['skill'], '笔记证据': r['status']} for r in assessed]), hide_index=True)
         if not is_configured():
             st.info(tr('尚未配置 LLM API Key：上传、保存、原文查看和检索可用；智能分析与跨笔记汇总尚不可用。'))
-        st.info(tr('当前助手读取的是笔记文字，尚未直接理解原始照片。涉及手写公式、图表或识别不清的文字，请先核对；不能据此保证答案正确。'))
+        st.info(tr('下方文字助手只读取已保存的文字。需要直接理解照片时，请使用上方照片笔记助手。'))
         scope = tuple(sorted(selected))
         if st.session_state.get('note_chat_scope') != scope:
             st.session_state.note_chat_scope = scope

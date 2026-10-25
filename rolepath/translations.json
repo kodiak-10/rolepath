@@ -313,5 +313,8 @@
   "已保存核对后的文字；不会覆盖旧笔记。": "Reviewed text saved. Existing notes were not overwritten.",
   "手写照片请使用下方照片笔记助手。旧版自动识别的文字可能不准确，不会自动修复。": "Use the photo note assistant below for handwriting. Earlier OCR text may be inaccurate and is not repaired automatically.",
   "粘贴 JD 或上传 TXT / MD / PDF。照片请先在学习笔记的照片助手中转录并核对，再粘贴到这里。": "Paste a JD or upload TXT, Markdown, or a text PDF. For photos, use the photo note assistant, review the transcription, then paste it here.",
-  "照片请使用学习笔记中的照片助手；核对并保存文字后，这里也可以检索。": "Use the photo assistant in Notes for images. Reviewed and saved transcriptions are also searchable here."
+  "照片请使用学习笔记中的照片助手；核对并保存文字后，这里也可以检索。": "Use the photo assistant in Notes for images. Reviewed and saved transcriptions are also searchable here.",
+  "已保存的文字笔记": "Saved text notes",
+  "旧版照片识别的文字尚未核对，默认不选中。请重新上传原图，使用上方照片助手。": "Legacy photo OCR text has not been reviewed and is not selected by default. Re-upload the original photos using the assistant above.",
+  "下方文字助手只读取已保存的文字。需要直接理解照片时，请使用上方照片笔记助手。": "The text assistant below reads saved text only. Use the photo note assistant above to work directly with images."
 }
