@@ -354,5 +354,12 @@
   "问一问": "Ask",
   "管理资料": "Manage material",
   "确认删除这份资料及其关联分析。": "Delete this material and its associated insights.",
-  "删除资料": "Delete material"
+  "删除资料": "Delete material",
+  "优先国内平台与中文学习来源": "Prefer domestic platforms and Chinese learning sources",
+  "先匹配岗位能力，再优先已核查的国内来源，组内按内容相关性排序。B站、小红书等平台按具体内容核查，不按作者或播放量加权；当前资源未逐集试听。": "Match the job skill first, prefer reviewed domestic sources, then rank by content relevance. Bilibili, Xiaohongshu and other platforms are reviewed item by item; creator names and view counts receive no bonus. Courses have not been watched in full.",
+  "访问说明：": "Access: ",
+  "补充参考来源，国内可达性未实测。": "Supplementary reference; accessibility from mainland networks has not been tested.",
+  "来源核查：{0} · {1}": "Source checked: {0} · {1}",
+  "题目区分平台练习、企业题库或历史套卷、用户回忆面经。企业归属以平台或作者标注为准，未获企业单独确认；旧题不代表当前考试。": "Questions distinguish platform practice, company-labelled banks or historical papers, and interview recollections. Company attribution comes from the platform or author, not independent company confirmation. Historical questions do not represent current exams.",
+  "这项能力暂无已核查的国内来源，以下为补充参考。": "No reviewed domestic source is available for this skill yet. The following are supplementary references."
 }

@@ -19,7 +19,7 @@ DELIVERABLES = {
 }
 
 
-def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_bili=True):
+def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_domestic=True):
     if not math.isfinite(hours_per_week) or hours_per_week <= 0 or not 1 <= days <= 180:
         raise ValueError('时间参数无效')
     start = start or date.today()
@@ -30,7 +30,7 @@ def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_bil
     ordered = sorted(assessed, key=lambda a: (a['priority'] == '加分项', a.get('importance') != '原文明示重点', rank.get(a['status'], 3)))
     for item in ordered:
         skill = item['skill']
-        hits = course_matches(item, retriever, prefer_bili)
+        hits = course_matches(item, retriever, prefer_domestic)
         if not hits:
             missing_resources.append(skill)
             continue

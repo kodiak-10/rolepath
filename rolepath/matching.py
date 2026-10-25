@@ -2,10 +2,15 @@
 from .catalog import load_questions
 
 
-def course_matches(requirement, retriever, prefer_bili=True):
+def reviewed_domestic(resource):
+    return resource.get('domestic_platform') is True and bool(resource.get('checked_at') and resource.get('quality_basis'))
+
+def course_matches(requirement, retriever, prefer_domestic=True):
     hits = retriever.search(requirement.get('detail', requirement['evidence']) + ' ' + requirement['skill'], limit=100, skill=requirement['skill'])
-    # Relevance first. Platform only breaks exact ties; no creator bonus.
-    hits.sort(key=lambda h: (-h.score, prefer_bili and h.resource.get('platform') != 'B站'))
+    # Exact skill coverage is mandatory. Prefer reviewed domestic sources within
+    # that scope, then rank their specific content by relevance. No creator bonus.
+    hits = [h for h in hits if requirement['skill'] in h.resource['skills']]
+    hits.sort(key=lambda h: (prefer_domestic and not reviewed_domestic(h.resource), -h.score))
     return hits
 
 
@@ -13,5 +18,5 @@ def question_matches(skill):
     return [q for q in load_questions() if skill in q['skills']]
 
 
-def coverage(requirements, retriever, prefer_bili=True):
-    return [dict(requirement=r, courses=course_matches(r, retriever, prefer_bili), questions=question_matches(r['skill'])) for r in requirements]
+def coverage(requirements, retriever, prefer_domestic=True):
+    return [dict(requirement=r, courses=course_matches(r, retriever, prefer_domestic), questions=question_matches(r['skill'])) for r in requirements]

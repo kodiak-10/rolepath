@@ -11,7 +11,8 @@
     "language": "中文",
     "url": "https://docs.python.org/zh-cn/3/tutorial/",
     "description": "Python 基础语法、流程控制、函数、模块。",
-    "practice": "使用 Python 读取 CSV，并计算两列数值的统计结果。"
+    "practice": "使用 Python 读取 CSV，并计算两列数值的统计结果。",
+    "domestic_platform": false
   },
   {
     "id": "res002",
@@ -25,7 +26,8 @@
     "language": "英文",
     "url": "https://dev.mysql.com/doc/refman/8.4/en/",
     "description": "SQL SELECT、WHERE、JOIN、GROUP BY、聚合函数等参考。",
-    "practice": "在样例订单表上查询每个品类订单数和销售额；用给定答案比对。"
+    "practice": "在样例订单表上查询每个品类订单数和销售额；用给定答案比对。",
+    "domestic_platform": false
   },
   {
     "id": "res003",
@@ -39,7 +41,8 @@
     "language": "英文",
     "url": "https://sqlbolt.com/",
     "description": "逐步练习 SQL SELECT、过滤、JOIN、聚合。",
-    "practice": "完成分组统计关卡，提交可运行的 SQL 和输出截图。"
+    "practice": "完成分组统计关卡，提交可运行的 SQL 和输出截图。",
+    "domestic_platform": false
   },
   {
     "id": "res004",
@@ -54,7 +57,8 @@
     "language": "英文",
     "url": "https://pandas.pydata.org/docs/getting_started/intro_tutorials/index.html",
     "description": "DataFrame、读取文件、分组、数据处理。",
-    "practice": "使用数据表计算转化率或分组平均值，写出三条业务观察。"
+    "practice": "使用数据表计算转化率或分组平均值，写出三条业务观察。",
+    "domestic_platform": false
   },
   {
     "id": "res005",
@@ -69,7 +73,8 @@
     "language": "英文",
     "url": "https://pandas.pydata.org/docs/user_guide/groupby.html",
     "description": "分组、聚合、转换与过滤。",
-    "practice": "对样例数据按日期分组并计算指标变化。"
+    "practice": "对样例数据按日期分组并计算指标变化。",
+    "domestic_platform": false
   },
   {
     "id": "res006",
@@ -83,7 +88,8 @@
     "language": "中文/多语言",
     "url": "https://support.microsoft.com/zh-cn/excel",
     "description": "Excel 公式、筛选、表格、数据透视表。",
-    "practice": "从订单表制作按月份的销售额透视表。"
+    "practice": "从订单表制作按月份的销售额透视表。",
+    "domestic_platform": false
   },
   {
     "id": "res007",
@@ -98,7 +104,8 @@
     "language": "英文",
     "url": "https://www.atlassian.com/agile/product-management/requirements",
     "description": "产品需求文档、需求背景、范围、用户故事与验收标准。",
-    "practice": "针对一个真实痛点撰写 1 页 PRD，含目标、边界和验收条件。"
+    "practice": "针对一个真实痛点撰写 1 页 PRD，含目标、边界和验收条件。",
+    "domestic_platform": false
   },
   {
     "id": "res008",
@@ -113,7 +120,8 @@
     "language": "英文",
     "url": "https://www.atlassian.com/agile/project-management/user-stories",
     "description": "用户故事的表达、拆解和验收。",
-    "practice": "选定一个功能，写出三条用户故事和可测试的验收标准。"
+    "practice": "选定一个功能，写出三条用户故事和可测试的验收标准。",
+    "domestic_platform": false
   },
   {
     "id": "res009",
@@ -127,7 +135,8 @@
     "language": "英文",
     "url": "https://platform.openai.com/docs/guides/prompt-engineering",
     "description": "模型指令、结构化提示、迭代验证。",
-    "practice": "对同一个输出任务设计两个 Prompt，记录评测差异。"
+    "practice": "对同一个输出任务设计两个 Prompt，记录评测差异。",
+    "domestic_platform": false
   },
   {
     "id": "res010",
@@ -142,7 +151,8 @@
     "language": "英文",
     "url": "https://docs.langchain.com/oss/python/langchain/retrieval",
     "description": "检索、Embedding、向量库和检索增强生成流程。",
-    "practice": "上传一份文档，检查检索 Top-K 是否包含答案证据。"
+    "practice": "上传一份文档，检查检索 Top-K 是否包含答案证据。",
+    "domestic_platform": false
   },
   {
     "id": "res011",
@@ -157,7 +167,8 @@
     "language": "英文",
     "url": "https://docs.langchain.com/oss/python/langgraph/overview",
     "description": "Agent 状态、工具调用、持久化与执行控制。",
-    "practice": "设计带查询工具和异常分支的 Agent 流程图。"
+    "practice": "设计带查询工具和异常分支的 Agent 流程图。",
+    "domestic_platform": false
   },
   {
     "id": "res012",
@@ -172,7 +183,8 @@
     "language": "中文/多语言",
     "url": "https://support.google.com/analytics/",
     "description": "流量来源、事件、转化与分析指标定义。",
-    "practice": "为一个产品设计指标树，说明每个指标的计算口径。"
+    "practice": "为一个产品设计指标树，说明每个指标的计算口径。",
+    "domestic_platform": false
   },
   {
     "id": "res013",
@@ -187,7 +199,8 @@
     "language": "英文",
     "url": "https://www.nngroup.com/articles/which-ux-research-methods/",
     "description": "用户研究方法选择及其使用条件。",
-    "practice": "针对实习求职问题设计五条中立的访谈提纲。"
+    "practice": "针对实习求职问题设计五条中立的访谈提纲。",
+    "domestic_platform": false
   },
   {
     "id": "res014",
@@ -201,7 +214,8 @@
     "language": "英文",
     "url": "https://www.nngroup.com/articles/competitive-usability-evaluations/",
     "description": "对比竞品体验与可用性评估的切入方法。",
-    "practice": "选择两款同类产品，制作相同任务下的体验对照表。"
+    "practice": "选择两款同类产品，制作相同任务下的体验对照表。",
+    "domestic_platform": false
   },
   {
     "id": "res015",
@@ -216,7 +230,8 @@
     "language": "中文/多语言",
     "url": "https://cloud.google.com/looker/docs/studio",
     "description": "数据连接、可视化与仪表盘入门。",
-    "practice": "使用样例数据制作一张指标趋势图并解释异常点。"
+    "practice": "使用样例数据制作一张指标趋势图并解释异常点。",
+    "domestic_platform": false
   },
   {
     "id": "bili001",
@@ -308,7 +323,9 @@
       "原型设计": 51,
       "项目协作": 42,
       "用户研究": 33
-    }
+    },
+    "domestic_platform": true,
+    "access_note": "国内视频平台；是否需登录、付费及地区限制以原站为准。"
   },
   {
     "id": "bili002",
@@ -345,7 +362,9 @@
     },
     "minutes_by_skill": {
       "竞品分析": 24
-    }
+    },
+    "domestic_platform": true,
+    "access_note": "国内视频平台；是否需登录、付费及地区限制以原站为准。"
   },
   {
     "id": "bili003",
@@ -432,7 +451,9 @@
       "运营指标": 71,
       "内容营销": 72,
       "数据分析": 71
-    }
+    },
+    "domestic_platform": true,
+    "access_note": "国内视频平台；是否需登录、付费及地区限制以原站为准。"
   },
   {
     "id": "bili004",
@@ -479,7 +500,9 @@
     },
     "minutes_by_skill": {
       "产品设计": 64
-    }
+    },
+    "domestic_platform": true,
+    "access_note": "国内视频平台；是否需登录、付费及地区限制以原站为准。"
   },
   {
     "id": "bili005",
@@ -616,7 +639,9 @@
       "RAG": 49,
       "AIGC": 61,
       "视频生产": 74
-    }
+    },
+    "domestic_platform": true,
+    "access_note": "国内视频平台；是否需登录、付费及地区限制以原站为准。"
   },
   {
     "id": "bili006",
@@ -655,7 +680,9 @@
     "verification": "核对译者项目及 B站公开接口中的合集章节、作者、时长，未验证视频播放。",
     "quality_basis": "译者提供来源、字幕和配套代码，可追溯原课",
     "freshness_note": "2023 年课程，示例接口可能过时；参考提示设计方法。",
-    "source_url": "https://github.com/GitHubDaily/ChatGPT-Prompt-Engineering-for-Developers-in-Chinese"
+    "source_url": "https://github.com/GitHubDaily/ChatGPT-Prompt-Engineering-for-Developers-in-Chinese",
+    "domestic_platform": true,
+    "access_note": "国内视频平台；是否需登录、付费及地区限制以原站为准。"
   },
   {
     "id": "ref021",
@@ -680,7 +707,8 @@
     "checked_at": "2026-10-18",
     "verification": "已核对官方公开页面；未登录或完成全部课程。",
     "quality_basis": "原机构公开资料，范围和出处可核对",
-    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。"
+    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。",
+    "domestic_platform": false
   },
   {
     "id": "ref022",
@@ -703,7 +731,8 @@
     "checked_at": "2026-10-18",
     "verification": "已核对官方公开页面；未登录或完成全部课程。",
     "quality_basis": "原机构公开资料，范围和出处可核对",
-    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。"
+    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。",
+    "domestic_platform": false
   },
   {
     "id": "ref023",
@@ -726,6 +755,340 @@
     "checked_at": "2026-10-18",
     "verification": "已核对官方公开页面；未登录或完成全部课程。",
     "quality_basis": "原机构公开资料，范围和出处可核对",
-    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。"
+    "freshness_note": "预算为单次学习安排，并非完整课程时长；英文资料，部分课程可能需要注册。",
+    "domestic_platform": false
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn001",
+    "title": "MySQL数据库入门到大牛，mysql安装到优化，百科全书级，全网天花板",
+    "skills": [
+      "SQL"
+    ],
+    "type": "视频课程",
+    "platform": "B站",
+    "creator": "尚硅谷",
+    "published": "2021-11-17",
+    "minutes": 110,
+    "minutes_by_skill": {
+      "SQL": 110
+    },
+    "focus": {
+      "SQL": "SELECT 基础、常用聚合函数与 GROUP BY；按需求选择章节，不要求刷完整套。"
+    },
+    "url": "https://www.bilibili.com/video/BV1iq4y1u7vj/",
+    "description": "SELECT 基础、常用聚合函数与 GROUP BY；按需求选择章节，不要求刷完整套。",
+    "chapters": {
+      "SQL": [
+        {
+          "title": "14-最基本的SELECT...FROM结构",
+          "url": "https://www.bilibili.com/video/BV1iq4y1u7vj/?p=14",
+          "seconds": 542
+        },
+        {
+          "title": "39-5大常用的聚合函数",
+          "url": "https://www.bilibili.com/video/BV1iq4y1u7vj/?p=39",
+          "seconds": 2588
+        },
+        {
+          "title": "40-GROUP BY的使用",
+          "url": "https://www.bilibili.com/video/BV1iq4y1u7vj/?p=40",
+          "seconds": 1890
+        }
+      ]
+    },
+    "practice": "用样例订单表完成分组统计，并解释 WHERE 与 GROUP BY 的顺序。",
+    "quality_basis": "公开目录包含所标注的学习内容，配套成果练习可供核对；目录核查不等于完整教学质量评审。",
+    "provenance": "尚硅谷原发布账号；已核对发布者与章节",
+    "review_sources": [
+      "https://api.bilibili.com/x/web-interface/view?bvid=BV1iq4y1u7vj"
+    ]
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn002",
+    "title": "李宏毅2024春《生成式人工智能导论》",
+    "skills": [
+      "LLM",
+      "Agent",
+      "模型评测",
+      "提示词工程"
+    ],
+    "type": "视频课程",
+    "platform": "B站",
+    "creator": "李宏毅（讲师）；啥都会一点的研究生（视频发布者）",
+    "published": "2024-02-24",
+    "minutes": 70,
+    "minutes_by_skill": {
+      "LLM": 50,
+      "Agent": 45,
+      "模型评测": 70,
+      "提示词工程": 55
+    },
+    "focus": {
+      "LLM": "生成式 AI 基础与大型语言模型概念。",
+      "Agent": "第9讲：以大型语言模型打造 AI Agent。",
+      "模型评测": "第12讲：评估大型语言模型能力的方法。",
+      "提示词工程": "第3讲：在不训练模型的条件下调整使用方法。"
+    },
+    "url": "https://www.bilibili.com/video/BV1BJ4m1e7g8/",
+    "description": "生成式 AI 基础与大型语言模型概念。；第9讲：以大型语言模型打造 AI Agent。；第12讲：评估大型语言模型能力的方法。；第3讲：在不训练模型的条件下调整使用方法。",
+    "chapters": {
+      "LLM": [
+        {
+          "title": "第1讲：生成式AI是什么",
+          "url": "https://www.bilibili.com/video/BV1BJ4m1e7g8/?p=2",
+          "seconds": 1769
+        }
+      ],
+      "Agent": [
+        {
+          "title": "第9讲：以大型语言模型打造的AI Agent",
+          "url": "https://www.bilibili.com/video/BV1BJ4m1e7g8/?p=19",
+          "seconds": 1486
+        }
+      ],
+      "模型评测": [
+        {
+          "title": "第12讲：浅谈评估大型语言模型能力的各种方式",
+          "url": "https://www.bilibili.com/video/BV1BJ4m1e7g8/?p=28",
+          "seconds": 2772
+        }
+      ],
+      "提示词工程": [
+        {
+          "title": "第3讲：训练不了人工智能？你可以训练你自己（上）",
+          "url": "https://www.bilibili.com/video/BV1BJ4m1e7g8/?p=6",
+          "seconds": 2075
+        }
+      ]
+    },
+    "practice": "说明一个应用场景的输入、输出与失败情况，给出可复核的评价标准。",
+    "quality_basis": "公开目录包含所标注的学习内容，配套成果练习可供核对；目录核查不等于完整教学质量评审。",
+    "provenance": "Hoper-J 的课程镜像项目将此链接列为官方/授权视频；不把转载账号当作讲师本人",
+    "review_sources": [
+      "https://api.bilibili.com/x/web-interface/view?bvid=BV1BJ4m1e7g8",
+      "https://github.com/Hoper-J/AI-Guide-and-Demos-zh_CN#快速访问"
+    ]
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "2017 年基础课程；部分 Pandas 写法已变化，代码请对照当前版本，不作为最新 API 教程。",
+    "id": "cn003",
+    "title": "【莫烦Python】Numpy & Pandas (数据处理教程)",
+    "skills": [
+      "Python",
+      "数据分析",
+      "数据可视化"
+    ],
+    "type": "视频课程",
+    "platform": "B站",
+    "creator": "莫烦Python",
+    "published": "2017-11-16",
+    "minutes": 50,
+    "minutes_by_skill": {
+      "Python": 50,
+      "数据分析": 40,
+      "数据可视化": 30
+    },
+    "focus": {
+      "Python": "Pandas 基本对象与数据选择。",
+      "数据分析": "Pandas 缺失值处理与数据导入导出。",
+      "数据可视化": "Pandas plot 基础绘图。"
+    },
+    "url": "https://www.bilibili.com/video/BV1Ex411L7oT/",
+    "description": "Pandas 基本对象与数据选择。；Pandas 缺失值处理与数据导入导出。；Pandas plot 基础绘图。",
+    "chapters": {
+      "Python": [
+        {
+          "title": "3.1 pandas 基本介绍",
+          "url": "https://www.bilibili.com/video/BV1Ex411L7oT/?p=11",
+          "seconds": 1067
+        },
+        {
+          "title": "3.2 pandas 选择数据",
+          "url": "https://www.bilibili.com/video/BV1Ex411L7oT/?p=12",
+          "seconds": 703
+        }
+      ],
+      "数据分析": [
+        {
+          "title": "3.4 pandas 处理丢失数据",
+          "url": "https://www.bilibili.com/video/BV1Ex411L7oT/?p=14",
+          "seconds": 444
+        },
+        {
+          "title": "3.5 pandas 导入导出",
+          "url": "https://www.bilibili.com/video/BV1Ex411L7oT/?p=15",
+          "seconds": 442
+        }
+      ],
+      "数据可视化": [
+        {
+          "title": "3.8 pandas plot画图",
+          "url": "https://www.bilibili.com/video/BV1Ex411L7oT/?p=18",
+          "seconds": 713
+        }
+      ]
+    },
+    "practice": "读取一份 CSV，处理缺失值后画出一张图并解释其含义。",
+    "quality_basis": "公开目录包含所标注的学习内容，配套成果练习可供核对；目录核查不等于完整教学质量评审。",
+    "provenance": "莫烦Python 原发布账号；2017 年基础课程，API 需按当前 Pandas 文档核对",
+    "review_sources": [
+      "https://api.bilibili.com/x/web-interface/view?bvid=BV1Ex411L7oT"
+    ]
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": false,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "作者中文站点，已读取公开目录；国内不同网络的可达性未实测。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn004",
+    "title": "莫烦Python：数据的伙伴 Pandas",
+    "skills": [
+      "Python",
+      "数据分析",
+      "数据可视化"
+    ],
+    "type": "作者教程",
+    "platform": "莫烦Python",
+    "creator": "莫烦Python",
+    "published": "原站未标明统一发布日期",
+    "minutes": 60,
+    "url": "https://mofanpy.com/tutorials/data-manipulation/pandas/",
+    "description": "原作者中文教程：读取文件、选择数据、基础统计、绘图、异常数据处理和分组。",
+    "focus": {
+      "Python": "基本操作：读取文件、选择数据。",
+      "数据分析": "数据管理：分组 Groupby；基础统计和异常数据处理。",
+      "数据可视化": "统计展示：绘制图表。"
+    },
+    "practice": "按教程读入一份 CSV，分组统计并保存可运行代码。",
+    "quality_basis": "原作者公开目录包含基础操作、统计展示与小练习；未将作者知名度当作已完成教学评审。"
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn005",
+    "title": "阿里云百炼：文生文 Prompt 指南",
+    "skills": [
+      "提示词工程",
+      "LLM"
+    ],
+    "type": "官方文档",
+    "platform": "阿里云",
+    "creator": "阿里云百炼",
+    "published": "见官方更新记录",
+    "minutes": 50,
+    "url": "https://help.aliyun.com/zh/model-studio/prompt-engineering-guide",
+    "description": "官方中文指南：明确任务描述、组织输入信息、约束输出，并通过示例改善提示词。",
+    "focus": {
+      "提示词工程": "设计清晰的任务、上下文和输出要求，对比优化前后的结果。",
+      "LLM": "了解提示词对大模型输出的影响与使用边界。"
+    },
+    "practice": "为同一任务编写两个提示词，用相同样例对比结果并记录失败情况。",
+    "quality_basis": "厂商官方中文说明，包含提示词前后对比示例；实操可能产生模型调用费用。"
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn006",
+    "title": "扣子官方：工作流",
+    "skills": [
+      "Agent"
+    ],
+    "type": "官方文档",
+    "platform": "扣子",
+    "creator": "扣子官方",
+    "published": "见官方更新记录",
+    "minutes": 60,
+    "url": "https://docs.coze.cn/guides_agent_workflow",
+    "description": "官方低代码智能体文档：绑定工作流、传递参数、调试和处理超时。",
+    "focus": {
+      "Agent": "给智能体添加工作流，理解输入参数、执行过程和超时边界。"
+    },
+    "practice": "搭建一个输入、模型处理、输出的简易流程，记录一项失败和调试过程。",
+    "quality_basis": "厂商官方操作说明，可按步骤核对流程；平台版本、权限和费用以原站为准。"
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn007",
+    "title": "重新定义竞品分析：从目标到分析报告",
+    "skills": [
+      "竞品分析"
+    ],
+    "type": "行业作者文章",
+    "platform": "人人都是产品经理",
+    "creator": "大丰",
+    "published": "2024-04-03",
+    "minutes": 45,
+    "url": "https://www.woshipm.com/pmd/6025408.html",
+    "description": "从业务目标与产品类型出发选择竞品分析维度，避免机械套用模板。",
+    "focus": {
+      "竞品分析": "明确分析目标和比较维度，再形成支持决策的结论。"
+    },
+    "practice": "围绕同一用户任务比较两款产品，用截图或公开材料支持结论。",
+    "quality_basis": "原作者署名文章，讨论分析框架与模板适用边界；观点需结合项目验证，并非行业统一标准。"
+  },
+  {
+    "difficulty": "入门",
+    "language": "中文",
+    "domestic_platform": true,
+    "checked_at": "2026-10-26",
+    "verification": "已核对原站公开内容与目录；未逐集试听，未验证所有地区与账户的播放权限。",
+    "access_note": "可查看公开内容；登录、实操权限与费用以原站为准。",
+    "freshness_note": "只学习标注内容；工具界面与接口请以当前官方文档为准。",
+    "id": "cn008",
+    "title": "用户研究与市场、竞品分析的关系",
+    "skills": [
+      "用户研究"
+    ],
+    "type": "行业作者文章",
+    "platform": "人人都是产品经理",
+    "creator": "用研那些事儿 / Ala叮说用研",
+    "published": "2021-10-22",
+    "minutes": 35,
+    "url": "https://www.woshipm.com/user-research/5184902.html",
+    "description": "区分用户研究、市场分析和竞品分析的目的，并理解它们怎样共同支持产品机会判断。",
+    "focus": {
+      "用户研究": "明确研究问题，区分市场证据、竞品证据和用户证据。"
+    },
+    "practice": "针对一个用户问题设计访谈提纲，区分已知事实与待验证假设。",
+    "quality_basis": "原作者署名文章，用于理解研究分工；不是完整用户研究课程或能力认证。"
   }
 ]

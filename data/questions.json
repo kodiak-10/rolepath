@@ -5,7 +5,7 @@
     "skills": [
       "LLM",
       "AIGC",
-      "数据分析"
+      "模型评测"
     ],
     "kind": "场景题",
     "source_type": "公开面经回忆题（非官方真题）",
@@ -15,7 +15,9 @@
     "summary": "参考原帖中的模型效果评估问题，练习说明评价口径与案例分类。",
     "minutes": 40,
     "deliverable": "先到原帖阅读题目，再写出评价维度、失败样例分类和复核方法；不是标准答案。",
-    "checked_at": "2026-10-18"
+    "checked_at": "2026-10-18",
+    "provenance": "interview_recall",
+    "access_note": "国内平台；题目作答、讨论或完整内容可能需要登录，以原站为准。"
   },
   {
     "id": "q002",
@@ -33,7 +35,9 @@
     "summary": "参考原帖关于 AI 产品盈利模式的提问，练习从用户问题推导商业价值。",
     "minutes": 40,
     "deliverable": "给出目标用户、付费动机、成本与待验证假设；请先阅读原题。",
-    "checked_at": "2026-10-18"
+    "checked_at": "2026-10-18",
+    "provenance": "interview_recall",
+    "access_note": "国内平台；题目作答、讨论或完整内容可能需要登录，以原站为准。"
   },
   {
     "id": "q003",
@@ -49,7 +53,9 @@
     "summary": "原帖包含少量图片条件下的模型应用讨论，适合练习识别数据限制。",
     "minutes": 40,
     "deliverable": "到原帖阅读小数据集场景，列出限制、方案和验证办法；旧面经不代表当前招聘题。",
-    "checked_at": "2026-10-18"
+    "checked_at": "2026-10-18",
+    "provenance": "interview_recall",
+    "access_note": "国内平台；题目作答、讨论或完整内容可能需要登录，以原站为准。"
   },
   {
     "id": "q004",
@@ -65,7 +71,9 @@
     "summary": "练习数组查找与哈希表；仅在 JD 明确涉及算法与数据结构时安排。",
     "minutes": 45,
     "deliverable": "独立手写代码，在原站测试，并记录时间与空间复杂度。",
-    "checked_at": "2026-10-18"
+    "checked_at": "2026-10-18",
+    "provenance": "platform_problem",
+    "access_note": "国内平台；题目作答、讨论或完整内容可能需要登录，以原站为准。"
   },
   {
     "id": "q005",
@@ -81,6 +89,142 @@
     "summary": "使用员工与上级之间的关联关系练习查询。",
     "minutes": 35,
     "deliverable": "在原站阅读表结构、独立编写 SQL 并测试，记录关联条件。",
-    "checked_at": "2026-10-18"
+    "checked_at": "2026-10-18",
+    "provenance": "platform_problem",
+    "access_note": "国内平台；题目作答、讨论或完整内容可能需要登录，以原站为准。"
+  },
+  {
+    "id": "q006",
+    "title": "HJ1 字符串最后一个单词的长度",
+    "skills": [
+      "算法与数据结构"
+    ],
+    "kind": "算法题",
+    "url": "https://www.nowcoder.com/practice/8c949ea5f36f422594b306a2300315da",
+    "source_type": "企业机试题库（牛客平台标注，非企业当期试卷）",
+    "source": "牛客 · 华为机试题库",
+    "published": "原站未标明单题出题年份",
+    "summary": "字符串输入与边界处理练习；不声称会在当前华为招聘中出现。",
+    "deliverable": "到原题编写可运行代码，自测空格和单词边界，并说明复杂度。",
+    "minutes": 35,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "company_bank",
+    "company": "华为（题库标签）",
+    "source_page": "https://www.nowcoder.com/ta/huawei"
+  },
+  {
+    "id": "q007",
+    "title": "HJ3 明明的随机数",
+    "skills": [
+      "算法与数据结构"
+    ],
+    "kind": "算法题",
+    "url": "https://www.nowcoder.com/practice/3245215fffb84b7b81285493eae92ff0",
+    "source_type": "企业机试题库（牛客平台标注，非企业当期试卷）",
+    "source": "牛客 · 华为机试题库",
+    "published": "原站未标明单题出题年份",
+    "summary": "用去重与排序处理一组数值，按原题输入输出要求作答。",
+    "deliverable": "完成去重排序实现，对比一种集合实现与一种排序实现。",
+    "minutes": 35,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "company_bank",
+    "company": "华为（题库标签）",
+    "source_page": "https://www.nowcoder.com/ta/huawei"
+  },
+  {
+    "id": "q008",
+    "title": "SQL1 查找最晚入职员工的所有信息",
+    "skills": [
+      "SQL"
+    ],
+    "kind": "SQL练习",
+    "url": "https://www.nowcoder.com/practice/218ae58dfdcd4af195fff264e062138f",
+    "source_type": "平台练习题（非企业真题）",
+    "source": "牛客 · SQL 实战",
+    "published": "原站未标明单题出题年份",
+    "summary": "从员工表中找出最新入职日期对应的记录，注意同一天入职的边界。",
+    "deliverable": "在原题提交 SQL，解释日期排序与并列结果的处理。",
+    "minutes": 35,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "platform_problem"
+  },
+  {
+    "id": "q009",
+    "title": "2017 腾讯校招笔试：历史套卷入口",
+    "skills": [
+      "算法与数据结构"
+    ],
+    "kind": "笔试练习",
+    "url": "https://www.nowcoder.com/exam/test/1725829/summary",
+    "source_type": "历史企业笔试套卷（牛客平台标注，未获企业单独确认）",
+    "source": "牛客 · 2017 腾讯校招笔试真题",
+    "published": "2017",
+    "summary": "平台以腾讯历史校招试卷归档；只作为历史练习，不代表当前招聘题型。",
+    "deliverable": "登录原站查看历史试卷，选择一道编程题作答并记录错因；时间预算不代表整卷时长。",
+    "minutes": 45,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "company_archive",
+    "company": "腾讯（平台标注）",
+    "verification": "已核对原站归档标题与入口；完整试卷需原站登录，未逐题审阅。"
+  },
+  {
+    "id": "q010",
+    "title": "如何说明你的产品与竞品的差异",
+    "skills": [
+      "竞品分析"
+    ],
+    "kind": "场景题",
+    "url": "https://www.nowcoder.com/discuss/353156008090476544",
+    "source_type": "公开面经回忆题（非官方真题）",
+    "source": "牛客 · 葱省种地我最棒 · 商汤产品面经",
+    "published": "2020-01-10",
+    "summary": "原作者记录了竞品与产品差异的面试提问；练习用可核实证据支持比较。",
+    "deliverable": "先阅读原帖问题，再以你熟悉的产品说明差异、证据与适用用户。",
+    "minutes": 35,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "interview_recall",
+    "company": "商汤（作者自述）"
+  },
+  {
+    "id": "q011",
+    "title": "部分地区用户无法刷新内容，如何排查",
+    "skills": [
+      "软件测试"
+    ],
+    "kind": "场景题",
+    "url": "https://www.nowcoder.com/discuss/353156168417746944",
+    "source_type": "公开面经回忆题（非官方真题）",
+    "source": "牛客 · 虔诚求offer！· 测试开发实习面经",
+    "published": "2020-04-20",
+    "summary": "原帖记录了地区性内容刷新异常的排查场景，用于练习复现和定位思路。",
+    "deliverable": "区分用户范围、客户端、网络与服务端假设，写出验证顺序和需要的证据。",
+    "minutes": 35,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "interview_recall",
+    "company": "字节跳动（作者自述）"
+  },
+  {
+    "id": "q012",
+    "title": "SQL10 统计活跃间隔对用户分级结果",
+    "skills": [
+      "SQL"
+    ],
+    "kind": "SQL练习",
+    "url": "https://www.nowcoder.com/practice/6765b4a4f260455bae513a60b6eed0af",
+    "source_type": "平台练习题（非企业真题）",
+    "source": "牛客 · SQL 题库",
+    "published": "以原题样例日期为准",
+    "summary": "用行为日志计算用户分层及占比，核对日期窗口、分母和并列排序。",
+    "deliverable": "在原题提交 SQL，用样例核对各分层占比并解释日期窗口。",
+    "minutes": 50,
+    "checked_at": "2026-10-26",
+    "access_note": "已核对公开页面；提交作答或查看完整试卷可能需要登录，以原站权限为准。",
+    "provenance": "platform_problem"
   }
 ]

@@ -19,7 +19,7 @@ from rolepath.jd import parse_jd
 from rolepath.llm import grounded_answer, answer_from_document, is_configured, parse_jd_with_llm
 from rolepath.planner import plan_tasks
 from rolepath.retrieval import build_retriever
-from rolepath.matching import coverage
+from rolepath.matching import coverage, reviewed_domestic
 from rolepath.notes_ui import render_notes
 if not cloud_mode():
     load_dotenv()
@@ -59,7 +59,7 @@ if st.session_state.get('page') == 'AI 设置':
     PAGES.append('AI 设置')
 st.session_state.setdefault('page', PAGES[0])
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
-st.session_state.setdefault('_prefer_bili', True)
+st.session_state.setdefault('_prefer_domestic', True)
 st.session_state.jd_text = st.session_state['_jd_draft']
 page_labels = {value: tr('使用额度') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
 page = st.radio(tr('工作空间导航'), PAGES, key='page', horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
@@ -126,18 +126,20 @@ if page == '岗位分析':
                     st.rerun()
 if page == '课程与题目':
     st.subheader(tr('按 JD 选择课程与有来源的题目'))
-    prefer_bili = st.checkbox(tr('相关性相同时优先 B 站'), value=st.session_state['_prefer_bili'], key='prefer_bili', on_change=lambda: st.session_state.update(_prefer_bili=st.session_state['prefer_bili']))
-    st.caption(tr('先匹配能力范围，再按具体要求的相关性排序，不按作者加权。当前是经过目录核查的资源库，不是实时全网搜索；没有匹配项时明确留空。课程质量依据目录与出处，未逐集评审。'))
+    prefer_domestic = st.checkbox(tr('优先国内平台与中文学习来源'), value=st.session_state['_prefer_domestic'], key='prefer_domestic', on_change=lambda: st.session_state.update(_prefer_domestic=st.session_state['prefer_domestic']))
+    st.caption(tr('先匹配岗位能力，再优先已核查的国内来源，组内按内容相关性排序。B站、小红书等平台按具体内容核查，不按作者或播放量加权；当前资源未逐集试听。'))
     parsed = st.session_state.jd_result
     if not parsed:
         st.info(tr('先载入或解析一份 JD。'))
     else:
-        for group in coverage(parsed['requirements'], retriever, prefer_bili):
+        for group in coverage(parsed['requirements'], retriever, prefer_domestic):
             r = group['requirement']
             with st.expander(r['skill'] + ' · ' + r['priority']):
                 st.write(tr('JD 原文：') + r['evidence'])
                 if not group['courses']:
                     st.warning(tr('当前没有核验过的匹配课程，不自动安排无来源学习任务。'))
+                if prefer_domestic and group['courses'] and not any(reviewed_domestic(h.resource) for h in group['courses']):
+                    st.caption(tr('这项能力暂无已核查的国内来源，以下为补充参考。'))
                 for hit in group['courses'][:3]:
                     c = hit.resource
                     st.markdown(f"**[{c['title']}]({c['url']})**")
@@ -147,13 +149,15 @@ if page == '课程与题目':
                         st.markdown(tr('[{0}]({1}) · {2} 分钟', chapter['title'], chapter['url'], chapter['seconds'] // 60))
                     st.caption(c.get('quality_basis', '按资源目录技能标签匹配') + '；' + c.get('freshness_note', '内容时效以原站为准'))
                     st.caption(tr('核查：') + c.get('checked_at', '原有资源，本轮未核查') + ' · ' + c.get('verification', ''))
+                    st.caption(tr('访问说明：') + c.get('access_note', tr('补充参考来源，国内可达性未实测。')))
                 if not group['questions']:
                     st.caption(tr('暂无核查过的对应题目。计划可安排成果练习，但不会标成企业真题。'))
                 for q in group['questions']:
                     st.markdown(tr('练习：[{0}]({1})', q['title'], q['url']))
                     st.caption(q['source_type'] + ' · ' + q['source'] + ' · ' + q['published'])
                     st.write(q['summary'])
-        st.info(tr('题目只提供简要说明与原站入口，未提供企业内部题库；面经是作者回忆，不代表任何公司的当前考试内容。'))
+                    st.caption(tr('来源核查：{0} · {1}', q.get('checked_at', '未标注'), q.get('access_note', '以原站权限为准。')))
+        st.info(tr('题目区分平台练习、企业题库或历史套卷、用户回忆面经。企业归属以平台或作者标注为准，未获企业单独确认；旧题不代表当前考试。'))
 if page == '学习计划':
     st.subheader(tr('能力证据与个性化学习计划'))
     parsed = st.session_state.jd_result
@@ -179,7 +183,7 @@ if page == '学习计划':
         st.markdown(tr('**当前能力证据（未经技能测验）**'))
         st.dataframe(table([{'技能': a['skill'], 'JD要求': a['priority'], '状态': a['status']} for a in evaluated]), hide_index=True, use_container_width=True)
         if st.button(tr('生成并保存学习路径'), type='primary', key='make_plan'):
-            tasks, summary = plan_tasks(evaluated, retriever, hours, days, prefer_bili=st.session_state['_prefer_bili'])
+            tasks, summary = plan_tasks(evaluated, retriever, hours, days, prefer_domestic=st.session_state['_prefer_domestic'])
             if not tasks:
                 st.error(tr('没有可安排的任务：请检查课程缺口或增加时间预算。未覆盖原有计划。'))
             else:
