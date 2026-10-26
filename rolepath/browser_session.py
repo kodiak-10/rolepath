@@ -9,9 +9,35 @@ _bridge = components.component('rolepath_session', js=_STORAGE_JS)
 def session_payload(session, until=None):
     return dict(access_token=session.access_token, refresh_token=session.refresh_token, until=until or int(time.time()) + 7 * 24 * 3600)
 
-def browser_session(command):
-    result = _bridge(key='browser_auth', data=command, on_result_change=lambda: None, height=0)
+def browser_session(command, key='browser_auth'):
+    result = _bridge(key=key, data=command, on_result_change=lambda: None, height=0)
     return result.result
+
+
+def refresh_action_session():
+    """Dialogs rerun independently of require_login; refresh before private access."""
+    client = st.session_state.get('_account_client')
+    expected = st.session_state.get('_account_id')
+    try:
+        session = client.auth.get_session() if client else None
+        user = client.auth.get_user().user if session else None
+        if not user or not expected or user.id != expected:
+            raise ValueError('Account verification failed')
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning('Dialog authentication failed: type=%s', type(exc).__name__)
+        st.error(tr('登录已失效，请关闭窗口并刷新页面重新登录。'))
+        st.stop()
+    saved = st.session_state.get('_auth_command', {}).get('session', {})
+    if saved.get('access_token') != session.access_token or saved.get('refresh_token') != session.refresh_token:
+        queue_session(session)
+
+
+def sync_action_session():
+    """Flush after actions, so a browser sync cannot interrupt a model request."""
+    command = st.session_state.get('_auth_command')
+    if command and command.get('action') == 'write':
+        browser_session(command, key='note_dialog_auth')
 
 def queue_session(session):
     import uuid

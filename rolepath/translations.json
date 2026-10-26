@@ -390,5 +390,6 @@
   "上次问题：": "Previous question: ",
   "重试这次照片请求": "Retry this photo request",
   "核对并保存 AI 学习记录": "Review and save the AI learning record",
-  "对应指令：": "Instruction for this record: "
+  "对应指令：": "Instruction for this record: ",
+  "登录已失效，请关闭窗口并刷新页面重新登录。": "Your session is no longer valid. Close this window and refresh the page to sign in again."
 }

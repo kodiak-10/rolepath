@@ -8,7 +8,7 @@ from .notes import note_inventory, summarize_notes, save_report
 from .photo_notes import analyze_photos
 from .llm import is_configured
 from .credits import run_ai_task
-from .cloud_settings import managed_ai
+from .cloud_settings import managed_ai, cloud_mode
 from .credits import unlimited_account
 
 
@@ -24,6 +24,9 @@ def render_open_note_chat(parsed=None):
 
 
 def render_note_chat(parsed=None):
+    if cloud_mode():
+        from .browser_session import refresh_action_session
+        refresh_action_session()
     con = connect()
     try:
         docs = [dict(d) for d in get_documents(con) if not is_image(d['filename'])]
@@ -109,5 +112,8 @@ def render_note_chat(parsed=None):
             with st.expander(tr('核对并保存 AI 学习记录')):
                 from .photo_notes_ui import render_photo_review
                 render_photo_review(con, photo_result)
+        if cloud_mode():
+            from .browser_session import sync_action_session
+            sync_action_session()
     finally:
         con.close()
