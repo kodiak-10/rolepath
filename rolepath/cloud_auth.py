@@ -92,6 +92,8 @@ def require_login():
         st.session_state['_account_id'] = user.id
         st.session_state['_account_email'] = user.email or '个人账户'
         return (client, user.id)
+    from .i18n import render_language_picker
+    render_language_picker()
     st.title(tr('登录 RolePath'))
     st.write(tr('用邮箱验证码登录，无需设置密码。首次验证成功后创建账号。'))
     st.caption(tr('同一邮箱对应同一份笔记、学习计划和打卡记录。在个人设备上保留登录 7 天；换浏览器或清除浏览器数据后需要重新验证。'))

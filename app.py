@@ -25,9 +25,11 @@ if not cloud_mode():
     load_dotenv()
 from rolepath.ui import apply_style, render_header, go_to, render_home
 st.set_page_config(page_title='RolePath · Your next chapter', page_icon='◈', layout='wide', initial_sidebar_state='collapsed')
+from rolepath.presentation import ensure_clean_presentation
+ensure_clean_presentation()
 apply_style()
-from rolepath.i18n import render_language_picker
-render_language_picker()
+from rolepath.i18n import init_language
+init_language()
 if cloud_mode():
     from rolepath.cloud_auth import require_login
     require_login()
@@ -59,7 +61,7 @@ if st.session_state.get('page') == 'AI 设置':
     PAGES.append('AI 设置')
 st.session_state.setdefault('page', PAGES[0])
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
-st.session_state.setdefault('_prefer_domestic', True)
+st.session_state['_prefer_domestic'] = True
 st.session_state.jd_text = st.session_state['_jd_draft']
 page_labels = {value: tr('使用额度') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
 page = st.radio(tr('工作空间导航'), PAGES, key='page', horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
@@ -132,8 +134,7 @@ if page == '岗位分析':
                     st.rerun()
 if page == '课程与题目':
     st.subheader(tr('按 JD 选择课程与有来源的题目'))
-    prefer_domestic = st.checkbox(tr('优先国内平台与中文学习来源'), value=st.session_state['_prefer_domestic'], key='prefer_domestic', on_change=lambda: st.session_state.update(_prefer_domestic=st.session_state['prefer_domestic']))
-    st.caption(tr('先匹配岗位能力，再优先已核查的国内来源，组内按内容相关性排序。B站、小红书等平台按具体内容核查，不按作者或播放量加权；当前资源未逐集试听。'))
+    prefer_domestic = True
     parsed = st.session_state.jd_result
     if not parsed:
         st.info(tr('先载入或解析一份 JD。'))
@@ -331,45 +332,8 @@ if page == 'AI 设置':
     else:
         st.info(tr('本机版本从本地环境配置读取 AI 服务。'))
 if page == '历史记录':
-    from rolepath.ui import restore_plan
-    from rolepath.notes import reports
-    st.subheader(tr('每一步，都有记录'))
-    st.caption(tr('查看已保存的学习计划、打卡与笔记分析。未保存的输入不在这里。'))
-    query = st.text_input(tr('搜索历史记录'), placeholder=tr('输入岗位名称、笔记名称或分析指令…'), key='ui_dcf5e18a1645').strip().casefold()
-    con = connect()
-    try:
-        plans = all_plans(con)
-        docs = get_documents(con)
-        saved_reports = reports(con)
-        st.markdown(tr('**学习计划与打卡**'))
-        visible_plans = [p for p in plans if query in p['target'].casefold()]
-        if not visible_plans:
-            st.caption(tr('暂无匹配的已保存计划。'))
-        for p in visible_plans:
-            with st.expander(str(p['created_at']) + ' · ' + p['target']):
-                rows = tasks_for(con, p['id'])
-                st.write(tr('已完成 {0} / {1} 个任务', sum((t['status'] == '已完成' for t in rows)), len(rows)))
-                logs = study_stats(con, p['id'])['logs']
-                if logs:
-                    st.dataframe(table([{'日期': x['day'], '学习内容': x['title'], '分钟': x['minutes'], '心得': x['reflection']} for x in logs]), hide_index=True)
-                st.button(tr('继续这份计划'), key='history_' + p['id'], on_click=restore_plan, args=(dict(p),))
-        st.markdown(tr('**已保存笔记**'))
-        matched = [d for d in docs if query in d['filename'].casefold()]
-        if matched:
-            st.dataframe(table([{'名称': d['filename'], '保存时间': d['created_at']} for d in matched]), hide_index=True)
-        else:
-            st.caption(tr('暂无匹配的已保存笔记。'))
-        st.markdown(tr('**分析与汇总**'))
-        matched_reports = [(rid, r) for rid, r in saved_reports if query in (r.get('instruction', '') + ' ' + ' '.join((x['filename'] for x in r['sources']))).casefold()]
-        if not matched_reports:
-            st.caption(tr('暂无匹配的已保存分析。'))
-        for rid, report in matched_reports:
-            with st.expander(report['created_at'] + ' · ' + (report.get('instruction') or '笔记总结')):
-                for item in report['items']:
-                    st.write(item['kind'] + '：' + item['text'])
-                st.caption(tr('完整引用可在学习笔记的已保存分析中查看。'))
-    finally:
-        con.close()
+    from rolepath.history_ui import render_history
+    render_history()
 from rolepath.note_chat_ui import render_open_note_chat
 render_open_note_chat(st.session_state.jd_result)
 st.divider()

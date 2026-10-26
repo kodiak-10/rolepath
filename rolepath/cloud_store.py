@@ -62,6 +62,18 @@ class CloudStore:
         result=self.client.rpc('rp_save_document',dict(p_filename=filename,p_checksum=checksum,p_chunks=chunks)).execute().data
         return result['id'], result['count']
 
+    def history_logs(self):
+        tasks = {r['id']: r for r in self.rows('tasks')}
+        result = []
+        for start in range(0, 100000, 500):
+            batch = self.table('learning_logs').select('*').eq('user_id', self.user_id).order('day', desc=True).order('task_id').range(start, start + 499).execute().data
+            for row in batch:
+                task = tasks[row['task_id']]
+                result.append({**row, 'title': task['title'], 'plan_id': task['plan_id']})
+            if len(batch) < 500:
+                return result
+        raise ValueError('学习记录数量超过本次读取限制；没有截断结果。')
+
     def get_documents(self):
         return sorted(self.rows('documents'),key=lambda r:(r['created_at'],r['id']),reverse=True)
 

@@ -95,3 +95,14 @@ def all_plans(conn):
         rows = conn.rows('plans')
         return [{**r, 'meta': json.dumps(r['meta'], ensure_ascii=False)} for r in sorted(rows, key=lambda r:(r['created_at'],r['id']), reverse=True)]
     return list(conn.execute('SELECT * FROM plans ORDER BY created_at DESC, rowid DESC'))
+
+
+def history_logs(conn):
+    """Read actual check-ins across plans for the account calendar."""
+    if getattr(conn, 'cloud', False):
+        return conn.history_logs()
+    ensure_learning_log(conn)
+    return [dict(r) for r in conn.execute('''
+        SELECT l.*, t.title, t.plan_id FROM learning_logs l
+        JOIN tasks t ON t.id=l.task_id ORDER BY l.day DESC, l.task_id
+    ''')]

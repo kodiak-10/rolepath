@@ -8,7 +8,7 @@ An AI-assisted career exploration and learning workspace for students preparing 
 
 **Understand the role · Find relevant resources · Build a plan · Learn with evidence**
 
-[Launch RolePath](https://rolepath-kodiak.streamlit.app/) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
+[Launch RolePath](https://rolepath-kodiak.streamlit.app/?embed=true) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
 
 **Status:** actively developed MVP · **Interface:** English / 简体中文 · **AI access:** managed Qwen trial; optional self-hosted BYOK
 
@@ -84,7 +84,7 @@ The photo note assistant sends 1–4 original photos and the user’s instructio
 
 ### Personal history and bilingual presentation
 
-Saved plans, check-ins, note text and accepted note analyses are available through the user's account. The History page supports searching and resuming a selected plan. Unsaved drafts, standalone job analyses and a complete persistent chat transcript are not automatically included in history.
+Saved plans, check-ins, note text and accepted note analyses are available through the user's account. History is organized as an interactive monthly calendar. Colored date markers distinguish plans, notes, check-ins and analyses; selecting a day opens its real records. Search locates matching activity across months, and saved plans can be resumed. Timestamps are displayed in Asia/Shanghai time. Unsaved drafts, standalone job analyses and a complete persistent chat transcript are not automatically included in history.
 
 The interface opens in English and provides a **Language / 语言** selector for Simplified Chinese. Language switching preserves the current page and inputs. Original job descriptions, notes, course titles and quotations retain their source language. AI responses are not automatically translated merely because the interface language changes.
 
@@ -227,7 +227,7 @@ Use the repository's [Issues](https://github.com/kodiak-10/rolepath/issues) to r
 
 **RolePath** — Understand the work. Build the evidence. Take the next step.
 
-[Open the workspace](https://rolepath-kodiak.streamlit.app/) · [阅读中文版](README.zh-CN.md)
+[Open the workspace](https://rolepath-kodiak.streamlit.app/?embed=true) · [阅读中文版](README.zh-CN.md)
 
 </div>
 

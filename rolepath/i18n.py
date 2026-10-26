@@ -16,15 +16,23 @@ def label(value, locale=None):
     """Known display labels only; source material is intentionally left intact."""
     return EN.get(value, value) if (locale or language()) == 'en' and isinstance(value, str) else value
 
-def render_language_picker():
+def init_language():
     if '_language' not in st.session_state:
         st.session_state['_language'] = 'zh' if st.query_params.get('lang') == 'zh' else 'en'
+
+def render_language_picker(compact=False):
+    init_language()
     def change():
         st.query_params['lang'] = st.session_state['_language']
-    _, control = st.columns([5, 1.4])
-    with control:
+    def control():
         st.selectbox('Language / 语言', ['en', 'zh'], key='_language',
                      format_func=lambda x: 'English' if x == 'en' else '简体中文', on_change=change)
+    if compact:
+        control()
+    else:
+        _, column = st.columns([5, 1.4])
+        with column:
+            control()
 
 def table(rows):
     """Translate column headings without rewriting user-provided cell values."""
