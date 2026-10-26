@@ -42,6 +42,8 @@ RolePath separates three things that are easy to confuse: **what a role asks for
 
 ### Job analysis with traceable evidence
 
+JD analysis requests strict JSON Schema output from the configured text model, including required interview-assessment text, field types and length limits. The model must support this mode (for example, Qwen3.7-Plus). Local validation still checks source references and duplicate skills; invalid results fail explicitly without being saved or consuming a RolePath credit. There are no automatic retries or fabricated replacement fields.
+
 Users can paste a job description or upload a supported text document. In the hosted app, photos go through the photo note assistant for review before their text is used as a JD. AI-assisted extraction identifies explicit requirements and connects them to the source text. The interface separates skill requirements from conditions such as education or internship availability, and supports manual additions grounded in an exact source excerpt.
 
 Without an API key, a limited keyword scan is available. It is explicitly presented as an incomplete first pass, not a substitute for semantic analysis. The three home-page role examples are demonstrations, not live recruitment listings.
