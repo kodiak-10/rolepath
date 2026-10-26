@@ -14,6 +14,8 @@ def load_questions():
     return json.loads((DATA_DIR / "questions.json").read_text(encoding="utf-8"))
 
 SKILL_ALIASES = {
+    "产品思维": ["产品思维", "产品 sense", "产品sense"],
+    "AI应用基础": ["AI应用基础", "AI工具使用", "AI 工具使用", "大模型应用基础"],
     "需求分析": ["需求分析", "需求挖掘", "需求调研"],
     "PRD": ["prd", "需求文档", "产品需求文档"],
     "竞品分析": ["竞品分析", "竞品调研", "竞争产品分析"],

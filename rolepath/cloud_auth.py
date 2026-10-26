@@ -22,8 +22,11 @@ def validate_public_config(url, key):
 
 def new_client(url, key):
     validate_public_config(url, key)
-    from supabase import create_client
-    return create_client(url, key)
+    from supabase import create_client, ClientOptions
+    # Streamlit must persist each rotated token back to the browser in the same
+    # rerun. A background timer can otherwise rotate it without updating storage.
+    # get_session still refreshes expired tokens synchronously in require_login.
+    return create_client(url, key, options=ClientOptions(auto_refresh_token=False, persist_session=False))
 
 def validate_email(email):
     email = email.strip()

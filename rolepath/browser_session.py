@@ -48,7 +48,9 @@ def restore_browser_session(client):
                 if not response.session:
                     raise ValueError('No session')
                 st.session_state['_auth_until'] = saved['until']
-            except Exception:
+            except Exception as exc:
+                import logging
+                logging.getLogger(__name__).warning('Session restore failed: type=%s status=%s code=%s', type(exc).__name__, getattr(exc, 'status', None), getattr(exc, 'code', None))
                 st.error(tr('无法恢复上次登录。可以重试，或清除这台设备的登录后重新验证。'))
                 if st.button(tr('重试恢复登录')):
                     st.rerun()

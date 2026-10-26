@@ -54,7 +54,7 @@ def parse_jd_with_llm(text: str, with_orientation=False):
         raise ValueError('JD 超过 12000 字符，请缩短后提交；未进行截断解析。')
     sources = {f'L{i}': line for i, line in enumerate(text.splitlines(), 1) if line.strip()}
     skills = ','.join(SKILL_ALIASES)
-    system = ("你是保守的实习JD信息抽取器。只能根据原文提取明确出现的技能要求，不推断隐含技能。"
+    system = ("你是保守的实习JD信息抽取器。只能根据原文提取明确出现的技能要求，不推断隐含技能。产品思维、逻辑表达、沟通协作等也是能力要求，不能只提取软件工具名称。"
               "仅返回JSON对象，格式 {\"requirements\":[{\"skill\":\"SQL\",\"priority\":\"常规要求\",\"evidence_ids\":[\"L1\"],\"detail\":\"具体能力要求\",\"importance\":\"未标注\"}]}。"
               "priority仅允许 常规要求 或 加分项。适用于所有岗位；不因岗位名称推断技能或算法题要求。"
               "逐条检查职责、任职要求和加分项；同一条内的不同能力分别列出，不能用LLM等大类代替提示词设计、评测、调优等具体能力。不得为了匹配课程而合并或遗漏能力。每项增加detail字段，说明原文要求做到什么；importance字段严格只允许字符串“原文明示重点”或“未标注”，不得填写“必须”“精通”等原文词语。仅在证据中明确出现必须、精通、核心、最看重时选“原文明示重点”，否则选“未标注”。加分项标题即使没有冒号也适用于后续条目，直到下一章节。技能名应具体，以下只是可选参考，不是覆盖边界："+skills+
@@ -69,11 +69,23 @@ def parse_jd_with_llm(text: str, with_orientation=False):
             '"interview":[{"question":"可能的面试准备问题","assesses":"考察什么、回答时应展示什么"}]}。'
             'concepts给3至5项，learning给3至6项按入门顺序，interview给3至5项。'
             '根据当前岗位名称与职责推理建议，不机械套某个公司的JD。产品岗侧重用户问题、产品思维、AI应用边界和验证，'
-            '不可无依据要求所有岗位学SQL、写算法或搭RAG。对陌生岗位也解释其工作和合理的入门任务。'
+            '不可无依据要求所有岗位学SQL、写算法或搭RAG。使用AI聊天助手与提示词不等于AI辅助编程；'
+            '只有JD明确涉及编程或用户明确选择技术方向时，才把编程作为入门建议。普通AI工具使用应选择AI应用基础。'
+            '对陌生岗位也解释其工作和合理的入门任务。'
             '建议能力如与参考技能相同，使用参考技能的规范名称便于匹配；需要参考词表外的能力时直接列出，不为匹配而改写成无关技能。'
             '这些都是一般性建议，不声称企业实际会问，不声称某年或某企业的真题，不生成任何网址、课程名或未经提供的资料来源。'
             '不得在orientation中输出招聘资格判断或录用结论。')
-    raw, usage = _message(json.dumps({'sources': sources}, ensure_ascii=False),system, max_tokens=8000 if with_orientation else 6000)
+    context = {'sources': sources}
+    if with_orientation:
+        from .catalog import load_resources
+        learning_catalog = {}
+        for resource in load_resources():
+            for skill in resource['skills']:
+                learning_catalog.setdefault(skill, resource.get('focus', {}).get(skill, resource['description']))
+        learning_catalog['AI辅助编程'] = '使用AI编写、阅读、修改或调试实际代码，不是普通AI聊天助手的使用。'
+        context['learning_catalog'] = learning_catalog
+        system += '输入learning_catalog给出已有资源覆盖的能力及范围。先独立判断岗位需要准备什么，再选择含义准确的规范名称；不得为凑资源把非编程学习改成编程。'
+    raw, usage = _message(json.dumps(context, ensure_ascii=False),system, max_tokens=8000 if with_orientation else 6000)
     try:
         # Some compatible APIs wrap output in markdown fences.
         cleaned=raw.strip().removeprefix('```json').removeprefix('```').removesuffix('```').strip()

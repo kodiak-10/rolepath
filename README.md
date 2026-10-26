@@ -244,7 +244,7 @@ are not a cost benchmark or a full security audit. See [the rollout checklist](d
 
 ## Domestic learning sources and question provenance
 
-The catalogue currently contains 32 learning resources and 12 question entries. The default preference ranks reviewed domestic-platform sources first **within an explicitly matched skill scope**, then uses content relevance. This preference also applies to newly generated study plans and can be turned off. It does not assign a creator or popularity bonus. Foreign references are identified as supplementary when no reviewed domestic source is available.
+The catalogue currently contains 33 learning resources and 12 question entries. The default preference ranks reviewed domestic-platform sources first **within an explicitly matched skill scope**, then uses content relevance. This preference also applies to newly generated study plans and can be turned off. It does not assign a creator or popularity bonus. Foreign references are identified as supplementary when no reviewed domestic source is available.
 
 Recent additions include Bilibili chapters from Atguigu, Morvan and Hung-yi Lee's course; official Chinese Prompt and Coze guides; signed product-research articles; and Nowcoder practice, company-labelled banks, a historical Tencent-labelled paper and attributed interview recollections. Public catalogue checks do not establish teaching quality or universal mainland playback access. Xiaohongshu items require an identifiable original author, inspectable content and a stable source before admission; none was added without those checks.
 
