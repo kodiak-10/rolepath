@@ -379,5 +379,16 @@
   "岗位入门建议": "Role preparation suggestion",
   "关键词预览不调用 AI，也不消耗使用次数；它不能代替完整岗位分析。": "Keyword preview does not call AI or use credits. It is not a complete role analysis.",
   "产品思维": "Product thinking",
-  "AI应用基础": "AI application fundamentals"
+  "AI应用基础": "AI application fundamentals",
+  "这是根据照片生成的 AI 学习记录，不是系统验证过的逐字转录。请对照照片核对事实、公式和代码。": "This is an AI learning record based on your photos, not a certified verbatim transcript. Check facts, formulas and code against the originals.",
+  "AI 学习记录（可编辑）": "AI learning record (editable)",
+  "我已核对并修正这份 AI 学习记录。": "I have checked and corrected this AI learning record.",
+  "保存不消耗 AI 次数；原始照片不长期保存。": "Saving uses no AI credits. Original photos are not stored permanently.",
+  "保存这份学习记录": "Save this learning record",
+  "已保存学习记录，并标注 AI 来源；原始照片未长期保存。": "Saved with its AI origin labeled. Original photos were not stored permanently.",
+  "照片和问题已保留在当前会话，可以修改问题后发送，或重试；不会自动重复调用 AI。": "Your photos and question remain in this session. Edit and send your question, or retry. AI calls are never retried automatically.",
+  "上次问题：": "Previous question: ",
+  "重试这次照片请求": "Retry this photo request",
+  "核对并保存 AI 学习记录": "Review and save the AI learning record",
+  "对应指令：": "Instruction for this record: "
 }

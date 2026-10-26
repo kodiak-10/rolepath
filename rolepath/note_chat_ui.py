@@ -34,7 +34,7 @@ def render_note_chat(parsed=None):
                                       format_func=labels.get, key='dialog_note_sources')
             st.caption(tr('照片可通过输入框旁的加号添加，每次最多 4 张；附图时只使用照片。'))
         if reset.button(tr('新对话'), key='dialog_note_reset', use_container_width=True):
-            for key in ('workspace_note_chat', 'workspace_note_photos', 'workspace_photo_result'):
+            for key in ('workspace_note_chat', 'workspace_note_photos', 'workspace_photo_result', 'workspace_photo_pending', 'workspace_photo_error'):
                 st.session_state.pop(key, None)
         scope = tuple(sorted(selected))
         if st.session_state.get('workspace_note_scope') != scope:
@@ -62,15 +62,25 @@ def render_note_chat(parsed=None):
         prompt = st.chat_input(tr('问点什么，或添加笔记照片…'), key='workspace_note_prompt',
                                accept_file='multiple', file_type=list(IMAGE_TYPES), max_chars=3000,
                                disabled=not is_configured() or limit)
-        if prompt:
-            text = prompt if isinstance(prompt, str) else prompt.text
-            incoming = [] if isinstance(prompt, str) else [(f.name, f.getvalue()) for f in prompt.files]
+        retry = False
+        if st.session_state.get('workspace_photo_error'):
+            st.error(tr('本次回答未完成：{0}', st.session_state['workspace_photo_error']))
+            st.caption(tr('照片和问题已保留在当前会话，可以修改问题后发送，或重试；不会自动重复调用 AI。'))
+            st.write(tr('上次问题：') + st.session_state.get('workspace_photo_pending', ''))
+            retry = st.button(tr('重试这次照片请求'), key='retry_photo_request', disabled=limit or not is_configured())
+        if prompt or retry:
+            text = st.session_state['workspace_photo_pending'] if retry else prompt if isinstance(prompt, str) else prompt.text
+            incoming = [] if retry or isinstance(prompt, str) else [(f.name, f.getvalue()) for f in prompt.files]
             task_photos = incoming or photos
+            if task_photos:
+                # Keep the user's request even when the provider fails. No automatic retry.
+                st.session_state['workspace_note_photos'] = task_photos
+                st.session_state['workspace_photo_pending'] = text
             try:
                 with st.spinner(tr('正在思考…')):
                     if task_photos:
                         result = run_ai_task('notes', lambda: analyze_photos(task_photos, text, language(), history=chat.copy()))
-                        answer = '\n\n'.join(i['text'] for i in result['items'])
+                        answer = result['answer']
                         st.session_state['workspace_photo_result'] = result
                         st.session_state['workspace_note_photos'] = task_photos
                     else:
@@ -85,12 +95,18 @@ def render_note_chat(parsed=None):
                         answer = '\n\n'.join(i['kind'] + '：' + i['text'] for i in result['items'])
                     chat.extend([{'role':'user','content':text or tr('帮我整理这些笔记。')},
                                  {'role':'assistant','content':answer}])
-                st.rerun(scope='fragment')
+                    st.session_state.pop('workspace_photo_error', None)
+                    st.session_state.pop('workspace_photo_pending', None)
+                st.rerun()
             except Exception as exc:
-                st.error(tr('本次回答未完成：{0}', exc))
+                if task_photos:
+                    st.session_state['workspace_photo_error'] = str(exc)
+                    st.rerun()
+                else:
+                    st.error(tr('本次回答未完成：{0}', exc))
         photo_result = st.session_state.get('workspace_photo_result')
         if photo_result:
-            with st.expander(tr('核对照片文字并保存')):
+            with st.expander(tr('核对并保存 AI 学习记录')):
                 from .photo_notes_ui import render_photo_review
                 render_photo_review(con, photo_result)
     finally:
