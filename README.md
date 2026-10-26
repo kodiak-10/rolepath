@@ -54,6 +54,12 @@ Bilibili can be preferred when relevance is equal. Creators do not receive a uni
 
 The catalog is not a live search engine. Missing matches are shown as gaps; the planner does not invent course URLs to fill them. Catalog and provenance checks also do not imply that every lesson has received an independent quality review.
 
+### Role foundations for broad job descriptions
+
+A vague vacancy should still give a beginner somewhere to start. AI analysis now returns a separate preparation guide: what the role does, key concepts, suggested learning goals and interview practice prompts. The guide uses the current job context rather than a fixed employer template. Suggested topics match the same reviewed catalog used by explicit requirements.
+
+Employer-stated requirements retain their original evidence. Preparation suggestions are labeled separately and never treated as quoted JD requirements. AI interview prompts are explicitly marked as simulated practice, while sourced employer archives and interview recollections retain their own provenance. Learners can choose whether to include the suggested topics in a saved plan. Unknown topics remain visible even when the catalog lacks a reviewed resource.
+
 ### Learning plans constrained by available time
 
 Users provide weekly study hours, a preparation period and optional evidence of prior work. The planner orders requirements, selects available learning material and allocates tasks across days within the total time budget. Longer tasks can span multiple daily sessions.
@@ -131,7 +137,7 @@ The browser can retain Supabase session credentials for up to seven days. Restor
 The hosted app is configured for a **managed Qwen trial**:
 
 - The operator supplies the model service; visitors do not enter an API key.
-- Each verified account receives one free AI task. A successful task uses one credit; failed generation or validation returns the reservation.
+- Each verified account receives one free AI task. Server-assigned unlimited accounts are exempt from credit deductions and request quotas; concurrency controls and usage logging still apply. For ordinary accounts, a successful task uses one credit; failed generation or validation returns the reservation.
 - Usage and validated results are stored under the signed-in account. History, saved notes and check-ins remain free.
 - Model credentials and the privileged accounting key stay in server secrets. Ordinary learning-data access continues to use the user's JWT and row-level access policies.
 - Selected text and context are sent to the configured Qianwen AI Platform endpoint when the user requests an AI operation.

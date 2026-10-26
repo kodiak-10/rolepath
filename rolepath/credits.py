@@ -89,23 +89,35 @@ def task_notice():
     if managed_ai():
         import streamlit as st
         from .i18n import t
-        st.caption(t('本次 AI 任务使用 1 次额度。失败不扣次；首次验证邮箱赠送 1 次。所选内容将发送给平台配置的 AI 服务商。'))
+        st.caption(t('你的账号享有不限次使用权限。本次内容将发送给平台配置的 AI 服务商。') if unlimited_account() else t('本次 AI 任务使用 1 次额度。失败不扣次；首次验证邮箱赠送 1 次。所选内容将发送给平台配置的 AI 服务商。'))
+
+
+def unlimited_account():
+    """Display entitlement from the user's RLS-protected wallet; never grant it here."""
+    if not managed_ai():
+        return False
+    import streamlit as st
+    client = st.session_state.get('_account_client')
+    if client is None:
+        return False
+    rows = client.table('rp_ai_wallets').select('unlimited').eq('user_id', st.session_state['_account_id']).execute().data
+    return bool(rows and rows[0]['unlimited'])
 
 
 def render_credits():
     import streamlit as st
     from .i18n import t, label
     st.subheader(t('AI 使用额度'))
-    st.caption(t('首次验证邮箱赠送 1 次。查看历史、保存笔记和学习打卡始终免费。'))
     client = st.session_state['_account_client']
     user_id = st.session_state['_account_id']
     try:
-        wallet = client.table('rp_ai_wallets').select('remaining').eq('user_id', user_id).execute().data
+        wallet = client.table('rp_ai_wallets').select('remaining,unlimited').eq('user_id', user_id).execute().data
         runs = client.table('rp_ai_runs').select('id,task,status,created_at,result').eq('user_id', user_id).order('created_at', desc=True).limit(30).execute().data
     except Exception:
         st.error(t('额度服务尚未就绪，请稍后再试。'))
         return
-    st.metric(t('剩余次数'), wallet[0]['remaining'] if wallet else 1)
+    st.metric(t('剩余次数'), t('不限次') if wallet and wallet[0]['unlimited'] else wallet[0]['remaining'] if wallet else 1)
+    st.caption(t('你的账号享有不限次使用权限。本次内容将发送给平台配置的 AI 服务商。') if wallet and wallet[0]['unlimited'] else t('首次验证邮箱赠送 1 次。查看历史、保存笔记和学习打卡始终免费。'))
     st.caption(t('微信支付尚未开放，当前不收款。次数包价格将在成本验证后公布。'))
     with st.expander(t('最近使用记录')):
         if not runs:

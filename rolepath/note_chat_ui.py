@@ -9,6 +9,7 @@ from .photo_notes import analyze_photos
 from .llm import is_configured
 from .credits import run_ai_task
 from .cloud_settings import managed_ai
+from .credits import unlimited_account
 
 
 def open_note_chat(parsed=None):
@@ -56,7 +57,7 @@ def render_note_chat(parsed=None):
             st.caption(tr('本轮已完成 3 次回答，开始新对话可继续。'))
         if not is_configured():
             st.caption(tr('AI 服务尚未配置，仍可上传和查看资料。'))
-        st.caption(tr('发送即将本次资料和问题交给已配置的千问服务。每次回答用 1 次额度，失败不扣次。') if managed_ai()
+        st.caption(tr('你的账号享有不限次使用权限。本次内容将发送给平台配置的 AI 服务商。') if managed_ai() and unlimited_account() else tr('发送即将本次资料和问题交给已配置的千问服务。每次回答用 1 次额度，失败不扣次。') if managed_ai()
                    else tr('发送时，所选资料和问题会交给你配置的模型服务。'))
         prompt = st.chat_input(tr('问点什么，或添加笔记照片…'), key='workspace_note_prompt',
                                accept_file='multiple', file_type=list(IMAGE_TYPES), max_chars=3000,

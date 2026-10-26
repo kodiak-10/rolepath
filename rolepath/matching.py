@@ -20,3 +20,16 @@ def question_matches(skill):
 
 def coverage(requirements, retriever, prefer_domestic=True):
     return [dict(requirement=r, courses=course_matches(r, retriever, prefer_domestic), questions=question_matches(r['skill'])) for r in requirements]
+
+
+def learning_requirements(parsed, include_guidance=True):
+    """Keep inferred preparation separate from the employer's stated requirements."""
+    rows = list(parsed['requirements'])
+    seen = {r['skill'] for r in rows}
+    if include_guidance:
+        for item in parsed.get('orientation', {}).get('learning', []):
+            if item['skill'] not in seen:
+                rows.append(dict(skill=item['skill'], detail=item['goal'], evidence=item['reason'],
+                                 priority='岗位入门建议', origin='guidance', importance='未标注'))
+                seen.add(item['skill'])
+    return rows

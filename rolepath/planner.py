@@ -67,7 +67,8 @@ def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_dom
                 resource_id=primary['id'], resource_title=primary['title'], resource_url=primary['url'],
                 resource_creator=primary.get('creator', '官方资料/原发布方'), focus=focus,
                 chapters=primary.get('chapters', {}).get(skill, []),
-                matching_reason=f'资源目录标注覆盖「{skill}」；对应 JD 原文：{item["evidence"]}',
+                matching_reason=f'资源目录标注覆盖「{skill}」；'+('岗位准备建议：' if item.get('origin') == 'guidance' else '对应 JD 原文：')+item['evidence'],
+                requirement_origin=item.get('origin', 'jd'),
                 source_checked_at=primary.get('checked_at', '原有资源，未本轮核验'),
                 source_note=primary.get('freshness_note', '按原站内容核对适用性'),
                 question=q, evidence_status=item['status'], priority=item['priority'], status='待完成'))

@@ -15,7 +15,10 @@ after refresh. Payment collection is disabled.
 1. Back up the database and apply `managed_ai.sql` once after the existing schema. It adds credit objects
    without replacing existing policies; rerunning an existing migration fails rather
    than silently replacing its access rules.
-2. Run [the transactional ledger checks](check_managed_ai.sql) in the SQL editor.
+2. Apply `account_entitlements.sql` after `managed_ai.sql`. It adds server-controlled unlimited entitlements and a per-run charged flag. Assign entitlements only to a verified account using a private operator query; never store operator email addresses or account IDs in the public repository. Ordinary users have read-only access to their own entitlement. Unlimited tasks are logged but do not deduct credits, trigger hourly/daily quotas or add credits when they fail. Existing charged reservations still refund correctly after an entitlement change.
+Run `check_account_entitlements.sql` after the entitlement migration to verify unlimited access, ordinary-account charging, refunds across entitlement changes and restricted mutation permissions. Its synthetic rows are rolled back.
+
+3. Run [the transactional ledger checks](check_managed_ai.sql) in the SQL editor.
    Its synthetic identities and ledger rows are rolled back after the checks.
    Also verify the browser flow with two real test identities: each can read only its own
    wallet/results, neither can modify a balance or invoke accounting functions.
@@ -52,8 +55,8 @@ Never put this key in public_config.json or a browser component.
   50,000 characters, and existing task-specific limits remain in force.
 - Successful results and reported provider token usage are stored per user.
   Failed validation preserves provider usage but refunds the user's credit.
-- Pending reservations prevent concurrent requests per user. Each account has
-  at most five new attempts/hour; the global daily request cap includes failures.
+- Pending reservations prevent concurrent requests per user. Ordinary accounts have
+  at most five new attempts/hour; the global daily request cap includes their failures. Explicitly entitled unlimited accounts do not consume those quotas.
   This is a request cap, **not a measured yuan spending limit**.
 - If the server crashes or settlement is uncertain, the reservation stays pending.
   Do not blindly retry generation or refund it: first inspect the run and provider

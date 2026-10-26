@@ -19,7 +19,7 @@ from rolepath.jd import parse_jd
 from rolepath.llm import grounded_answer, answer_from_document, is_configured, parse_jd_with_llm
 from rolepath.planner import plan_tasks
 from rolepath.retrieval import build_retriever
-from rolepath.matching import coverage, reviewed_domestic
+from rolepath.matching import coverage, reviewed_domestic, learning_requirements
 from rolepath.notes_ui import render_notes
 if not cloud_mode():
     load_dotenv()
@@ -72,7 +72,10 @@ if page == '岗位分析':
     uploaded_jd = st.file_uploader(tr('上传岗位 JD（可选）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), key='jd_upload')
     st.text_area(tr('岗位 JD 原文'), key='jd_text', on_change=lambda: st.session_state.update(_jd_draft=st.session_state.jd_text), height=210, placeholder=tr('粘贴岗位名称、职责、任职要求、优先条件和实习时间…'))
     parse_mode = st.selectbox(tr('解析方式'), ['关键词初筛（不完整，无需 API）', 'LLM 结构化抽取（需 API Key）'], index=1 if is_configured() else 0, format_func=(lambda value: tr('AI 深度分析') if value.startswith('LLM') else tr('关键词预览')) if managed_ai() else formatter(), key='ui_ace9d4ab6562')
-    task_notice()
+    if parse_mode.startswith('LLM'):
+        task_notice()
+    else:
+        st.caption(tr('关键词预览不调用 AI，也不消耗使用次数；它不能代替完整岗位分析。'))
     if st.button(tr('解析岗位要求'), type='primary', key='do_parse'):
         try:
             jd_text = read_upload(uploaded_jd) if uploaded_jd else st.session_state.jd_text
@@ -82,7 +85,7 @@ if page == '岗位分析':
             elif parse_mode.startswith('LLM'):
                 if not is_configured():
                     raise ValueError('LLM 未配置：请填写 API Key 和模型名称，或选择不完整的关键词初筛。')
-                st.session_state.jd_result = run_ai_task('jd', lambda: parse_jd_with_llm(jd_text))
+                st.session_state.jd_result = run_ai_task('jd', lambda: parse_jd_with_llm(jd_text, with_orientation=True))
             else:
                 st.session_state.jd_result = parse_jd(jd_text)
         except Exception as exc:
@@ -90,6 +93,9 @@ if page == '岗位分析':
             st.error(tr('无法解析该 JD：{0}', exc))
     parsed = st.session_state.jd_result
     if parsed:
+        if parsed.get('orientation'):
+            st.write(parsed['orientation']['overview'])
+            st.caption(tr('已同时生成岗位入门建议、基础概念与面试准备，请在「课程与题目」查看。'))
         next_a, next_b = st.columns(2)
         next_a.button(tr('查看匹配课程 →'), on_click=go_to, args=('课程与题目',), use_container_width=True)
         next_b.button(tr('制定学习计划 →'), on_click=go_to, args=('学习计划',), use_container_width=True)
@@ -132,10 +138,35 @@ if page == '课程与题目':
     if not parsed:
         st.info(tr('先载入或解析一份 JD。'))
     else:
-        for group in coverage(parsed['requirements'], retriever, prefer_domestic):
+        guide = parsed.get('orientation')
+        if not guide:
+            st.write(tr('JD 写得宽泛也可以准备：让 AI 解释岗位工作、基础概念、建议先学什么，以及可能的面试问题。'))
+            task_notice()
+            if st.button(tr('生成岗位入门建议'), type='primary', key='make_orientation'):
+                try:
+                    st.session_state.jd_result = run_ai_task('jd', lambda: parse_jd_with_llm(parsed['raw'], with_orientation=True))
+                    st.rerun()
+                except Exception as exc:
+                    st.error(tr('岗位建议生成失败：{0}', exc))
+        else:
+            st.markdown(tr('**这个岗位做什么**'))
+            st.write(guide['overview'])
+            st.caption(tr('以下是 AI 根据岗位背景提出的准备建议，不是企业明示要求，也不是实际面试题预测。'))
+            with st.expander(tr('先理解这些概念')):
+                for concept in guide['concepts']:
+                    st.markdown(f"**{concept['name']}**")
+                    st.write(concept['explanation'])
+            with st.expander(tr('面试准备 · AI 模拟题（非企业真题）')):
+                for i, question in enumerate(guide['interview'], 1):
+                    st.write(f"{i}. {question['question']}")
+                    st.caption(question['assesses'])
+            st.markdown(tr('**按顺序学习与练习**'))
+        for group in coverage(learning_requirements(parsed), retriever, prefer_domestic):
             r = group['requirement']
             with st.expander(r['skill'] + ' · ' + r['priority']):
-                st.write(tr('JD 原文：') + r['evidence'])
+                st.write((tr('建议原因：') if r.get('origin') == 'guidance' else tr('JD 原文：')) + r['evidence'])
+                if r.get('origin') == 'guidance':
+                    st.write(tr('学习目标：') + r['detail'])
                 if not group['courses']:
                     st.warning(tr('当前没有核验过的匹配课程，不自动安排无来源学习任务。'))
                 visible_courses = group['courses']
@@ -166,12 +197,14 @@ if page == '课程与题目':
 if page == '学习计划':
     st.subheader(tr('能力证据与个性化学习计划'))
     parsed = st.session_state.jd_result
-    if not parsed or not parsed['requirements']:
+    if not parsed or not learning_requirements(parsed):
         st.info(tr('先去「我的空间」载入一个演示 JD，或在「岗位分析」中提交真实 JD。'))
     else:
+        include_guidance = st.checkbox(tr('将岗位入门建议加入计划（不是企业硬性要求）'), value=True, key='include_guidance') if parsed.get('orientation') else False
+        requirements = learning_requirements(parsed, include_guidance)
         col_a, col_b = st.columns([3, 2])
         with col_a:
-            claimed = st.multiselect(tr('你认为自己接触过哪些技能？（仅作自述，不视为已掌握）'), list(dict.fromkeys(ALL_SKILLS + [r['skill'] for r in parsed['requirements']])), key='ui_eb570ab6ba05')
+            claimed = st.multiselect(tr('你认为自己接触过哪些技能？（仅作自述，不视为已掌握）'), list(dict.fromkeys(ALL_SKILLS + [r['skill'] for r in requirements])), key='ui_eb570ab6ba05')
             notes = st.text_area(tr('项目经历、学习成果或作品说明（可选）'), height=130, placeholder=tr('例：我做过RAG知识库问答项目，记录了检索结果；尚未做系统评测。'), key='ui_bf3afc2595b1')
             upload_evidence = st.file_uploader(tr('上传自己的项目文档或学习笔记（可选）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), key='profile_upload')
             if upload_evidence:
@@ -184,7 +217,7 @@ if page == '学习计划':
             hours = st.slider(tr('每周可用学习时间（小时）'), min_value=1, max_value=30, value=8, key='ui_ef3a7187fdff')
             days = st.slider(tr('准备周期（天）'), min_value=3, max_value=90, value=14, key='ui_d3906eea5fd9')
             st.caption(tr('规划器会遵循总时间预算。固定练习任务只是候选计划，不代表标准化课时。'))
-        evaluated = assess(parsed['requirements'], claimed, notes)
+        evaluated = assess(requirements, claimed, notes)
         st.markdown(tr('**当前能力证据（未经技能测验）**'))
         st.dataframe(table([{'技能': a['skill'], 'JD要求': a['priority'], '状态': a['status']} for a in evaluated]), hide_index=True, use_container_width=True)
         if st.button(tr('生成并保存学习路径'), type='primary', key='make_plan'):
