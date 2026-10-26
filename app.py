@@ -25,8 +25,6 @@ if not cloud_mode():
     load_dotenv()
 from rolepath.ui import apply_style, render_header, go_to, render_home
 st.set_page_config(page_title='RolePath · Your next chapter', page_icon='◈', layout='wide', initial_sidebar_state='collapsed')
-from rolepath.presentation import ensure_clean_presentation
-ensure_clean_presentation()
 apply_style()
 from rolepath.i18n import init_language
 init_language()
