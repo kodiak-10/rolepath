@@ -62,6 +62,10 @@ def restore_browser_session(client):
     command = st.session_state.get('_auth_command', dict(action='read', id='initial'))
     result = browser_session(command)
     if not result or result.get('id') != command['id']:
+        # Once restored, the verified server session can render while a storage
+        # write is acknowledged. Stopping here would unmount and erase widgets.
+        if st.session_state.get('_auth_browser_loaded'):
+            return None
         st.info(tr('正在恢复登录…'))
         st.stop()
     if not result['available']:

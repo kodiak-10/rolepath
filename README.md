@@ -260,3 +260,12 @@ The catalogue currently contains 33 learning resources and 12 question entries. 
 Recent additions include Bilibili chapters from Atguigu, Morvan and Hung-yi Lee's course; official Chinese Prompt and Coze guides; signed product-research articles; and Nowcoder practice, company-labelled banks, a historical Tencent-labelled paper and attributed interview recollections. Public catalogue checks do not establish teaching quality or universal mainland playback access. Xiaohongshu items require an identifiable original author, inspectable content and a stable source before admission; none was added without those checks.
 
 See [source selection and review evidence](deploy/RESOURCE_SOURCING.md).
+
+## Development checks
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest tests --ignore=tests/test_image_upload.py
+```
+
+The separate image-upload tests exercise the host OCR runtime. Live model checks require a private provider configuration and are never part of the offline suite. Transactional database checks live in `deploy/check_*.sql`; synthetic data rolls back.

@@ -343,3 +343,6 @@ from rolepath.note_chat_ui import render_open_note_chat
 render_open_note_chat(st.session_state.jd_result)
 from rolepath.membership_ui import render_open_checkout
 render_open_checkout()
+
+if st.session_state.pop('_auth_flush_requested', False):
+    st.rerun()

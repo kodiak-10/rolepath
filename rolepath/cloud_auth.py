@@ -85,10 +85,12 @@ def require_login():
             st.session_state.clear()
             st.error(tr('账户已变化，请重新登录。'))
             st.stop()
-        saved = browser_result.get('session') or {}
-        if browser_result.get('available') and (saved.get('access_token') != session.access_token or saved.get('refresh_token') != session.refresh_token):
+        saved = (browser_result or {}).get('session') or {}
+        if browser_result and browser_result.get('available') and (saved.get('access_token') != session.access_token or saved.get('refresh_token') != session.refresh_token):
             queue_session(session)
-            st.rerun()
+            # Render existing widgets before the storage-sync rerun, preserving
+            # their values. Authentication and identity checks already passed.
+            st.session_state['_auth_flush_requested'] = True
         st.session_state['_account_id'] = user.id
         st.session_state['_account_email'] = user.email or '个人账户'
         return (client, user.id)
