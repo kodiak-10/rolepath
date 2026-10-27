@@ -1,6 +1,6 @@
 streamlit>=1.66,<2
 scikit-learn>=1.4,<2
-openai>=1.40,<3
+openai>=2.54,<3
 pypdf>=5,<7
 python-dotenv>=1,<2
 supabase==2.33.0

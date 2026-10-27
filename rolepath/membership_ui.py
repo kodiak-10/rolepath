@@ -158,7 +158,7 @@ def render_my_membership(client,user_id,state):
         runs=client.table('rp_ai_runs').select('id,task,status,created_at,result').eq('user_id',user_id).order('created_at',desc=True).limit(30).execute().data
         if not runs:st.caption(tr('还没有使用记录。'))
         for row in runs:
-            st.write(display_time(row['created_at'])+' · '+label({'jd':'岗位分析','notes':'学习笔记','document':'资料问答'}[row['task']])+' · '+label({'pending':'处理中','succeeded':'已完成','failed':'失败，未扣次'}[row['status']]))
+            st.write(display_time(row['created_at'])+' · '+label({'jd':'岗位分析','notes':'学习笔记','document':'资料问答','resources':'资源检索'}[row['task']])+' · '+label({'pending':'处理中','succeeded':'已完成','failed':'失败，未扣次'}[row['status']]))
             if row['status']=='succeeded':
                 import json
                 st.download_button(tr('下载结果'),json.dumps(row['result'],ensure_ascii=False,indent=2),file_name='rolepath-result.json',mime='application/json',key='ai_result_'+row['id'])

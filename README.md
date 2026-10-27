@@ -245,6 +245,14 @@ and refreshing the page preserved the login.
 
 The current monthly plan is CNY 12.90 with unlimited AI use. The owner reviews actual WeChat receipts before activating a calendar month of access. No automated payment gateway or recurring billing is used. Functional checks are not a cost benchmark or a full security audit. See [membership operations](deploy/MEMBERSHIPS.md).
 
+## Live research across industries
+
+Enter a target role or learning goal in **Courses & practice**. Qwen searches public websites, reads resource pages, selects relevant courses and practice material, and explains the learning order. Only links present in actual tool output are accepted. Evidence uses source paragraph IDs so citations are copied from retrieved content instead of rewritten by the model. Users can select these materials for a time-budgeted study plan.
+
+The existing collection remains available in a secondary section. It no longer limits role preparation or the range of resources the model can find. Search is designed for roles across industries, with domestic and Chinese sources preferred where appropriate. Sources that cannot be read are not presented as verified courses. Company-labelled material is attributed to its original author/platform and is not a claim of company confirmation.
+
+See [live research implementation and deployment](deploy/RESOURCE_RESEARCH.md).
+
 ## Domestic learning sources and question provenance
 
 The catalogue currently contains 33 learning resources and 12 question entries. The default preference ranks reviewed domestic-platform sources first **within an explicitly matched skill scope**, then uses content relevance. This preference also applies to newly generated study plans and can be turned off. It does not assign a creator or popularity bonus. Foreign references are identified as supplementary when no reviewed domestic source is available.

@@ -10,12 +10,12 @@ def course_matches(requirement, retriever, prefer_domestic=True):
     # Exact skill coverage is mandatory. Prefer reviewed domestic sources within
     # that scope, then rank their specific content by relevance. No creator bonus.
     hits = [h for h in hits if requirement['skill'] in h.resource['skills']]
-    hits.sort(key=lambda h: (prefer_domestic and not reviewed_domestic(h.resource), -h.score))
+    hits.sort(key=lambda h: (not h.resource.get('selected_for_plan',False), prefer_domestic and not reviewed_domestic(h.resource), -h.score))
     return hits
 
 
-def question_matches(skill):
-    return [q for q in load_questions() if skill in q['skills']]
+def question_matches(skill, extra_questions=None):
+    return [q for q in (extra_questions or [])+load_questions() if skill in q['skills']]
 
 
 def coverage(requirements, retriever, prefer_domestic=True):

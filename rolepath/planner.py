@@ -19,7 +19,7 @@ DELIVERABLES = {
 }
 
 
-def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_domestic=True):
+def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_domestic=True, extra_questions=None):
     if not math.isfinite(hours_per_week) or hours_per_week <= 0 or not 1 <= days <= 180:
         raise ValueError('时间参数无效')
     start = start or date.today()
@@ -39,7 +39,7 @@ def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_dom
         candidates = [dict(kind='学习' if item['status'] == '暂无证据' else '复习',
             title=f"{skill}：{focus}", minutes=int(primary.get('minutes_by_skill', {}).get(skill, primary.get('minutes', 60))) if item['status'] == '暂无证据' else 30,
             acceptance='完成指定部分，上传笔记；写出关键结论、一个应用例子和一个待解问题。', question=None)]
-        qs = [q for q in question_matches(skill) if q['id'] not in used_questions]
+        qs = [q for q in question_matches(skill,extra_questions) if q['id'] not in used_questions]
         if qs:
             q = qs[0]
             candidates.append(dict(kind=q['kind'], title=q['title'], minutes=q['minutes'], acceptance=q['deliverable'], question=q))
@@ -67,7 +67,7 @@ def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_dom
                 resource_id=primary['id'], resource_title=primary['title'], resource_url=primary['url'],
                 resource_creator=primary.get('creator', '官方资料/原发布方'), focus=focus,
                 chapters=primary.get('chapters', {}).get(skill, []),
-                matching_reason=f'资源目录标注覆盖「{skill}」；'+('岗位准备建议：' if item.get('origin') == 'guidance' else '对应 JD 原文：')+item['evidence'],
+                matching_reason=(f'用户选取的联网资料对应「{skill}」；' if primary.get('selected_for_plan') else f'资源目录标注覆盖「{skill}」；')+('岗位准备建议：' if item.get('origin') == 'guidance' else '对应 JD 原文：')+item['evidence'],
                 requirement_origin=item.get('origin', 'jd'),
                 source_checked_at=primary.get('checked_at', '原有资源，未本轮核验'),
                 source_note=primary.get('freshness_note', '按原站内容核对适用性'),
@@ -75,4 +75,4 @@ def plan_tasks(assessed, retriever, hours_per_week, days, start=None, prefer_dom
     return output, dict(capacity_minutes=capacity, scheduled_minutes=capacity-sum(daily), remaining_minutes=sum(daily),
         unscheduled_skills=[x['skill'] for x in ordered if not any(t['skill']==x['skill'] for t in output)],
         missing_resources=missing_resources,
-        missing_questions=[x['skill'] for x in ordered if not question_matches(x['skill'])])
+        missing_questions=[x['skill'] for x in ordered if not question_matches(x['skill'],extra_questions)])

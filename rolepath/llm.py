@@ -114,15 +114,6 @@ def parse_jd_with_llm(text: str, with_orientation=False):
             '这些都是一般性建议，不声称企业实际会问，不声称某年或某企业的真题，不生成任何网址、课程名或未经提供的资料来源。'
             '不得在orientation中输出招聘资格判断或录用结论。')
     context = {'sources': sources}
-    if with_orientation:
-        from .catalog import load_resources
-        learning_catalog = {}
-        for resource in load_resources():
-            for skill in resource['skills']:
-                learning_catalog.setdefault(skill, resource.get('focus', {}).get(skill, resource['description']))
-        learning_catalog['AI辅助编程'] = '使用AI编写、阅读、修改或调试实际代码，不是普通AI聊天助手的使用。'
-        context['learning_catalog'] = learning_catalog
-        system += '输入learning_catalog给出已有资源覆盖的能力及范围。先独立判断岗位需要准备什么，再选择含义准确的规范名称；不得为凑资源把非编程学习改成编程。'
     raw, usage = _message(json.dumps(context, ensure_ascii=False),system,
                           max_tokens=8000 if with_orientation else 6000,
                           response_format=jd_response_format(sources, with_orientation))

@@ -131,68 +131,71 @@ if page == '岗位分析':
                     parsed['requirements'].append(dict(skill=skill.strip(), evidence=evidence.strip(), priority=priority, parser='人工补充'))
                     st.rerun()
 if page == '课程与题目':
-    st.subheader(tr('按 JD 选择课程与有来源的题目'))
-    prefer_domestic = True
-    parsed = st.session_state.jd_result
-    if not parsed:
-        st.info(tr('先载入或解析一份 JD。'))
-    else:
-        guide = parsed.get('orientation')
-        if not guide:
-            st.write(tr('JD 写得宽泛也可以准备：让 AI 解释岗位工作、基础概念、建议先学什么，以及可能的面试问题。'))
-            task_notice()
-            if st.button(tr('生成岗位入门建议'), type='primary', key='make_orientation'):
-                try:
-                    st.session_state.jd_result = run_ai_task('jd', lambda: parse_jd_with_llm(parsed['raw'], with_orientation=True))
-                    st.rerun()
-                except Exception as exc:
-                    st.error(tr('岗位建议生成失败：{0}', exc))
+    st.subheader(tr('为目标岗位寻找学习资源'))
+    from rolepath.research_ui import render_research
+    render_research(st.session_state.jd_result)
+    with st.expander(tr('查看已收录的参考资料')):
+        prefer_domestic = True
+        parsed = st.session_state.jd_result
+        if not parsed:
+            st.info(tr('先载入或解析一份 JD。'))
         else:
-            st.markdown(tr('**这个岗位做什么**'))
-            st.write(guide['overview'])
-            st.caption(tr('以下是 AI 根据岗位背景提出的准备建议，不是企业明示要求，也不是实际面试题预测。'))
-            with st.expander(tr('先理解这些概念')):
-                for concept in guide['concepts']:
-                    st.markdown(f"**{concept['name']}**")
-                    st.write(concept['explanation'])
-            with st.expander(tr('面试准备 · AI 模拟题（非企业真题）')):
-                for i, question in enumerate(guide['interview'], 1):
-                    st.write(f"{i}. {question['question']}")
-                    st.caption(question['assesses'])
-            st.markdown(tr('**按顺序学习与练习**'))
-        for group in coverage(learning_requirements(parsed), retriever, prefer_domestic):
-            r = group['requirement']
-            with st.expander(r['skill'] + ' · ' + r['priority']):
-                st.write((tr('建议原因：') if r.get('origin') == 'guidance' else tr('JD 原文：')) + r['evidence'])
-                if r.get('origin') == 'guidance':
-                    st.write(tr('学习目标：') + r['detail'])
-                if not group['courses']:
-                    st.warning(tr('当前没有核验过的匹配课程，不自动安排无来源学习任务。'))
-                visible_courses = group['courses']
-                if prefer_domestic:
-                    domestic_courses = [h for h in group['courses'] if reviewed_domestic(h.resource)]
-                    if domestic_courses:
-                        visible_courses = domestic_courses
-                    elif group['courses']:
-                        st.caption(tr('这项能力暂无已核查的国内来源，以下为补充参考。'))
-                for hit in visible_courses[:3]:
-                    c = hit.resource
-                    st.markdown(f"**[{c['title']}]({c['url']})**")
-                    st.write(tr('对应学习内容：') + c.get('focus', {}).get(r['skill'], c['description']))
-                    st.caption(tr('发布方：{0} · 发布：{1} · 本次学习预算约 {2} 分钟（含练习，非整课时长）', c.get('creator', '官方资料/原发布方'), c.get('published', '见原站'), c.get('minutes_by_skill', {}).get(r['skill'], c['minutes'])))
-                    for chapter in c.get('chapters', {}).get(r['skill'], []):
-                        st.markdown(tr('[{0}]({1}) · {2} 分钟', chapter['title'], chapter['url'], chapter['seconds'] // 60))
-                    st.caption(c.get('quality_basis', '按资源目录技能标签匹配') + '；' + c.get('freshness_note', '内容时效以原站为准'))
-                    st.caption(tr('核查：') + c.get('checked_at', '原有资源，本轮未核查') + ' · ' + c.get('verification', ''))
-                    st.caption(tr('访问说明：') + c.get('access_note', tr('补充参考来源，国内可达性未实测。')))
-                if not group['questions']:
-                    st.caption(tr('暂无核查过的对应题目。计划可安排成果练习，但不会标成企业真题。'))
-                for q in group['questions']:
-                    st.markdown(tr('练习：[{0}]({1})', q['title'], q['url']))
-                    st.caption(q['source_type'] + ' · ' + q['source'] + ' · ' + q['published'])
-                    st.write(q['summary'])
-                    st.caption(tr('来源核查：{0} · {1}', q.get('checked_at', '未标注'), q.get('access_note', '以原站权限为准。')))
-        st.info(tr('题目区分平台练习、企业题库或历史套卷、用户回忆面经。企业归属以平台或作者标注为准，未获企业单独确认；旧题不代表当前考试。'))
+            guide = parsed.get('orientation')
+            if not guide:
+                st.write(tr('JD 写得宽泛也可以准备：让 AI 解释岗位工作、基础概念、建议先学什么，以及可能的面试问题。'))
+                task_notice()
+                if st.button(tr('生成岗位入门建议'), type='primary', key='make_orientation'):
+                    try:
+                        st.session_state.jd_result = run_ai_task('jd', lambda: parse_jd_with_llm(parsed['raw'], with_orientation=True))
+                        st.rerun()
+                    except Exception as exc:
+                        st.error(tr('岗位建议生成失败：{0}', exc))
+            else:
+                st.markdown(tr('**这个岗位做什么**'))
+                st.write(guide['overview'])
+                st.caption(tr('以下是 AI 根据岗位背景提出的准备建议，不是企业明示要求，也不是实际面试题预测。'))
+                with st.expander(tr('先理解这些概念')):
+                    for concept in guide['concepts']:
+                        st.markdown(f"**{concept['name']}**")
+                        st.write(concept['explanation'])
+                with st.expander(tr('面试准备 · AI 模拟题（非企业真题）')):
+                    for i, question in enumerate(guide['interview'], 1):
+                        st.write(f"{i}. {question['question']}")
+                        st.caption(question['assesses'])
+                st.markdown(tr('**按顺序学习与练习**'))
+            for group in coverage(learning_requirements(parsed), retriever, prefer_domestic):
+                r = group['requirement']
+                with st.expander(r['skill'] + ' · ' + r['priority']):
+                    st.write((tr('建议原因：') if r.get('origin') == 'guidance' else tr('JD 原文：')) + r['evidence'])
+                    if r.get('origin') == 'guidance':
+                        st.write(tr('学习目标：') + r['detail'])
+                    if not group['courses']:
+                        st.warning(tr('当前没有核验过的匹配课程，不自动安排无来源学习任务。'))
+                    visible_courses = group['courses']
+                    if prefer_domestic:
+                        domestic_courses = [h for h in group['courses'] if reviewed_domestic(h.resource)]
+                        if domestic_courses:
+                            visible_courses = domestic_courses
+                        elif group['courses']:
+                            st.caption(tr('这项能力暂无已核查的国内来源，以下为补充参考。'))
+                    for hit in visible_courses[:3]:
+                        c = hit.resource
+                        st.markdown(f"**[{c['title']}]({c['url']})**")
+                        st.write(tr('对应学习内容：') + c.get('focus', {}).get(r['skill'], c['description']))
+                        st.caption(tr('发布方：{0} · 发布：{1} · 本次学习预算约 {2} 分钟（含练习，非整课时长）', c.get('creator', '官方资料/原发布方'), c.get('published', '见原站'), c.get('minutes_by_skill', {}).get(r['skill'], c['minutes'])))
+                        for chapter in c.get('chapters', {}).get(r['skill'], []):
+                            st.markdown(tr('[{0}]({1}) · {2} 分钟', chapter['title'], chapter['url'], chapter['seconds'] // 60))
+                        st.caption(c.get('quality_basis', '按资源目录技能标签匹配') + '；' + c.get('freshness_note', '内容时效以原站为准'))
+                        st.caption(tr('核查：') + c.get('checked_at', '原有资源，本轮未核查') + ' · ' + c.get('verification', ''))
+                        st.caption(tr('访问说明：') + c.get('access_note', tr('补充参考来源，国内可达性未实测。')))
+                    if not group['questions']:
+                        st.caption(tr('暂无核查过的对应题目。计划可安排成果练习，但不会标成企业真题。'))
+                    for q in group['questions']:
+                        st.markdown(tr('练习：[{0}]({1})', q['title'], q['url']))
+                        st.caption(q['source_type'] + ' · ' + q['source'] + ' · ' + q['published'])
+                        st.write(q['summary'])
+                        st.caption(tr('来源核查：{0} · {1}', q.get('checked_at', '未标注'), q.get('access_note', '以原站权限为准。')))
+            st.info(tr('题目区分平台练习、企业题库或历史套卷、用户回忆面经。企业归属以平台或作者标注为准，未获企业单独确认；旧题不代表当前考试。'))
 if page == '学习计划':
     st.subheader(tr('能力证据与个性化学习计划'))
     parsed = st.session_state.jd_result
@@ -220,7 +223,11 @@ if page == '学习计划':
         st.markdown(tr('**当前能力证据（未经技能测验）**'))
         st.dataframe(table([{'技能': a['skill'], 'JD要求': a['priority'], '状态': a['status']} for a in evaluated]), hide_index=True, use_container_width=True)
         if st.button(tr('生成并保存学习路径'), type='primary', key='make_plan'):
-            tasks, summary = plan_tasks(evaluated, retriever, hours, days, prefer_domestic=st.session_state['_prefer_domestic'])
+            from rolepath.research_ui import selected_materials
+            from rolepath.retrieval import LexicalRetriever
+            live_resources,live_questions=selected_materials(parsed)
+            plan_retriever=LexicalRetriever(live_resources+RESOURCES) if live_resources else retriever
+            tasks, summary = plan_tasks(evaluated, plan_retriever, hours, days, prefer_domestic=st.session_state['_prefer_domestic'],extra_questions=live_questions)
             if not tasks:
                 st.error(tr('没有可安排的任务：请检查课程缺口或增加时间预算。未覆盖原有计划。'))
             else:
