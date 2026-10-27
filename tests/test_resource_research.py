@@ -75,3 +75,32 @@ def test_overview_and_gaps_cannot_add_model_written_urls():
     for field,value in [('overview','More at HTTPS://invented.example/test'),('gaps',['Try https://invented.example'])]:
         row=payload();row[field]=value
         with pytest.raises(ValueError):validate_selection(row,sources,['机械制图'])
+
+
+def test_date_evidence_must_be_real_and_belong_to_selected_source():
+    e=events();e[1]['output']=e[1]['output'].replace(TEXT,TEXT+'\n发布时间：2023-04-12')
+    sources,_=collect_evidence(e);result=payload()
+    result['items'][0]['date_evidence_id']=list(sources[0]['paragraphs'])[1]
+    assert '2023-04-12' in validate_selection(result,sources,['机械制图'])['items'][0]['date_evidence']
+    result['items'][0]['date_evidence_id']=next(iter(sources[0]['paragraphs']))
+    with pytest.raises(ValueError,match='日期依据'):validate_selection(result,sources,['机械制图'])
+    result['items'][0]['date_evidence_id']='not-a-source'
+    with pytest.raises(ValueError,match='日期依据'):validate_selection(result,sources,['机械制图'])
+
+
+def test_search_deadline_closes_stream_without_returning_partial_result(monkeypatch):
+    from types import SimpleNamespace
+    from rolepath import resource_research as rr
+    class Stream:
+        closed=False
+        def __iter__(self):yield SimpleNamespace(type='heartbeat')
+        def close(self):self.closed=True
+    stream=Stream()
+    fake=SimpleNamespace(with_options=lambda **kw:SimpleNamespace(responses=SimpleNamespace(create=lambda **kw:stream)))
+    monkeypatch.setattr(rr,'client',lambda:fake)
+    monkeypatch.setattr(rr,'managed_ai',lambda:False)
+    monkeypatch.setattr(rr,'model_setting',lambda key:'example')
+    ticks=iter([0,rr.SEARCH_DEADLINE_SECONDS+1]);monkeypatch.setattr(rr.time,'monotonic',lambda:next(ticks))
+    with pytest.raises(TimeoutError,match='联网搜索超时'):
+        rr.research_resources('机械设计',[],'scope')
+    assert stream.closed

@@ -10,6 +10,7 @@ from .llm import is_configured
 from .credits import run_ai_task
 from .cloud_settings import managed_ai, cloud_mode
 from .credits import unlimited_account
+from .resume_review import RESUME_TYPES, extract_resume, review_resume
 
 
 def open_note_chat(parsed=None):
@@ -36,9 +37,9 @@ def render_note_chat(parsed=None):
         with tools, st.popover(tr('选择资料'), icon=':material/attach_file:'):
             selected = st.multiselect(tr('本次使用的笔记'), list(labels), default=list(labels),
                                       format_func=labels.get, key='dialog_note_sources')
-            st.caption(tr('照片可通过输入框旁的加号添加，每次最多 4 张；附图时只使用照片。'))
+            st.caption(tr('照片或简历可通过输入框旁的加号添加；每次最多 4 张照片或一份简历。'))
         if reset.button(tr('新对话'), key='dialog_note_reset', use_container_width=True):
-            for key in ('workspace_note_chat', 'workspace_note_photos', 'workspace_photo_result', 'workspace_photo_pending', 'workspace_photo_error'):
+            for key in ('workspace_note_chat', 'workspace_note_photos', 'workspace_photo_result', 'workspace_photo_pending', 'workspace_photo_error', 'workspace_resume_text', 'workspace_resume_name'):
                 st.session_state.pop(key, None)
         scope = tuple(sorted(selected))
         if st.session_state.get('workspace_note_scope') != scope:
@@ -46,13 +47,16 @@ def render_note_chat(parsed=None):
             st.session_state.pop('workspace_note_chat', None)
         chat = st.session_state.setdefault('workspace_note_chat', [])
         photos = st.session_state.get('workspace_note_photos', [])
+        resume_text = st.session_state.get('workspace_resume_text', '')
         if photos:
             st.caption(tr('正在使用照片：{0}', '、'.join(name for name, _ in photos)))
+        elif resume_text:
+            st.caption(tr('正在使用简历：{0}', st.session_state.get('workspace_resume_name', '')))
         else:
             st.caption(tr('已选择 {0} 份资料', len(selected)))
         with st.container(height=300, border=False, key='note_chat_messages'):
             if not chat:
-                st.markdown('<div class="rp-chat-empty"><div class="rp-chat-glyph">✦</div><h3>' + tr('从一个问题开始。') + '</h3><p>' + tr('解释一页笔记，梳理一个概念，或一起练一道题。') + '</p></div>', unsafe_allow_html=True)
+                st.markdown('<div class="rp-chat-empty"><div class="rp-chat-glyph">✦</div><h3>' + tr('从一个问题开始。') + '</h3><p>' + tr('分析简历、解释笔记，或一起练一道题。') + '</p></div>', unsafe_allow_html=True)
             for turn in chat:
                 with st.chat_message(turn['role']):
                     st.write(turn['content'])
@@ -63,8 +67,11 @@ def render_note_chat(parsed=None):
             st.caption(tr('AI 服务尚未配置，仍可上传和查看资料。'))
         st.caption(tr('你的账号享有不限次使用权限。本次内容将发送给平台配置的 AI 服务商。') if managed_ai() and unlimited_account() else tr('发送即将本次资料和问题交给已配置的千问服务。每次回答用 1 次额度，失败不扣次。') if managed_ai()
                    else tr('发送时，所选资料和问题会交给你配置的模型服务。'))
-        prompt = st.chat_input(tr('问点什么，或添加笔记照片…'), key='workspace_note_prompt',
-                               accept_file='multiple', file_type=list(IMAGE_TYPES), max_chars=3000,
+        st.caption(tr('可上传简历 PDF、DOCX、TXT 或照片。发送后内容会交给 AI 服务商；分析简历文档时会同时发送当前岗位描述，原文件不自动保存。'))
+        if managed_ai():
+            st.caption(tr('AI 分析结果会保存在你的账号中。'))
+        prompt = st.chat_input(tr('问点什么，或添加简历、笔记…'), key='workspace_note_prompt',
+                               accept_file='multiple', file_type=list(IMAGE_TYPES)+list(RESUME_TYPES), max_chars=3000,
                                disabled=not is_configured() or limit)
         retry = False
         if st.session_state.get('workspace_photo_error'):
@@ -75,7 +82,33 @@ def render_note_chat(parsed=None):
         if prompt or retry:
             text = st.session_state['workspace_photo_pending'] if retry else prompt if isinstance(prompt, str) else prompt.text
             incoming = [] if retry or isinstance(prompt, str) else [(f.name, f.getvalue()) for f in prompt.files]
-            task_photos = incoming or photos
+            if incoming:
+                image_files = [f for f in incoming if is_image(f[0])]
+                document_files = [f for f in incoming if not is_image(f[0])]
+                if document_files and (image_files or len(document_files) != 1):
+                    st.error(tr('请单独上传一份简历，或只上传照片。'))
+                    return
+                if document_files:
+                    try:
+                        resume_text = extract_resume(*document_files[0])
+                    except ValueError as exc:
+                        st.error(str(exc))
+                        return
+                    st.session_state.pop('workspace_photo_result', None)
+                    st.session_state['workspace_resume_text'] = resume_text
+                    st.session_state['workspace_resume_name'] = document_files[0][0]
+                    st.session_state.pop('workspace_note_photos', None)
+                    st.session_state.pop('workspace_photo_error', None)
+                    chat.clear()
+                    photos = []
+                else:
+                    st.session_state.pop('workspace_photo_result', None)
+                    st.session_state.pop('workspace_photo_error', None)
+                    st.session_state.pop('workspace_resume_text', None)
+                    st.session_state.pop('workspace_resume_name', None)
+                    resume_text = ''
+                    chat.clear()
+            task_photos = (incoming if incoming and is_image(incoming[0][0]) else []) or photos
             if task_photos:
                 # Keep the user's request even when the provider fails. No automatic retry.
                 st.session_state['workspace_note_photos'] = task_photos
@@ -87,6 +120,9 @@ def render_note_chat(parsed=None):
                         answer = result['answer']
                         st.session_state['workspace_photo_result'] = result
                         st.session_state['workspace_note_photos'] = task_photos
+                    elif resume_text:
+                        result = run_ai_task('notes', lambda: review_resume(resume_text, text, parsed['raw'] if parsed else '', chat.copy(), language()))
+                        answer = result['answer']
                     else:
                         rows, _ = note_inventory(con, selected, [])
                         if not rows:
@@ -97,7 +133,7 @@ def render_note_chat(parsed=None):
                             return result
                         result = run_ai_task('notes', analyze_and_save)
                         answer = '\n\n'.join(i['kind'] + '：' + i['text'] for i in result['items'])
-                    chat.extend([{'role':'user','content':text or tr('帮我整理这些笔记。')},
+                    chat.extend([{'role':'user','content':text or (tr('请分析我的简历并提出修改建议。') if resume_text else tr('帮我整理这些笔记。'))},
                                  {'role':'assistant','content':answer}])
                     st.session_state.pop('workspace_photo_error', None)
                     st.session_state.pop('workspace_photo_pending', None)

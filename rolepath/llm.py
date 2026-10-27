@@ -22,7 +22,7 @@ def client():
         kwargs['base_url']=model_setting('LLM_BASE_URL')
     return OpenAI(**kwargs)
 
-def _message(content, system, max_tokens=1000, response_format=None):
+def _message(content, system, max_tokens=1000, response_format=None, timeout=None):
     from .cloud_settings import managed_ai
     from .credits import _usage
     if managed_ai() and _usage.get() is None:
@@ -32,6 +32,8 @@ def _message(content, system, max_tokens=1000, response_format=None):
     if text_length + len(system) > 50000:
         raise ValueError('This task exceeds the AI input limit.')
     options = {}
+    if timeout is not None:
+        options['timeout'] = timeout
     if response_format is not None:
         options['response_format'] = response_format
     thinking = model_setting('LLM_ENABLE_THINKING').strip().lower()

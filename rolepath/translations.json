@@ -523,5 +523,19 @@
   "重试发送提醒": "Retry reminder",
   "发送测试提醒": "Send test reminder",
   "测试提醒发送失败，请检查发信配置。": "Test reminder failed. Check the email configuration.",
-  "测试提醒已由邮件服务器接收，请检查收件箱。": "The email server accepted the test reminder. Check your inbox."
+  "测试提醒已由邮件服务器接收，请检查收件箱。": "The email server accepted the test reminder. Check your inbox.",
+  "这份资料发布较早；涉及工具版本或平台规则时，请核对最新资料。": "This resource is older. Check current sources for tool versions and platform rules.",
+  "原文中的时间信息（请结合上下文核对）：": "Date information from the source (check its context):",
+  "来源未提供可核对的发布时间或更新时间。": "No verifiable publication or update date was provided.",
+  "照片或简历可通过输入框旁的加号添加；每次最多 4 张照片或一份简历。": "Use the plus button to add up to four photos or one resume.",
+  "分析简历、解释笔记，或一起练一道题。": "Review a resume, explore your notes, or practice a question.",
+  "可上传简历 PDF、DOCX、TXT 或照片；发送后内容和当前岗位描述将交给 AI 服务商。原文件不自动保存。": "Upload a resume as PDF, DOCX, TXT, or a photo. Sending shares the content and current job description with the AI provider. The original file is not automatically saved.",
+  "问点什么，或添加简历、笔记…": "Ask a question or add a resume or notes…",
+  "正在使用简历：{0}": "Using resume: {0}",
+  "请单独上传一份简历，或只上传照片。": "Upload one resume on its own, or photos only.",
+  "请分析我的简历并提出修改建议。": "Please review my resume and suggest improvements.",
+  "本次联网搜索超时，未生成结果，请稍后重试。": "The web search timed out without a result. Please try again later.",
+  "可上传简历 PDF、DOCX、TXT 或照片；发送后内容和当前岗位描述将交给 AI 服务商，分析结果保存在账号中，原文件不自动保存。": "Upload a resume as PDF, DOCX, TXT, or a photo. Sending shares the content and current job description with the AI provider. Analysis is saved to your account; the original file is not automatically saved.",
+  "可上传简历 PDF、DOCX、TXT 或照片。发送后内容会交给 AI 服务商；分析简历文档时会同时发送当前岗位描述，原文件不自动保存。": "Upload a resume as PDF, DOCX, TXT, or a photo. Sending shares the content with the AI provider; resume document analysis also shares the current job description. The original file is not automatically saved.",
+  "AI 分析结果会保存在你的账号中。": "AI analysis results are saved to your account."
 }

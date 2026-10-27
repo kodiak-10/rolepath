@@ -62,6 +62,11 @@ def render_research(parsed):
             st.caption(label(KINDS[item['kind']])+' · '+item['creator'])
             st.link_button(item['title'],item['url'],use_container_width=True)
             st.write(item['reason'])
+            if item.get('date_evidence'):
+                st.caption(tr('原文中的时间信息（请结合上下文核对）：'))
+                st.text(item['date_evidence'])
+            else:
+                st.caption(tr('来源未提供可核对的发布时间或更新时间。'))
             if item.get('source_claim'):
                 st.caption(tr('原站声明（未经企业确认）：')+item['source_claim'])
             st.write(tr('先学什么：')+item['learn'])

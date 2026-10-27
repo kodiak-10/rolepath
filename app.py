@@ -191,6 +191,11 @@ if page == '课程与题目':
                         st.markdown(f"**[{c['title']}]({c['url']})**")
                         st.write(tr('对应学习内容：') + c.get('focus', {}).get(r['skill'], c['description']))
                         st.caption(tr('发布方：{0} · 发布：{1} · 本次学习预算约 {2} 分钟（含练习，非整课时长）', c.get('creator', '官方资料/原发布方'), c.get('published', '见原站'), c.get('minutes_by_skill', {}).get(r['skill'], c['minutes'])))
+                        from datetime import datetime
+                        import re
+                        year = re.match(r'^(\d{4})', str(c.get('published', '')))
+                        if year and datetime.now().year - int(year.group(1)) >= 3:
+                            st.caption(tr('这份资料发布较早；涉及工具版本或平台规则时，请核对最新资料。'))
                         for chapter in c.get('chapters', {}).get(r['skill'], []):
                             st.markdown(tr('[{0}]({1}) · {2} 分钟', chapter['title'], chapter['url'], chapter['seconds'] // 60))
                         st.caption(c.get('quality_basis', '按资源目录技能标签匹配') + '；' + c.get('freshness_note', '内容时效以原站为准'))
