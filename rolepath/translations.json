@@ -518,5 +518,10 @@
   "联网研究接口返回失败，本轮未生成推荐。": "The web research service failed. No recommendations were generated.",
   "本轮没有找到内容足够明确的学习资源，未保存推荐。": "No sufficiently detailed learning resources were found. No recommendations were saved.",
   "引用段落不属于对应网页。": "A cited paragraph does not belong to the linked page.",
-  "资源说明出现内部标识，未保存该结果。": "The explanation contained an internal identifier. The result was not saved."
+  "资源说明出现内部标识，未保存该结果。": "The explanation contained an internal identifier. The result was not saved.",
+  "提醒邮件发送失败，请联系支持并提供订单编号；请勿重复付款。": "The reminder could not be sent. Contact support with your order number; do not pay again.",
+  "重试发送提醒": "Retry reminder",
+  "发送测试提醒": "Send test reminder",
+  "测试提醒发送失败，请检查发信配置。": "Test reminder failed. Check the email configuration.",
+  "测试提醒已由邮件服务器接收，请检查收件箱。": "The email server accepted the test reminder. Check your inbox."
 }

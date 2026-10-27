@@ -56,6 +56,11 @@ def submit_order(order_id,paid_at,reference):
     return client.rpc('rp_membership_submit_order',dict(p_id=order_id,p_paid_at=paid_at.isoformat(),p_reference=reference.strip())).execute().data
 
 
+def notify_payment_review(order_code):
+    from .payment_notifications import send_review_alert
+    send_review_alert(order_code, config()['support_email'])
+
+
 def is_admin(client):
     return client.rpc('rp_membership_is_admin',{}).execute().data is True
 

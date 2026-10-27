@@ -80,6 +80,7 @@ def test_checkout_submit_is_not_activation_and_approval_displays_expiry(monkeypa
     order=dict(id='test-order',code='RP-TEST',status='awaiting_payment')
     def submit(*_):order['status']='submitted'
     monkeypatch.setattr(m,'submit_order',submit)
+    monkeypatch.setattr(m,'notify_payment_review',lambda code: None)
     at=checkout_app(monkeypatch,[order])
     at.text_input[0].input('123456')
     at.checkbox[0].check()
@@ -98,3 +99,18 @@ def test_checkout_preview_cannot_submit_payment(monkeypatch):
     assert not at.exception
     assert at.button[-1].disabled
     assert any('管理账号预览' in info.value for info in at.info)
+
+
+def test_failed_notification_keeps_order_and_warns_user(monkeypatch):
+    order=dict(id='test-order',code='RP-TEST',status='awaiting_payment')
+    def submit(*_):order['status']='submitted'
+    def fail(*_):raise RuntimeError('SMTP unavailable')
+    monkeypatch.setattr(m,'submit_order',submit)
+    monkeypatch.setattr(m,'notify_payment_review',fail)
+    at=checkout_app(monkeypatch,[order])
+    at.text_input[0].input('123456')
+    at.checkbox[0].check()
+    at.button[-1].click().run()
+    assert not at.exception
+    assert order['status']=='submitted'
+    assert any('提醒邮件发送失败' in x.value for x in at.warning)

@@ -78,6 +78,16 @@ def render_checkout(preview=False):
     if order['status']=='submitted':
         st.success(tr('付款信息已提交，正在等待人工核对。请勿重复付款。'))
         st.code(order['code'],language=None)
+        if st.session_state.get('_payment_alert_failed') == order['id']:
+            st.warning(tr('提醒邮件发送失败，请联系支持并提供订单编号；请勿重复付款。'))
+            if st.button(tr('重试发送提醒'),key='retry_payment_alert'):
+                try:
+                    member.notify_payment_review(order['code'])
+                except Exception:
+                    st.warning(tr('提醒邮件发送失败，请联系支持并提供订单编号；请勿重复付款。'))
+                else:
+                    st.session_state.pop('_payment_alert_failed',None)
+                    st.rerun()
         if st.button(tr('刷新订单状态'),key='member_refresh_order'):
             st.rerun()
         support(order);sync_action_session();return
@@ -107,6 +117,10 @@ def render_checkout(preview=False):
         else:
             try:
                 member.submit_order(order['id'],datetime.combine(paid_day,paid_time,tzinfo=ZONE),ref)
+                try:
+                    member.notify_payment_review(order['code'])
+                except Exception:
+                    st.session_state['_payment_alert_failed']=order['id']
                 st.rerun()
             except Exception as exc:
                 st.error(error_message(exc))
@@ -168,6 +182,13 @@ def render_my_membership(client,user_id,state):
 def render_payment_review():
     st.subheader(tr('付款审核'))
     st.caption(tr('仅审核账号可见。请先在微信账单核对真实到账，再开通会员；重复确认同一订单不会重复延长。'))
+    if st.button(tr('发送测试提醒'),key='test_payment_alert'):
+        try:
+            member.notify_payment_review('RP-000000000000')
+        except Exception:
+            st.error(tr('测试提醒发送失败，请检查发信配置。'))
+        else:
+            st.success(tr('测试提醒已由邮件服务器接收，请检查收件箱。'))
     query=st.text_input(tr('搜索订单编号或邮箱'),key='payment_review_search',max_chars=100)
     try:
         orders=member.review_orders(query)
