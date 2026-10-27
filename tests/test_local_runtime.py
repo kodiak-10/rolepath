@@ -53,7 +53,7 @@ def test_ui_plan_persists_and_missing_key_is_explicit(tmp_path, monkeypatch):
     app.text_area(key='jd_text').set_value('要求熟悉 SQL 和需求分析；有 RAG 项目经验者优先；每周至少4天。').run()
     app.button(key='do_parse').click().run()
     assert len(app.session_state.jd_result['requirements']) == 3
-    app.radio(key='page').set_value('学习计划').run()
+    app.radio[0].set_value('学习计划').run()
     for slider in app.slider:
         if slider.label == 'Weekly study time (hours)':
             slider.set_value(2)
@@ -64,14 +64,14 @@ def test_ui_plan_persists_and_missing_key_is_explicit(tmp_path, monkeypatch):
     con = connect()
     rows = con.execute('SELECT payload FROM tasks').fetchall()
     assert rows and sum(json.loads(row['payload'])['minutes'] for row in rows) <= 120
-    app.radio(key='page').set_value('学习任务').run()
+    app.radio[0].set_value('学习任务').run()
     next(c for c in app.checkbox if c.key and c.key.startswith('task_')).check().run()
     assert con.execute("SELECT COUNT(*) FROM tasks WHERE status='已完成'").fetchone()[0] == 1
     con.close()
     fresh = AppTest.from_file(str(ROOT / 'app.py'), default_timeout=30).run()
-    fresh.radio(key='page').set_value('学习任务').run()
+    fresh.radio[0].set_value('学习任务').run()
     assert next(c for c in fresh.checkbox if c.key and c.key.startswith('task_')).value
-    app.radio(key='page').set_value('岗位分析').run()
+    app.radio[0].set_value('岗位分析').run()
     next(x for x in app.selectbox if x.label=='Analysis method').select('LLM 结构化抽取（需 API Key）').run()
     app.button(key='do_parse').click().run()
     assert app.session_state.jd_result is None

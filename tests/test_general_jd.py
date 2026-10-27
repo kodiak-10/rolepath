@@ -67,9 +67,9 @@ def test_home_and_document_ui_are_general(tmp_path, monkeypatch):
     app=AppTest.from_file(str(root/'app.py'),default_timeout=30).run()
     assert not app.exception
     assert not any('传音' in b.label for b in app.button)
-    assert 'Ask materials' not in app.radio(key='page').options
+    assert 'Ask materials' not in app.radio[0].options
     assert app.button(key='global_note_chat').label == 'Ask'
-    app.radio(key='page').set_value('岗位分析').run()
+    app.radio[0].set_value('岗位分析').run()
     assert not any('黑马' in c.label for c in app.checkbox)
     app.text_area(key='jd_text').set_value(JD).run()
     app.button(key='do_parse').click().run()

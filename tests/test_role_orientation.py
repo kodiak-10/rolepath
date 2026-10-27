@@ -70,16 +70,16 @@ def test_broad_role_ui_has_courses_interview_prompts_and_opt_in_plan(monkeypatch
     respond(monkeypatch)
     at=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py'),default_timeout=30)
     at.session_state['_language']='zh';at.run()
-    at.radio(key='page').set_value('岗位分析').run()
+    at.radio[0].set_value('岗位分析').run()
     at.text_area(key='jd_text').set_value(BROAD_JD).run()
     at.button(key='do_parse').click().run()
     assert not at.exception
-    at.radio(key='page').set_value('课程与题目').run()
+    at.radio[0].set_value('课程与题目').run()
     assert any('从用户问题出发' in m.value for m in at.markdown)
     assert any('Coze' in m.value or '生成式人工智能' in m.value for m in at.markdown)
     assert any('面试准备' in e.label for e in at.expander)
     assert not any('JD 原文：产品工作先理解' in m.value for m in at.markdown)
-    at.radio(key='page').set_value('学习计划').run()
+    at.radio[0].set_value('学习计划').run()
     assert at.checkbox(key='include_guidance').value
     at.button(key='make_plan').click().run()
     assert not at.exception

@@ -57,12 +57,20 @@ if st.session_state.get('page') == '资料问答':
     st.session_state['page'] = '学习笔记'
 if st.session_state.get('page') == 'AI 设置':
     PAGES.append('AI 设置')
-st.session_state.setdefault('page', PAGES[0])
+st.session_state.page = st.session_state.get('page', PAGES[0])
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
 st.session_state['_prefer_domestic'] = True
 st.session_state.jd_text = st.session_state['_jd_draft']
 page_labels = {value: tr('会员中心') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
-page = st.radio(tr('工作空间导航'), PAGES, key='page', horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
+from rolepath.i18n import language
+nav_key = '_page_nav_' + language()
+# Navigation is durable app state; localized radio labels have their own widget.
+st.session_state[nav_key] = st.session_state.page
+def select_page():
+    st.session_state.page = st.session_state[nav_key]
+st.radio(tr('工作空间导航'), PAGES, index=PAGES.index(st.session_state.page), key=nav_key,
+         on_change=select_page, horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
+page = st.session_state.page
 st.write('')
 if page == '我的空间':
     render_home(ROLES)

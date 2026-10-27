@@ -100,15 +100,15 @@ def test_transsion_ui_and_daily_log(tmp_path,monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv('LLM_API_KEY','')
     app=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
-    app.radio(key='page').set_value('岗位分析').run()
+    app.radio[0].set_value('岗位分析').run()
     app.text_area(key='jd_text').set_value((ROOT/'data/transsion_jd.txt').read_text()).run()
     next(x for x in app.selectbox if x.label=='Analysis method').select('关键词初筛（不完整，无需 API）').run()
     app.button(key='do_parse').click().run()
     assert not app.exception
     assert '多模态' in [r['skill'] for r in app.session_state.jd_result['requirements']]
-    app.radio(key='page').set_value('学习计划').run()
+    app.radio[0].set_value('学习计划').run()
     app.button(key='make_plan').click().run()
-    app.radio(key='page').set_value('学习任务').run()
+    app.radio[0].set_value('学习任务').run()
     assert not app.exception
     next(x for x in app.text_area if x.label.startswith('What did you learn')).set_value('验收记录：核对了岗位原文与课程章节。')
     next(x for x in app.button if x.label=="Save today's check-in").click().run()
@@ -132,17 +132,17 @@ def test_notes_ui_persists_checked_report(tmp_path,monkeypatch):
     payload={'items':[dict(kind='总结',text='笔记关注需求文档的评审要素。',source_ref='S1')]}
     monkeypatch.setattr(llm,'_message',lambda *a,**kw:(json.dumps(payload),None))
     app=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
-    app.radio(key='page').set_value('岗位分析').run()
+    app.radio[0].set_value('岗位分析').run()
     app.text_area(key='jd_text').set_value((ROOT/'data/transsion_jd.txt').read_text()).run()
     next(x for x in app.selectbox if x.label=='Analysis method').select('关键词初筛（不完整，无需 API）').run()
     app.button(key='do_parse').click().run()
-    app.radio(key='page').set_value('学习笔记').run()
+    app.radio[0].set_value('学习笔记').run()
     app.button(key='open_note_chat').click().run()
     app.chat_input[0].set_value('总结笔记').run()
     assert not app.exception
     fresh=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
     assert not fresh.exception
-    fresh.radio(key='page').set_value('学习笔记').run()
+    fresh.radio[0].set_value('学习笔记').run()
     fresh.button(key='open_note_reports').click().run()
     assert any('笔记关注需求文档' in m.value for m in fresh.markdown)
 
