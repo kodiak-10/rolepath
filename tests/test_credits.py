@@ -116,3 +116,20 @@ def test_entitlement_migration_keeps_write_permissions_on_server():
     assert 'p_success and r.charged' in sql
     assert 'from public,anon,authenticated' in sql
     assert 'to authenticated' not in sql
+
+
+def test_script_cancellation_settles_failure_and_propagates():
+    class ScriptCancelled(BaseException):pass
+    ledger=Ledger()
+    def cancelled():raise ScriptCancelled()
+    with pytest.raises(ScriptCancelled):execute_task(ledger,'u','resources',cancelled,50,'cancelled')
+    assert ledger.runs['cancelled']['status']=='failed' and ledger.balance==1
+    assert _usage.get() is None
+
+
+def test_unlimited_cancellation_does_not_mint_credits():
+    class ScriptCancelled(BaseException):pass
+    ledger=Ledger();ledger.unlimited=True;ledger.balance=0
+    def cancelled():raise ScriptCancelled()
+    with pytest.raises(ScriptCancelled):execute_task(ledger,'owner','resources',cancelled,50,'cancelled')
+    assert ledger.runs['cancelled']['status']=='failed' and ledger.balance==0

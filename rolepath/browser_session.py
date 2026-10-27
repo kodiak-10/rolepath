@@ -9,9 +9,26 @@ _bridge = components.component('rolepath_session', js=_STORAGE_JS)
 def session_payload(session, until=None):
     return dict(access_token=session.access_token, refresh_token=session.refresh_token, until=until or int(time.time()) + 7 * 24 * 3600)
 
+@st.fragment
+def _render_browser_auth(command):
+    """Storage acknowledgments must not interrupt a running AI task."""
+    result = _bridge(key='browser_auth', data=command, on_result_change=lambda: None, height=0).result
+    if not result or result.get('id') != command['id']:
+        return
+    previous = st.session_state.get('_auth_browser_result')
+    st.session_state['_auth_browser_result'] = result
+    # Initial restoration is an authentication gate. Only its first new result
+    # wakes the full app; later writes stay inside this fragment.
+    if not st.session_state.get('_auth_browser_loaded') and previous != result:
+        st.rerun()
+
+
 def browser_session(command, key='browser_auth'):
-    result = _bridge(key=key, data=command, on_result_change=lambda: None, height=0)
-    return result.result
+    if key != 'browser_auth':
+        # Dialogs already supply their own fragment boundary.
+        return _bridge(key=key, data=command, on_result_change=lambda: None, height=0).result
+    _render_browser_auth(command)
+    return st.session_state.get('_auth_browser_result')
 
 
 def refresh_action_session():

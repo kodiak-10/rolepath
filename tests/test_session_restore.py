@@ -153,3 +153,35 @@ if st.session_state.pop('_auth_flush_requested',False):st.rerun()
     assert not at.exception and at.radio[0].value=='Resources'
     assert at.text_input[0].value=='Mechanical design'
     assert calls[:2]==['read','write']
+
+
+def test_first_browser_result_wakes_auth_gate_once_without_granting_identity(monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    result=dict(id='read',available=True,session=None,user_id='forged-browser-id')
+    monkeypatch.setattr(bs,'_bridge',lambda **_:SimpleNamespace(result=result))
+    at=AppTest.from_string('''import streamlit as st
+from rolepath.browser_session import browser_session
+st.session_state['runs']=st.session_state.get('runs',0)+1
+browser_session({'action':'read','id':'read'})
+st.write('gate-can-verify-on-server')
+''').run()
+    assert not at.exception
+    assert at.session_state['runs']==2
+    assert '_account_id' not in at.session_state
+    assert any(x.value=='gate-can-verify-on-server' for x in at.markdown)
+
+
+def test_later_storage_ack_does_not_restart_main_app(monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    result=dict(id='write',available=True,session={'access_token':'dummy-only'})
+    monkeypatch.setattr(bs,'_bridge',lambda **_:SimpleNamespace(result=result))
+    at=AppTest.from_string('''import streamlit as st
+from rolepath.browser_session import browser_session
+st.session_state['runs']=st.session_state.get('runs',0)+1
+browser_session({'action':'write','id':'write'})
+st.write('task-can-continue')
+''')
+    at.session_state['_auth_browser_loaded']=True
+    at.run()
+    assert not at.exception and at.session_state['runs']==1
+    assert at.session_state['_auth_browser_result']['id']=='write'

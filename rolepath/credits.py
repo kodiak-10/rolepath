@@ -37,7 +37,9 @@ def execute_task(store, user_id, task, operation, daily_limit, request_id=None):
             json.dumps(result, allow_nan=False)
             if result is None:
                 raise ValueError('The AI task did not produce a result.')
-        except Exception:
+        except BaseException:
+            # Streamlit cancellation/rerun exceptions also need a failed ledger
+            # settlement. Re-raise them; never turn an interrupted task into success.
             store.rpc('rp_ai_finish', dict(p_user=user_id, p_id=request_id,
                       p_success=False, p_usage=records, p_result=None)).execute()
             raise

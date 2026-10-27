@@ -97,6 +97,7 @@ def validate_selection(data,sources,skills):
     by_id={s['id']:s for s in sources};seen=set();items=[]
     private_ids=[s['id'] for s in sources]+[pid for s in sources for pid in s['paragraphs']]
     def visible_text(value):
+        if 'http://' in value.casefold() or 'https://' in value.casefold():raise ValueError('资源说明不能添加额外网址。')
         if any(ident in value for ident in private_ids):raise ValueError('资源说明出现内部标识，未保存该结果。')
     if not isinstance(data,dict) or not isinstance(data.get('items'),list) or not data['items'] or len(data['items'])>4:raise ValueError('本轮没有找到内容足够明确的学习资源，未保存推荐。')
     for row in data['items']:
@@ -108,7 +109,6 @@ def validate_selection(data,sources,skills):
         for k,limit in limits.items():
             if not isinstance(row.get(k),str) or (k!='access_note' and not row[k].strip()) or len(row[k])>limit:raise ValueError('资源说明字段无效：'+k)
             visible_text(row[k])
-            if 'http://' in row[k] or 'https://' in row[k]:raise ValueError('资源说明不能添加额外网址。')
         def original_refs(field,minimum):
             refs=row.get(field)
             if not isinstance(refs,list) or not minimum<=len(refs)<=3 or len(set(refs))!=len(refs) or any(not isinstance(pid,str) or pid not in source['paragraphs'] for pid in refs):raise ValueError('引用段落不属于对应网页。')

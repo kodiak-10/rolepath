@@ -67,7 +67,7 @@ def render_research(parsed):
             st.write(tr('先学什么：')+item['learn'])
             st.caption(tr('建议本次投入 {0} 分钟；这是学习预算，不是整课时长。',item['minutes']))
             with st.expander(tr('推荐依据与访问说明')):
-                st.write(item['evidence'])
+                st.text(item['evidence'])
                 if item['access_note']:st.caption(item['access_note'])
                 st.caption(tr('访问权限和是否免费请以原站当前页面为准。'))
                 st.caption(tr('依据千问网页工具返回内容筛选，未完整试听视频；面经和题库的企业归属以原站标注为准。'))

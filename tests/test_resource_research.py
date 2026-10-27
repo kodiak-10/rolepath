@@ -68,3 +68,10 @@ def test_quote_is_read_from_source_ids_without_model_rewriting():
     assert result['items'][0]['evidence']==TEXT
     row=payload();row['items'][0].update(kind='company_bank',company_label='某企业',claim_ids=[next(iter(sources[0]['paragraphs']))])
     with pytest.raises(ValueError):validate_selection(row,sources,['机械制图'])
+
+
+def test_overview_and_gaps_cannot_add_model_written_urls():
+    sources,_=collect_evidence(events())
+    for field,value in [('overview','More at HTTPS://invented.example/test'),('gaps',['Try https://invented.example'])]:
+        row=payload();row[field]=value
+        with pytest.raises(ValueError):validate_selection(row,sources,['机械制图'])
