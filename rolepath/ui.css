@@ -32,3 +32,7 @@ button:focus-visible{outline:3px solid #d5933c!important;outline-offset:3px}.stB
 [data-testid="stRadioGroup"][data-orientation="horizontal"]{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;max-width:100%;scrollbar-width:thin}
 [data-testid="stRadioGroup"][data-orientation="horizontal"]>div{flex:0 0 auto!important;min-width:max-content}
 [data-testid="stRadioGroup"][data-orientation="horizontal"] label p{white-space:nowrap}
+.rp-plus-heading{padding:10px 0 12px}.rp-plus-heading>span{display:inline-block;font-size:11px;letter-spacing:2px;font-weight:750;color:#116b5c;background:#e4f2ec;padding:7px 10px;border-radius:8px}.rp-plus-heading h2{font-size:48px!important;line-height:1.2;margin:16px 0 8px!important;letter-spacing:-2px}.rp-plus-heading h2 small{font-size:16px;color:#7b8d92;letter-spacing:0;font-weight:400;margin-left:8px}.rp-plus-heading p{font-size:18px;color:#3c5b60;margin:0}
+
+/* Display only the QR and its white quiet zone; preserve the source pixels. */
+.rp-payment-qr{position:relative;overflow:hidden;width:230px;max-width:100%;aspect-ratio:1;background:white;margin:0 auto 12px}.rp-payment-qr img{position:absolute;width:211.22449%;max-width:none;height:auto;left:-55.612245%;top:-69.387755%}

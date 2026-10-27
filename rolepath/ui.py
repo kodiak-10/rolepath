@@ -31,7 +31,7 @@ def render_header():
                 if cloud_mode():
                     st.caption(st.session_state.get('_account_email', '个人账户'))
                     st.caption(tr('学习记录保存在你的账户中。'))
-                    st.button(tr('使用额度') if managed_ai() else tr('AI 服务设置'), on_click=go_to, args=('AI 设置',), use_container_width=True)
+                    st.button(tr('会员中心') if managed_ai() else tr('AI 服务设置'), on_click=go_to, args=('AI 设置',), use_container_width=True)
                     if st.button(tr('退出登录'), key='account_logout'):
                         from .browser_session import logout
                         logout()

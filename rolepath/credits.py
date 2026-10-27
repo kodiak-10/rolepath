@@ -75,7 +75,7 @@ def run_ai_task(task, operation):
                             int(server_setting('AI_DAILY_REQUEST_LIMIT') or '50'))
     except APIError as exc:
         messages = {
-            'NO_CREDITS': '免费体验已用完。购买服务尚未开放，你仍可免费查看历史、保存笔记和打卡。',
+            'NO_CREDITS': '免费体验已用完，请在会员中心查看月卡。历史记录、保存笔记和打卡仍然免费。',
             'TASK_PENDING': '上一项任务仍在处理中，请在使用记录中查看状态，不要重复提交。',
             'RATE_LIMIT': '本小时尝试次数较多，请稍后再试。',
             'DAILY_LIMIT': '今日 AI 服务额度已用完，请明天再试。',
@@ -100,30 +100,10 @@ def unlimited_account():
     client = st.session_state.get('_account_client')
     if client is None:
         return False
-    rows = client.table('rp_ai_wallets').select('unlimited').eq('user_id', st.session_state['_account_id']).execute().data
-    return bool(rows and rows[0]['unlimited'])
+    from .membership import wallet_for, access_state
+    return access_state(wallet_for(client, st.session_state['_account_id']))['active']
 
 
 def render_credits():
-    import streamlit as st
-    from .i18n import t, label
-    st.subheader(t('AI 使用额度'))
-    client = st.session_state['_account_client']
-    user_id = st.session_state['_account_id']
-    try:
-        wallet = client.table('rp_ai_wallets').select('remaining,unlimited').eq('user_id', user_id).execute().data
-        runs = client.table('rp_ai_runs').select('id,task,status,created_at,result').eq('user_id', user_id).order('created_at', desc=True).limit(30).execute().data
-    except Exception:
-        st.error(t('额度服务尚未就绪，请稍后再试。'))
-        return
-    st.metric(t('剩余次数'), t('不限次') if wallet and wallet[0]['unlimited'] else wallet[0]['remaining'] if wallet else 1)
-    st.caption(t('你的账号享有不限次使用权限。本次内容将发送给平台配置的 AI 服务商。') if wallet and wallet[0]['unlimited'] else t('首次验证邮箱赠送 1 次。查看历史、保存笔记和学习打卡始终免费。'))
-    st.caption(t('微信支付尚未开放，当前不收款。次数包价格将在成本验证后公布。'))
-    with st.expander(t('最近使用记录')):
-        if not runs:
-            st.caption(t('还没有使用记录。'))
-        for row in runs:
-            st.write(f"{row['created_at'][:16]} · {label({'jd':'岗位分析','notes':'学习笔记','document':'资料问答'}[row['task']])} · {label({'pending':'处理中','succeeded':'已完成','failed':'失败，未扣次'}[row['status']])}")
-            if row['status'] == 'succeeded':
-                st.download_button(t('下载结果'), json.dumps(row['result'], ensure_ascii=False, indent=2),
-                                   file_name='rolepath-result.json', mime='application/json', key='ai_result_' + row['id'])
+    from .membership_ui import render_membership
+    render_membership()

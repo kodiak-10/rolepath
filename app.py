@@ -61,7 +61,7 @@ st.session_state.setdefault('page', PAGES[0])
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
 st.session_state['_prefer_domestic'] = True
 st.session_state.jd_text = st.session_state['_jd_draft']
-page_labels = {value: tr('使用额度') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
+page_labels = {value: tr('会员中心') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
 page = st.radio(tr('工作空间导航'), PAGES, key='page', horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
 st.write('')
 if page == '我的空间':
@@ -334,5 +334,5 @@ if page == '历史记录':
     render_history()
 from rolepath.note_chat_ui import render_open_note_chat
 render_open_note_chat(st.session_state.jd_result)
-st.divider()
-st.caption(tr('RolePath · 让每一次学习，都靠近想去的方向。\u3000｜\u3000学习建议请结合原始资料核对。'))
+from rolepath.membership_ui import render_open_checkout
+render_open_checkout()

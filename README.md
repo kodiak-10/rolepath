@@ -145,7 +145,7 @@ The hosted app is configured for a **managed Qwen trial**:
 - Usage and validated results are stored under the signed-in account. History, saved notes and check-ins remain free.
 - Model credentials and the privileged accounting key stay in server secrets. Ordinary learning-data access continues to use the user's JWT and row-level access policies.
 - Selected text and context are sent to the configured Qianwen AI Platform endpoint when the user requests an AI operation.
-- Credit packs and payment collection are not available. Model costs are paid by the operator.
+- RolePath Plus costs **CNY 12.90 per calendar month, with unlimited AI tasks**. WeChat QR payments are reviewed manually: submitting payment information does not activate access. There are no automatic charges or renewals. See [membership deployment and review](deploy/MEMBERSHIPS.md). Model costs are paid by the operator.
 
 Self-hosted deployments can keep the optional BYOK mode instead: each visitor's key stays only in their current application session. Local `.env` credentials are never implicitly shared with cloud visitors.
 
@@ -243,8 +243,7 @@ a synthetic JD returned a validated result, the balance became zero, and a secon
 request was blocked. The completed result remained available in usage history,
 and refreshing the page preserved the login.
 
-No payments are collected and no selling price has been set. The functional checks
-are not a cost benchmark or a full security audit. See [the rollout checklist](deploy/MANAGED_AI.md).
+The current monthly plan is CNY 12.90 with unlimited AI use. The owner reviews actual WeChat receipts before activating a calendar month of access. No automated payment gateway or recurring billing is used. Functional checks are not a cost benchmark or a full security audit. See [membership operations](deploy/MEMBERSHIPS.md).
 
 ## Domestic learning sources and question provenance
 

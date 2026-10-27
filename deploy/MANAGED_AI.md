@@ -44,19 +44,19 @@ Never put this key in public_config.json or a browser component.
    for a benchmark without specific permission. Two synthetic live tasks (JD extraction and note assistance) passed with
    `qwen3.7-plus` on Qianwen AI Platform. They consumed 812 input and 673 output
    tokens in total; this small functional check is not a pricing benchmark.
-   **No selling price is approved**.
+   **The approved monthly price is CNY 12.90 with unlimited AI tasks; this is not a measured cost guarantee**.
 5. Check the English and Chinese UI and an end-to-end free trial before activation.
 
 ## Semantics and limits
 
 - One verified **account**, not one proven human, receives a free credit.
-- Each AI JD analysis, note instruction or document answer uses one credit.
+- Without an active membership, each AI JD analysis, note instruction or document answer uses one trial credit. Active monthly members have unlimited tasks until expiry.
 - User input is bounded. The model adapter rejects combined prompts exceeding
   50,000 characters, and existing task-specific limits remain in force.
 - Successful results and reported provider token usage are stored per user.
   Failed validation preserves provider usage but refunds the user's credit.
 - Pending reservations prevent concurrent requests per user. Ordinary accounts have
-  at most five new attempts/hour; the global daily request cap includes their failures. Explicitly entitled unlimited accounts do not consume those quotas.
+  at most five new attempts/hour; the global daily request cap includes their failures. Active monthly members and permanent unlimited accounts do not consume those quotas.
   This is a request cap, **not a measured yuan spending limit**.
 - If the server crashes or settlement is uncertain, the reservation stays pending.
   Do not blindly retry generation or refund it: first inspect the run and provider
@@ -66,22 +66,11 @@ Never put this key in public_config.json or a browser component.
 - Account deletion also deletes its ledger. This trial model is not sufficient
   protection against deliberate multi-account abuse; a global cap limits exposure.
 
-## WeChat Pay: not integrated yet
+## Monthly access and manual WeChat collection
 
-Automatic payments require an API-capable merchant setup. A personal collection
-QR code cannot provide verified automatic settlement. No payment buttons, checkout,
-callbacks or top-ups are enabled.
+Apply `memberships.sql` after the existing ledger migrations. A personal QR code has no payment callback. Users submit payment details and an explicitly authorized reviewer confirms the actual CNY 12.90 receipt in WeChat. The database then grants one calendar month of unlimited access. Repeated approval is idempotent; renewals extend the current expiry. There is no automatic renewal.
 
-Before implementation, confirm the enabled payment product and associated AppID.
-Native QR payment fits desktop, whereas in-WeChat mobile payment requires the
-appropriate JSAPI setup. Streamlit alone does not provide a payment callback
-endpoint; an authenticated server endpoint (for example a Supabase Edge Function)
-is needed. Payment notifications require signature verification, strict merchant,
-AppID, currency and amount checks, and idempotent order settlement.
-
-Keep merchant private keys and APIv3 keys in server secrets. Never ask users to
-paste them into chat or commit them. Finish model-cost measurements before setting
-pack prices, then complete a real payment/reconciliation test before opening sales.
+The reviewer registry is separate from unlimited AI access. Ordinary accounts cannot read it, review orders, edit prices or change membership expiry. Order visibility is limited to its owner. The server verifies the logged-in reviewer before using service-role RPCs. Run `check_memberships.sql`; all synthetic fixtures roll back. See [membership operations](MEMBERSHIPS.md).
 
 ## Verified provider configuration
 

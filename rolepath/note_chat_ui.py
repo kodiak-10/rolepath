@@ -13,6 +13,7 @@ from .credits import unlimited_account
 
 
 def open_note_chat(parsed=None):
+    st.session_state['_membership_checkout_open'] = False
     st.session_state['_note_chat_open'] = True
 
 
