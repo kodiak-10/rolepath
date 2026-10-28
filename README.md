@@ -26,6 +26,34 @@ The product is designed primarily for first-time internship applicants and first
 
 RolePath separates three things that are easy to confuse: **what a role asks for, what a learner has evidence of, and what the learner has marked complete.** A checked task is a progress record, not a certification of competence.
 
+## Product in use
+
+The following screenshots show RolePath's interface with fictional demonstration data. The assistant dialogue and sample plan are illustrative, rather than results from a live model or real user records.
+
+### Job analysis
+
+Review extracted requirements alongside the original job description. The image shows the limited keyword preview.
+
+![Job analysis using a fictional mechanical design internship](docs/screenshots/job-analysis.png)
+
+### Learning resources
+
+Explore relevant courses and check where each resource comes from.
+
+![Learning resources for the example role](docs/screenshots/resources.png)
+
+### Study plan
+
+Break preparation into tasks that fit a chosen time budget.
+
+![Example study plan with fictional tasks](docs/screenshots/learning-plan.png)
+
+### AI learning assistant
+
+Ask for explanations, note summaries, or suggestions for improving a resume.
+
+![Illustrative resume feedback in the learning assistant](docs/screenshots/assistant.png)
+
 ## The learning journey
 
 | Stage | User action | Result |
