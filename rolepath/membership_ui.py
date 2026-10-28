@@ -98,6 +98,7 @@ def render_checkout(preview=False):
         encoded=b64encode((member.ROOT/'assets/wechat-collection.jpg').read_bytes()).decode('ascii')
         st.markdown('<div class="rp-payment-qr"><img alt="'+tr('微信收款二维码')+'" src="data:image/jpeg;base64,'+encoded+'"></div>',unsafe_allow_html=True)
         st.caption(tr('请使用微信支付 ¥12.90；请核对收款人尾字“文”。'))
+        st.caption(tr('请作者喝杯奶茶'))
     with details:
         st.markdown('**'+tr('订单编号')+'**')
         st.code(order['code'],language=None)
