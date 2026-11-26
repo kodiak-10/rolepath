@@ -105,7 +105,6 @@ button{font-family:inherit}
 .resource-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
 .resource-actions a{display:inline-flex;align-items:center;min-height:42px;padding:9px 15px;border:1px solid var(--rp-hair-strong);border-radius:12px;color:var(--rp-ink);text-decoration:none;background:rgba(255,255,255,.05);font-weight:600}
 .resource-actions a:hover{border-color:var(--rp-amber);color:var(--rp-amber);background:rgba(226,167,95,.08)}
-.resource-actions a:last-child{border-color:rgba(92,191,164,.35);color:var(--rp-teal);background:rgba(92,191,164,.08)}
 
 /* 表格（实底） */
 .table-wrap{overflow-x:auto;margin:0 0 12px;background:var(--rp-panel-solid);border:1px solid var(--rp-hair);border-radius:16px}

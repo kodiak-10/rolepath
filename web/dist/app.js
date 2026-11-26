@@ -27,12 +27,6 @@ function courseSearchUrl(query) {
   return 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(String(query || '').trim());
 }
 
-function xhsSearchUrl(skill) {
-  const role = String(state.jd && state.jd.raw ? state.jd.raw.split('\n')[0] : '').replace(/\s+/g, ' ').slice(0, 32);
-  const query = [role, String(skill || '').slice(0, 42), '实习', '经验'].filter(Boolean).join(' ');
-  return 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(query);
-}
-
 function searchResource(key, title, query, minutes, focus, reason) {
   return { id: 'search-' + key, title, url: courseSearchUrl(query), creator: 'B站课程搜索', minutes, focus, reason, verified: false };
 }
@@ -75,7 +69,6 @@ function matchedResources(reqs) {
     return {
       skill: item.skill, priority: item.priority, evidence: item.evidence, detail: item.detail || item.evidence,
       course, reason: course.reason,
-      xhs: { title: `${item.skill} 实习经验贴`, url: xhsSearchUrl(item.skill), creator: '小红书搜索结果' },
     };
   });
 }
@@ -642,7 +635,7 @@ function prepCoursesHtml() {
   const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : null;
   let html = `<h1>为目标岗位寻找学习资源</h1>`;
   if (!reqs || !reqs.length) {
-    html += `<p class="info">先载入或解析一份 JD。这里会按每项能力自动匹配课程/资料，并生成对应的小红书经验贴搜索。</p>
+    html += `<p class="info">先载入或解析一份 JD。这里会按每项能力自动匹配课程、资料和对应的实践任务。</p>
       <button type="button" class="primary" data-go="jd">去看岗位 →</button>`;
     return html;
   }
@@ -650,8 +643,8 @@ function prepCoursesHtml() {
   const verifiedCount = matches.filter((item) => item.course.verified).length;
   html += `<div class="card solid resource-intro">
     <p class="kicker">JD 驱动 · 即时匹配 · 不调用付费搜索</p>
-    <p>已按当前岗位的 <strong>${matches.length}</strong> 项能力匹配学习入口：${verifiedCount} 项来自人工核验课程目录，其余使用课程搜索；每项都附小红书经验贴搜索。</p>
-    <p class="muted">搜索结果不是单篇推荐，也不代表原站内容已经核验。优先选择有完整过程、具体作品和可复现细节的帖子；软广、转载和“保过”内容请直接跳过。</p>
+    <p>已按当前岗位的 <strong>${matches.length}</strong> 项能力匹配学习入口：${verifiedCount} 项来自人工核验课程目录，其余使用课程搜索。</p>
+    <p class="muted">不自动推荐社区经验贴，避免登录门槛和内容质量不可控。请优先完成可检查的学习成果，而不是收藏“速成”内容。</p>
   </div>`;
   for (const match of matches) {
     const course = match.course;
@@ -662,7 +655,6 @@ function prepCoursesHtml() {
       <p>${esc(match.reason)}</p>
       <p class="resource-actions">
         ${linkHtml(course.url, course.verified ? `打开课程：${course.title}` : `搜索课程：${course.title}`)}
-        ${linkHtml(match.xhs.url, '查看小红书经验贴 →')}
       </p>
       <p><strong>先学什么：</strong>${esc(course.focus)}</p>
       <p class="muted">${esc(course.creator)} · 建议本次投入 ${course.minutes} 分钟；这是学习预算，不是整课时长。</p>
@@ -670,8 +662,8 @@ function prepCoursesHtml() {
       <details><summary>匹配依据：当前 JD 原文</summary><p class="evidence">${esc(match.evidence || match.detail)}</p></details>
     </div>`;
   }
-  html += `<details><summary>怎么筛选小红书经验贴</summary>
-    <p>优先看作者是否展示了完整过程、实际作品、数据或反馈；只有“必看”“速成”标题但没有细节的帖子，参考价值有限。把帖子当作案例，不当成企业官方结论。</p></details>`;
+  html += `<details><summary>资源使用说明</summary>
+    <p>课程搜索只负责缩小查找范围，不等于对单条结果的质量背书。打开原站后，优先选择章节完整、案例具体、作者信息清楚的内容；遇到收费或登录要求请先确认，再决定是否学习。</p></details>`;
   return html;
 }
 
@@ -819,7 +811,7 @@ function buildContext() {
   }
   if (Array.isArray(state.jd.requirements) && state.jd.requirements.length) {
     const resources = matchedResources(state.jd.requirements).slice(0, 8);
-    parts.push('匹配学习入口：' + resources.map((item) => `${item.skill} → ${item.course.title}；小红书搜索：${item.xhs.title}`).join('；'));
+    parts.push('匹配学习入口：' + resources.map((item) => `${item.skill} → ${item.course.title}`).join('；'));
   }
   if (dollNote) parts.push(`笔记《${dollNote.title}》：${dollNote.body}`);
   return parts.join('\n').slice(0, 12000);
