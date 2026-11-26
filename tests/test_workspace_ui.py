@@ -64,16 +64,14 @@ def test_history_reopens_the_selected_plan(monkeypatch, tmp_path):
     assert not at.exception
 
 
-def test_chat_is_a_separate_window_and_does_not_change_location(monkeypatch,tmp_path):
-    at=launch(monkeypatch,tmp_path)
-    at.radio[0].set_value('学习笔记').run()
+def test_doll_panel_does_not_change_location(monkeypatch, tmp_path):
+    at = launch(monkeypatch, tmp_path)
+    at.radio(key='_space_nav').set_value('学习笔记').run()
     assert not at.chat_input
-    assert not at.text_area
-    at.button(key='global_note_chat').click().run()
+    at.button(key='doll_toggle').click().run()
     assert not at.exception
-    assert len(at.chat_input)==1
-    assert at.session_state['page']=='学习笔记'
-    at.session_state['_note_chat_open']=False
-    at.run()
+    assert len(at.chat_input) == 1
+    assert at.session_state['_space_nav'] == '学习笔记'
+    at.button(key='doll_close').click().run()
     assert not at.chat_input
-    assert at.session_state['page']=='学习笔记'
+    assert at.session_state['_space_nav'] == '学习笔记'

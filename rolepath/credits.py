@@ -3,7 +3,7 @@ from contextvars import ContextVar
 import json
 import uuid
 from pathlib import Path
-from .cloud_settings import managed_ai, server_setting
+from .cloud_settings import wallet_enabled, server_setting
 
 _usage = ContextVar('ai_usage', default=None)
 
@@ -54,7 +54,7 @@ def execute_task(store, user_id, task, operation, daily_limit, request_id=None):
 
 
 def run_ai_task(task, operation):
-    if not managed_ai():
+    if not wallet_enabled():
         return operation()
     import streamlit as st
     from supabase import create_client
@@ -77,7 +77,7 @@ def run_ai_task(task, operation):
                             int(server_setting('AI_DAILY_REQUEST_LIMIT') or '50'))
     except APIError as exc:
         messages = {
-            'NO_CREDITS': '免费体验已用完，请在会员中心查看月卡。历史记录、保存笔记和打卡仍然免费。',
+            'NO_CREDITS': 'AI 服务本次不可用：请稍后再试。历史记录、保存笔记和打卡不受影响。',
             'TASK_PENDING': '上一项任务仍在处理中，请在使用记录中查看状态，不要重复提交。',
             'RATE_LIMIT': '本小时尝试次数较多，请稍后再试。',
             'DAILY_LIMIT': '今日 AI 服务额度已用完，请明天再试。',
@@ -88,7 +88,7 @@ def run_ai_task(task, operation):
 
 
 def task_notice():
-    if managed_ai():
+    if wallet_enabled():
         import streamlit as st
         from .i18n import t
         st.caption(t('你的账号享有不限次使用权限。本次内容将发送给平台配置的 AI 服务商。') if unlimited_account() else t('本次 AI 任务使用 1 次额度。失败不扣次；首次验证邮箱赠送 1 次。所选内容将发送给平台配置的 AI 服务商。'))
@@ -96,7 +96,7 @@ def task_notice():
 
 def unlimited_account():
     """Display entitlement from the user's RLS-protected wallet; never grant it here."""
-    if not managed_ai():
+    if not wallet_enabled():
         return False
     import streamlit as st
     client = st.session_state.get('_account_client')
@@ -104,8 +104,3 @@ def unlimited_account():
         return False
     from .membership import wallet_for, access_state
     return access_state(wallet_for(client, st.session_state['_account_id']))['active']
-
-
-def render_credits():
-    from .membership_ui import render_membership
-    render_membership()

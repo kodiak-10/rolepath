@@ -9,8 +9,13 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_catalog_covers_static_ui_messages():
     for p in [ROOT/'app.py', *(ROOT/'rolepath').glob('*ui.py'), ROOT/'rolepath/cloud_auth.py', ROOT/'rolepath/cloud_settings.py', ROOT/'rolepath/browser_session.py']:
         for node in ast.walk(ast.parse(p.read_text())):
-            if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id=='tr':
+            if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id=='tr' and node.args and isinstance(node.args[0],ast.Constant):
                 assert node.args[0].value in EN
+    from rolepath.doll_ui import QUICK
+    for questions in QUICK.values():
+        for q in questions:
+            assert q in EN
+    assert '解释我的评分和下一步' in EN
 
 def test_switch_keeps_draft_plan_and_location(monkeypatch,tmp_path):
     monkeypatch.setenv('ROLEPATH_CLOUD','0')

@@ -4,6 +4,7 @@ from rolepath.i18n import t as tr, label, table, formatter
 import os
 import json
 import hashlib
+from html import escape
 from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
@@ -21,9 +22,11 @@ from rolepath.planner import plan_tasks
 from rolepath.retrieval import build_retriever
 from rolepath.matching import coverage, reviewed_domestic, learning_requirements
 from rolepath.notes_ui import render_notes
+from rolepath.practice import applies_to as practice_applies
+from rolepath.practice_ui import practice_visible, render_practice_entry, render_practice_record, render_workbench
 if not cloud_mode():
     load_dotenv()
-from rolepath.ui import apply_style, render_header, go_to, render_home
+from rolepath.ui import apply_style, render_header, go_to, render_home, render_role_cards
 st.set_page_config(page_title='RolePath · Your next chapter', page_icon='◈', layout='wide', initial_sidebar_state='collapsed')
 apply_style()
 from rolepath.i18n import init_language
@@ -38,7 +41,7 @@ RESOURCES = load_resources()
 @st.cache_resource(show_spinner=False)
 def get_retriever(mode: str, catalog_version: str):
     return build_retriever(RESOURCES, mode)
-retriever_name = st.session_state.get('_retriever_mode', 'lexical')
+retriever_name = 'lexical'  # retrieval strategy is system-chosen; no user-facing switch
 try:
     retriever = get_retriever(retriever_name, hashlib.sha256(json.dumps(RESOURCES, ensure_ascii=False).encode()).hexdigest())
     retrieval_ok = True
@@ -52,31 +55,64 @@ if 'jd_result' not in st.session_state:
     st.session_state.jd_result = None
 if 'last_plan_id' not in st.session_state:
     st.session_state.last_plan_id = None
-PAGES = ['我的空间', '岗位分析', '课程与题目', '学习计划', '学习任务', '学习笔记', '历史记录']
+PAGES = ['我的空间', '看岗位', '准备学习', '岗位实操', '查看反馈']
+STEP_PAGES = PAGES[1:]
 if st.session_state.get('page') == '资料问答':
     st.session_state['page'] = '学习笔记'
+from rolepath.ui import PAGE_ALIASES
+if st.session_state.get('page') in PAGE_ALIASES:
+    target, tab = PAGE_ALIASES[st.session_state['page']]
+    st.session_state.page = target
+    if tab:
+        st.session_state['_prep_nav' if target == '准备学习' else '_space_nav'] = tab
 if st.session_state.get('page') == 'AI 设置':
     PAGES.append('AI 设置')
 st.session_state.page = st.session_state.get('page', PAGES[0])
+if st.session_state.page not in PAGES:
+    st.session_state.page = PAGES[0]
 st.session_state.setdefault('_jd_draft', st.session_state.jd_text)
 st.session_state['_prefer_domestic'] = True
 st.session_state.jd_text = st.session_state['_jd_draft']
-page_labels = {value: tr('会员中心') if value == 'AI 设置' and managed_ai() else label(value) for value in PAGES}
+page_labels = {value: label(value) for value in PAGES}
 from rolepath.i18n import language
+from rolepath.db import latest_practice_attempt
+from rolepath import practice as practice_module
+_conn = connect()
+try:
+    _nav_plan = recent_plan(_conn)
+    _nav_attempt = latest_practice_attempt(_conn, practice_module.PRACTICE_ID)
+finally:
+    _conn.close()
+_step_done = {'看岗位': st.session_state.jd_result is not None,
+              '准备学习': _nav_plan is not None,
+              '岗位实操': _nav_attempt is not None,
+              '查看反馈': _nav_attempt is not None}
+def nav_label(value):
+    if value in STEP_PAGES:
+        return f"{STEP_PAGES.index(value) + 1} {page_labels[value]}" + (' ✓' if _step_done[value] else '')
+    return page_labels[value]
 nav_key = '_page_nav_' + language()
 # Navigation is durable app state; localized radio labels have their own widget.
 st.session_state[nav_key] = st.session_state.page
 def select_page():
     st.session_state.page = st.session_state[nav_key]
 st.radio(tr('工作空间导航'), PAGES, index=PAGES.index(st.session_state.page), key=nav_key,
-         on_change=select_page, horizontal=True, label_visibility='collapsed', format_func=page_labels.get)
+         on_change=select_page, horizontal=True, label_visibility='collapsed', format_func=nav_label)
 page = st.session_state.page
-st.write('')
 if page == '我的空间':
+    st.radio(tr('我的空间导航'), ['概览', '学习笔记', '历史记录'], key='_space_nav',
+             horizontal=True, label_visibility='collapsed', format_func=label)
+space_view = st.session_state.get('_space_nav', '概览')
+if page == '我的空间' and space_view == '概览':
     render_home(ROLES)
-if page == '岗位分析':
+if page == '我的空间' and space_view == '学习笔记':
+    render_notes(st.session_state.jd_result)
+if page == '我的空间' and space_view == '历史记录':
+    from rolepath.history_ui import render_history
+    render_history()
+if page == '看岗位':
     st.subheader(tr('把目标 JD 变成可检查的能力要求'))
-    st.write(tr('粘贴 JD 或上传 TXT / MD / PDF。照片请先在学习笔记的照片助手中转录并核对，再粘贴到这里。') if cloud_mode() else tr('直接粘贴 JD，或上传 TXT / MD / PDF、PNG / JPG / HEIC 图片。推荐使用真实岗位，解析结果会保留原文证据。'))
+    st.write(tr('粘贴 JD 或上传 TXT / MD / PDF。岗位截图可先发给狗蛋转录，核对后再粘贴到这里。') if cloud_mode() else tr('直接粘贴 JD，或上传 TXT / MD / PDF、PNG / JPG / HEIC 图片。推荐使用真实岗位，解析结果会保留原文证据。'))
     uploaded_jd = st.file_uploader(tr('上传岗位 JD（可选）'), type=(['txt', 'md', 'pdf'] if cloud_mode() else UPLOAD_TYPES), key='jd_upload')
     st.text_area(tr('岗位 JD 原文'), key='jd_text', on_change=lambda: st.session_state.update(_jd_draft=st.session_state.jd_text), height=210, placeholder=tr('粘贴岗位名称、职责、任职要求、优先条件和实习时间…'))
     parse_mode = st.selectbox(tr('解析方式'), ['关键词初筛（不完整，无需 API）', 'LLM 结构化抽取（需 API Key）'], index=1 if is_configured() else 0, format_func=(lambda value: tr('AI 深度分析') if value.startswith('LLM') else tr('关键词预览')) if managed_ai() else formatter(), key='ui_ace9d4ab6562')
@@ -104,9 +140,7 @@ if page == '岗位分析':
         if parsed.get('orientation'):
             st.write(parsed['orientation']['overview'])
             st.caption(tr('已同时生成岗位入门建议、基础概念与面试准备，请在「课程与题目」查看。'))
-        next_a, next_b = st.columns(2)
-        next_a.button(tr('查看匹配课程 →'), on_click=go_to, args=('课程与题目',), use_container_width=True)
-        next_b.button(tr('制定学习计划 →'), on_click=go_to, args=('学习计划',), use_container_width=True)
+        st.button(tr('生成学习计划 →'), type='primary', on_click=go_to, args=('准备学习',), key='jd_to_plan', use_container_width=True)
         st.caption(tr('解析方式：') + parsed['mode'])
         if parsed['mode'].startswith('规则'):
             st.warning(tr('下面只是词库命中，不是完整岗位分析，也不是重要性排名。完整拆解需要配置模型；请逐条核对下面的 JD 原文。'))
@@ -138,11 +172,16 @@ if page == '岗位分析':
                 else:
                     parsed['requirements'].append(dict(skill=skill.strip(), evidence=evidence.strip(), priority=priority, parser='人工补充'))
                     st.rerun()
-if page == '课程与题目':
+    render_role_cards(ROLES)
+if page == '准备学习':
+    st.radio(tr('学习准备导航'), ['计划与行动', '课程与题目', '学习任务'], key='_prep_nav',
+             horizontal=True, label_visibility='collapsed', format_func=label)
+prep_view = st.session_state.get('_prep_nav', '计划与行动')
+if page == '准备学习' and prep_view == '课程与题目':
     st.subheader(tr('为目标岗位寻找学习资源'))
     from rolepath.research_ui import render_research
     render_research(st.session_state.jd_result)
-    with st.expander(tr('查看已收录的参考资料')):
+    with st.expander(tr('本地资源目录（非 AI 联网查找）')):
         prefer_domestic = True
         parsed = st.session_state.jd_result
         if not parsed:
@@ -209,12 +248,16 @@ if page == '课程与题目':
                         st.write(q['summary'])
                         st.caption(tr('来源核查：{0} · {1}', q.get('checked_at', '未标注'), q.get('access_note', '以原站权限为准。')))
             st.info(tr('题目区分平台练习、企业题库或历史套卷、用户回忆面经。企业归属以平台或作者标注为准，未获企业单独确认；旧题不代表当前考试。'))
-if page == '学习计划':
+if page == '准备学习' and prep_view == '计划与行动':
     st.subheader(tr('能力证据与个性化学习计划'))
     parsed = st.session_state.jd_result
     if not parsed or not learning_requirements(parsed):
-        st.info(tr('先去「我的空间」载入一个演示 JD，或在「岗位分析」中提交真实 JD。'))
+        st.info(tr('先在「我的空间」体验岗位任务，或在「看岗位」提交真实 JD。'))
+        if not cloud_mode():
+            render_practice_record()
     else:
+        role_name = (parsed.get('orientation') or {}).get('role_name') or parsed['raw'].splitlines()[0][:40]
+        st.markdown('<div class="rp-role-banner"><span>' + tr('正在准备') + '</span>' + escape(role_name) + '</div>', unsafe_allow_html=True)
         include_guidance = st.checkbox(tr('将岗位入门建议加入计划（不是企业硬性要求）'), value=True, key='include_guidance') if parsed.get('orientation') else False
         requirements = learning_requirements(parsed, include_guidance)
         col_a, col_b = st.columns([3, 2])
@@ -276,7 +319,27 @@ if page == '学习计划':
             if sessions:
                 with st.expander(tr('每日学习安排（较长任务分天完成）')):
                     st.dataframe(table(sessions), hide_index=True)
-if page == '学习任务':
+            pending = [t for t in plan_items if t['status'] == '待完成']
+            if pending:
+                st.markdown('<div class="rp-now">' + tr('**当前推荐行动**') + ' ' + escape(pending[0]['title']) + '</div>', unsafe_allow_html=True)
+            plan_skills = list(dict.fromkeys(t['skill'] for t in plan_items))
+            groups = [g for g in coverage(learning_requirements(parsed), retriever, True) if g['requirement']['skill'] in plan_skills]
+            if groups:
+                st.markdown(tr('**按技能准备：资料 · 题目 · 实操**'))
+            for gi, group in enumerate(groups):
+                r = group['requirement']
+                with st.container(border=True, key=f'rp_skill_{gi}'):
+                    st.markdown(f"**{r['skill']}**")
+                    for hit in group['courses'][:2]:
+                        c = hit.resource
+                        st.markdown(tr('准备资料：[{0}]({1})', c['title'], c['url']))
+                    for q in group['questions'][:2]:
+                        st.markdown(tr('练习题：[{0}]({1})', q['title'], q['url']))
+                    if r['skill'] == '运营指标' and not cloud_mode() and practice_applies(parsed):
+                        render_practice_entry(plan_items)
+            if not any(g['requirement']['skill'] == '运营指标' for g in groups) and not cloud_mode() and practice_applies(parsed):
+                render_practice_entry(plan_items)
+if page == '准备学习' and prep_view == '学习任务':
     st.subheader(tr('执行任务 · 保存进度'))
     conn = connect()
     try:
@@ -284,7 +347,7 @@ if page == '学习任务':
         selected_id = st.session_state.get('_selected_plan_id')
         latest = next((p for p in plans if p['id'] == selected_id), plans[0] if plans else None)
         if not latest:
-            st.info(tr('目前还没有学习计划。去「学习计划」创建。'))
+            st.info(tr('目前还没有学习计划。去「计划与行动」创建。'))
         else:
             tasks = tasks_for(conn, latest['id'])
             stats = study_stats(conn, latest['id'])
@@ -314,8 +377,8 @@ if page == '学习任务':
                         st.dataframe(table([{'日期': r['day'], '任务': r['title'], '分钟': r['minutes'], '记录': r['reflection']} for r in stats['logs']]), hide_index=True)
             completed = sum((t['status'] == '已完成' for t in tasks))
             st.progress(completed / len(tasks) if tasks else 0, text=tr('任务记录完成：{0}/{1}（不代表能力已验证）', completed, len(tasks)))
-            for t in tasks:
-                with st.container(border=True):
+            for i, t in enumerate(tasks):
+                with st.container(border=True, key=f'rp_task_card_{i}'):
                     c1, c2 = st.columns([5, 1])
                     with c1:
                         st.markdown(f"**{t['title']}**")
@@ -339,8 +402,18 @@ if page == '学习任务':
             st.info(tr('本版“完成”仅代表用户自报。自动评测练习作品和动态重排属于下一版本。'))
     finally:
         conn.close()
-if page == '学习笔记':
-    render_notes(st.session_state.jd_result)
+if page == '岗位实操':
+    if practice_visible(st.session_state.jd_result):
+        render_workbench()
+    else:
+        st.info(tr('载入示例 JD 或保存一次练习后，这里会开放实习工作台。'))
+        funnel = next((r for r in ROLES if r['id'] == 'funnel_analyst'), None)
+        if funnel:
+            from rolepath.ui import select_role
+            st.button(tr('体验岗位任务 →'), type='primary', on_click=select_role, args=(funnel,), key='practice_demo')
+if page == '查看反馈':
+    from rolepath.practice_ui import render_feedback_page
+    render_feedback_page()
 if page == 'AI 设置':
     if not managed_ai():
         st.subheader(tr('连接你的 AI 服务'))
@@ -349,13 +422,8 @@ if page == 'AI 设置':
         render_model_settings()
     else:
         st.info(tr('本机版本从本地环境配置读取 AI 服务。'))
-if page == '历史记录':
-    from rolepath.history_ui import render_history
-    render_history()
-from rolepath.note_chat_ui import render_open_note_chat
-render_open_note_chat(st.session_state.jd_result)
-from rolepath.membership_ui import render_open_checkout
-render_open_checkout()
+from rolepath.doll_ui import render_doll
+render_doll(st.session_state.jd_result)
 
 if st.session_state.pop('_auth_flush_requested', False):
     st.rerun()

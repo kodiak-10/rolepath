@@ -1,3 +1,5 @@
+> **StudyHack contest edition (`qoder-contest` branch).** This branch is free and sign-in-free: no membership, checkout, prices or payment QR. The production RolePath, its Supabase project and payment configuration are maintained separately on `main`; the pricing and payment sections below describe that production edition only.
+
 <div align="center">
 
 # RolePath

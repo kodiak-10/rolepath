@@ -1,3 +1,5 @@
+> Production-only reference (`main` branch). The StudyHack contest branch has no membership, checkout or payment QR; this document does not apply to it.
+
 # RolePath Plus
 
 RolePath Plus costs CNY 12.90 per calendar month with unlimited AI tasks. Membership starts when an authorized reviewer confirms the actual WeChat receipt. Renewals extend the existing expiry. Calendar-month arithmetic uses Asia/Shanghai, including month-end clamping. There are no automatic charges or renewals. Existing saved learning records remain available after expiry.

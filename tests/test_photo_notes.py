@@ -1,9 +1,13 @@
+from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
 import pytest
+from PIL import Image
 from rolepath import photo_notes, llm
 
-PHOTO=(Path(__file__).parent/'fixtures/ocr-note.png').read_bytes()
+with BytesIO() as image_data:
+    Image.new('RGB', (64, 64), 'white').save(image_data, format='PNG')
+    PHOTO = image_data.getvalue()
 ANSWER='## 照片内容总结\nGROUP BY 用于分组统计，COUNT 用于计数。\n\n## 测试题\n1. 分组统计每类订单时，要用什么语句？\n2. COUNT(*) 与 COUNT(字段) 有什么区别？\n3. 请写出按类别统计订单数的SQL。\n请先作答，我再逐题反馈。'
 
 
@@ -110,9 +114,9 @@ def test_failed_photo_input_is_kept_for_manual_retry(monkeypatch,tmp_path):
         return response()
     monkeypatch.setattr(note_chat_ui,'analyze_photos',analyze)
     at=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py'),default_timeout=30)
-    at.session_state['_language']='zh';at.session_state['workspace_note_photos']=[('note.png',PHOTO)];at.run()
-    at.button(key='global_note_chat').click().run()
-    at.chat_input[0].set_value('总结内容，然后出几道测试题').run()
+    at.run()
+    at.button(key='doll_toggle').click().run()
+    at.chat_input[0].upload('note.png', PHOTO).set_value('总结内容，然后出几道测试题').run()
     assert not at.exception
     assert calls==['总结内容，然后出几道测试题']
     assert at.session_state['workspace_photo_pending']==calls[0]

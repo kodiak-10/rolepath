@@ -1,3 +1,5 @@
+> **StudyHack 参赛版（`qoder-contest` 分支）。** 本分支免费、免登录：无会员、购买入口、价格或收款二维码。原版线上 RolePath、生产 Supabase 与支付配置在 `main` 分支独立维护；下文的会员与收款说明仅适用于原版。
+
 <div align="center">
 
 # RolePath

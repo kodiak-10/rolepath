@@ -68,8 +68,9 @@ def test_home_and_document_ui_are_general(tmp_path, monkeypatch):
     assert not app.exception
     assert not any('传音' in b.label for b in app.button)
     assert 'Ask materials' not in app.radio[0].options
-    assert app.button(key='global_note_chat').label == 'Ask'
-    app.radio[0].set_value('岗位分析').run()
+    assert all(button.key != 'global_note_chat' for button in app.button)
+    assert app.button(key='doll_toggle')
+    app.radio[0].set_value('看岗位').run()
     assert not any('黑马' in c.label for c in app.checkbox)
     app.text_area(key='jd_text').set_value(JD).run()
     app.button(key='do_parse').click().run()

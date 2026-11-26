@@ -1,3 +1,5 @@
+> Production-only reference (`main` branch). The StudyHack contest branch runs without a managed wallet or membership gating; this document does not apply to it.
+
 # Managed AI deployment
 
 RolePath can reserve one credit for an AI task on the server, store the validated

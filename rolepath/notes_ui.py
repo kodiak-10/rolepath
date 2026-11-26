@@ -57,7 +57,7 @@ def render_notes(parsed):
     st.markdown('<div class="rp-library-heading"><div class="rp-kicker">YOUR LEARNING LIBRARY</div><h1>' + tr('学习笔记') + '</h1><p>' + tr('把零散的学习，变成自己的积累。') + '</p></div>', unsafe_allow_html=True)
     chat, upload, history, space = st.columns([1.25, 1.1, 1.1, 2.5])
     if chat.button(tr('与笔记对话'), type='primary', icon=':material/chat_bubble_outline:', key='open_note_chat', use_container_width=True):
-        open_note_chat(parsed)
+        open_note_chat()
     con = connect()
     try:
         with upload, st.popover(tr('添加资料'), icon=':material/add:', use_container_width=True):

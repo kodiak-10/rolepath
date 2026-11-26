@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RolePath · 岗位练习工作台</title>
+<meta name="description" content="免登录的岗位练习工作台：拆解 JD、生成学习计划、AI 查找资料、完成转化漏斗实习任务并获得规则点评，记录保存在本浏览器。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">◈</span><span class="brand-text"><strong>RolePath</strong><span class="kicker brand-kicker">岗位练习工作台</span></span></div>
+  <nav class="tabs" id="page-nav" aria-label="工作空间导航">
+    <button type="button" data-go="space">我的空间</button>
+    <button type="button" data-go="jd">1 看岗位</button>
+    <button type="button" data-go="prep">2 准备学习</button>
+    <button type="button" data-go="work">3 岗位实操</button>
+    <button type="button" data-go="feedback">4 查看反馈</button>
+  </nav>
+</header>
+<main>
+  <p id="storage-warning" class="warn" hidden>浏览器不允许保存本地记录；本次练习记录在关闭页面后不会保留。</p>
+  <section id="view-space" aria-label="我的空间"><div id="space-body"></div></section>
+  <section id="view-jd" aria-label="看岗位" hidden><div id="jd-body"></div></section>
+  <section id="view-prep" aria-label="准备学习" hidden><div id="prep-body"></div></section>
+  <section id="view-work" aria-label="岗位实操" hidden><div id="work-body"></div></section>
+  <section id="view-feedback" aria-label="查看反馈" hidden><div id="feedback-body"></div></section>
+</main>
+<footer class="muted">
+  <div class="foot-chips"><span class="foot-chip">记录仅存本浏览器</span><span class="foot-chip">localStorage</span><span class="foot-chip">免登录演示</span></div>
+  <p class="foot-line">RolePath 参赛演示 · 练习记录仅保存在本浏览器（localStorage），不代表能力认证。</p>
+</footer>
+
+<button type="button" id="doll-launcher" class="doll-launcher" aria-label="狗蛋助手" aria-expanded="false"></button>
+<div id="doll-panel" class="doll-panel" hidden aria-label="狗蛋 · 实习导师助手">
+  <div class="doll-head">
+    <span class="doll-avatar" aria-hidden="true"></span>
+    <span class="doll-title"><strong>狗蛋 · 实习导师助手</strong><span class="doll-status" id="doll-status">陪伴中 · 本次 0 条</span></span>
+    <button type="button" data-action="doll-close">收起</button>
+  </div>
+  <p id="doll-note-line" class="muted doll-note-line" hidden></p>
+  <div class="doll-quicks" id="doll-quicks"></div>
+  <div class="doll-messages" id="doll-messages" aria-live="polite"></div>
+  <div class="doll-modes" id="doll-modes">
+    <button type="button" data-action="doll-mode" data-mode="chat" aria-pressed="true">问答</button>
+    <button type="button" data-action="doll-mode" data-mode="resume" aria-pressed="false">简历分析</button>
+  </div>
+  <div class="doll-resume" id="doll-resume-box" hidden>
+    <input id="doll-resume-target" type="text" placeholder="目标岗位(可选)" maxlength="100" autocomplete="off">
+    <div class="doll-file-row">
+      <label class="doll-file-btn" for="doll-resume-file">上传简历文件</label>
+      <input id="doll-resume-file" type="file" accept=".pdf,.docx,.txt,.md" hidden>
+      <span id="doll-resume-file-name" class="muted"></span>
+    </div>
+    <textarea id="doll-resume-text" rows="5" maxlength="20000" placeholder="上传 PDF/DOCX/TXT/MD,或粘贴简历全文…"></textarea>
+    <p id="doll-resume-memory" class="muted doll-resume-memory" hidden></p>
+    <p class="muted doll-resume-note">上传后狗蛋会先建立结构化简历记忆,再按当前 JD 逐项优化。原文与结构化记忆仅保留在当前页面,不写入本地存储;分析回复会留在对话记录里。</p>
+    <button type="button" class="primary" data-action="doll-resume-send">建立记忆并按 JD 优化</button>
+  </div>
+  <div class="doll-input-row" id="doll-chat-row">
+    <input id="doll-input" type="text" placeholder="问狗蛋…" maxlength="2000" autocomplete="off">
+    <button type="button" class="primary" data-action="doll-send">发送</button>
+  </div>
+</div>
+<script src="vendor/pdf.min.js"></script>
+<script src="extract.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

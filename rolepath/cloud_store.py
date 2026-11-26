@@ -62,6 +62,22 @@ class CloudStore:
         result=self.client.rpc('rp_save_document',dict(p_filename=filename,p_checksum=checksum,p_chunks=chunks)).execute().data
         return result['id'], result['count']
 
+    def save_practice_attempt(self, practice_id, submission, feedback):
+        attempt_id = str(uuid.uuid4())
+        self.table('practice_attempts').insert({
+            'id': attempt_id, 'user_id': self.user_id, 'practice_id': practice_id,
+            'submission': submission, 'feedback': feedback,
+        }).execute()
+        return attempt_id
+
+    def latest_practice_attempt(self, practice_id):
+        rows = (self.table('practice_attempts')
+                .select('id,practice_id,created_at,submission,feedback')
+                .eq('user_id', self.user_id).eq('practice_id', practice_id)
+                .order('created_at', desc=True).order('id', desc=True)
+                .limit(1).execute().data)
+        return rows[0] if rows else None
+
     def history_logs(self):
         tasks = {r['id']: r for r in self.rows('tasks')}
         result = []

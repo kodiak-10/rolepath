@@ -3,7 +3,7 @@ from .i18n import t as tr, label, table, formatter
 from html import escape
 import json
 import streamlit as st
-from .cloud_settings import cloud_mode, managed_ai, render_model_settings
+from .cloud_settings import cloud_mode
 from .db import connect, recent_plan, tasks_for, study_stats
 from .jd import parse_jd
 
@@ -12,17 +12,27 @@ def apply_style():
     st.markdown('<style>'+Path(__file__).with_name('ui.css').read_text()+'</style>', unsafe_allow_html=True)
 
 def go_to(page):
-    st.session_state.page = page
+    target, tab = PAGE_ALIASES.get(page, (page, None))
+    st.session_state.page = target
+    if tab:
+        st.session_state['_prep_nav' if target == '准备学习' else '_space_nav'] = tab
+
+# Old page ids stay valid as deep links; the top nav now shows the four-step flow.
+PAGE_ALIASES = {
+    '岗位分析': ('看岗位', None),
+    '学习计划': ('准备学习', '计划与行动'),
+    '课程与题目': ('准备学习', '课程与题目'),
+    '学习任务': ('准备学习', '学习任务'),
+    '实习工作台': ('岗位实操', None),
+    '学习笔记': ('我的空间', '学习笔记'),
+    '历史记录': ('我的空间', '历史记录'),
+}
 
 def render_header():
     with st.container(key='rp_header'):
-        brand, ask, account = st.columns([4, 1.15, 1.4])
+        brand, account = st.columns([4, 1.4])
         with brand:
             st.markdown('<div class="rp-brand"><span>◈</span>RolePath</div><div class="rp-sub">YOUR NEXT CHAPTER</div>', unsafe_allow_html=True)
-        with ask:
-            if st.button(tr('问一问'), type='primary', icon=':material/chat_bubble_outline:', key='global_note_chat', use_container_width=True):
-                from .note_chat_ui import open_note_chat
-                open_note_chat(st.session_state.get('jd_result'))
         with account:
             with st.popover(tr('账户与设置'), icon=':material/person_outline:', use_container_width=True):
                 from .i18n import render_language_picker
@@ -31,22 +41,21 @@ def render_header():
                 if cloud_mode():
                     st.caption(st.session_state.get('_account_email', '个人账户'))
                     st.caption(tr('学习记录保存在你的账户中。'))
-                    st.button(tr('会员中心') if managed_ai() else tr('AI 服务设置'), on_click=go_to, args=('AI 设置',), use_container_width=True)
+                    st.button(tr('AI 服务设置'), on_click=go_to, args=('AI 设置',), use_container_width=True)
                     if st.button(tr('退出登录'), key='account_logout'):
                         from .browser_session import logout
                         logout()
                         st.rerun()
                 else:
                     st.caption(tr('本机个人空间'))
-                    mode = st.selectbox(tr('资料查找方式'), ['关键词查找', '语义查找'], index=1 if st.session_state.get('_retriever_mode') == 'dense' else 0, format_func=formatter(), key='ui_d5d532d1eaaa')
-                    st.session_state['_retriever_mode'] = 'dense' if mode == '语义查找' else 'lexical'
+                    st.caption(tr('资料由 AI 自动查找，检索策略由系统选择。'))
         st.write('')
 
 def select_role(role):
     st.session_state['_jd_draft'] = role['demo_jd']
     st.session_state.jd_text = role['demo_jd']
     st.session_state.jd_result = parse_jd(role['demo_jd'])
-    go_to('岗位分析')
+    go_to('看岗位')
 
 def restore_plan(plan):
     meta = json.loads(plan['meta'])
@@ -66,10 +75,14 @@ def render_home(roles):
     finally:
         con.close()
     st.markdown(tr('<section class="rp-hero"><div class="rp-orbit" aria-hidden="true"></div>\n    <div class="eyebrow">从好奇开始 · 向目标前进</div><h1>你的下一步，<br>从这里变清晰。</h1>\n    <p>探索感兴趣的工作，拆解真实岗位要求。<br>把想去的方向，变成今天可以完成的一小步。</p></section>'), unsafe_allow_html=True)
-    a, b, c = st.columns(3)
-    a.button(tr('分析我的目标岗位 →'), type='primary', use_container_width=True, on_click=go_to, args=('岗位分析',))
-    b.button(tr('继续学习 →') if plan else tr('制定学习计划 →'), use_container_width=True, on_click=restore_plan if plan else go_to, args=(dict(plan),) if plan else ('学习计划',))
-    c.button(tr('整理我的笔记 →'), use_container_width=True, on_click=go_to, args=('学习笔记',))
+    funnel = next((r for r in roles if r['id'] == 'funnel_analyst'), None)
+    cols = st.columns(3 if funnel else 2)
+    slot = 0
+    if funnel:
+        cols[0].button(tr('体验岗位任务 →'), type='primary', use_container_width=True, on_click=select_role, args=(funnel,), key='select_funnel_analyst')
+        slot = 1
+    cols[slot].button(tr('分析我的 JD →'), use_container_width=True, on_click=go_to, args=('看岗位',))
+    cols[slot + 1].button(tr('继续学习 →') if plan else tr('制定学习计划 →'), use_container_width=True, on_click=restore_plan if plan else go_to, args=(dict(plan),) if plan else ('准备学习',))
     st.write('')
     a, b, c = st.columns(3)
     completed = sum((t['status'] == '已完成' for t in tasks))
@@ -77,17 +90,19 @@ def render_home(roles):
     b.metric(tr('连续学习'), tr('{0} 天', stats['streak']))
     c.metric(tr('当前计划完成'), f'{completed} / {len(tasks)}')
     if plan:
-        with st.container(border=True):
+        with st.container(border=True, key='rp_home_prepare'):
             st.markdown(tr('**正在准备**'))
             st.write(plan['target'])
             st.progress(completed / len(tasks) if tasks else 0, text=tr('按你记录的任务完成情况统计'))
     else:
         st.caption(tr('从零开始也没关系。分析一份岗位描述后，就可以制定自己的第一份计划。'))
-    st.write('')
+
+
+def render_role_cards(roles):
     st.subheader(tr('还没想好方向？先了解真实工作'))
-    st.caption(tr('下面是三个入门示例，你也可以上传任意岗位描述。示例不代表实时招聘。'))
+    st.caption(tr('下面是几个入门示例，你也可以上传任意岗位描述。示例不代表实时招聘。'))
     for i, (col, role) in enumerate(zip(st.columns(len(roles)), roles)):
-        with col, st.container(border=True):
+        with col, st.container(border=True, key='rp_role_card_' + role['id']):
             st.markdown(f"""<div class="rp-kicker">0{i + 1} / {escape(label(role['kind']))}</div><div class="rp-title">{escape(label(role['name']))}</div><p class="rp-desc">{escape(label(role['description']))}</p>""", unsafe_allow_html=True)
             st.markdown(''.join((f'<span class="rp-chip">{escape(label(skill))}</span>' for skill in role['skills'][:4])), unsafe_allow_html=True)
             st.button(tr('了解这个方向 ↗'), key='select_' + role['id'], on_click=select_role, args=(role,), use_container_width=True)

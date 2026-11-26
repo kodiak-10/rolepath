@@ -123,8 +123,7 @@ def test_notes_ui_persists_checked_report(tmp_path,monkeypatch):
     from streamlit.testing.v1 import AppTest
     monkeypatch.chdir(tmp_path)
     con=connect()
-    doc,_=save_document(con,'我的学习笔记.md',[(1,'PRD 应写明目标、范围及验收标准，便于团队评审。')])
-    rows,_=note_inventory(con,[doc],[])
+    save_document(con,'我的学习笔记.md',[(1,'PRD 应写明目标、范围及验收标准，便于团队评审。')])
     con.close()
     monkeypatch.setattr(llm,'is_configured',lambda:True)
     monkeypatch.setenv('LLM_API_KEY','test-not-real')
@@ -132,17 +131,13 @@ def test_notes_ui_persists_checked_report(tmp_path,monkeypatch):
     payload={'items':[dict(kind='总结',text='笔记关注需求文档的评审要素。',source_ref='S1')]}
     monkeypatch.setattr(llm,'_message',lambda *a,**kw:(json.dumps(payload),None))
     app=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
-    app.radio[0].set_value('岗位分析').run()
-    app.text_area(key='jd_text').set_value((ROOT/'data/transsion_jd.txt').read_text()).run()
-    next(x for x in app.selectbox if x.label=='Analysis method').select('关键词初筛（不完整，无需 API）').run()
-    app.button(key='do_parse').click().run()
-    app.radio[0].set_value('学习笔记').run()
+    app.radio(key='_space_nav').set_value('学习笔记').run()
     app.button(key='open_note_chat').click().run()
     app.chat_input[0].set_value('总结笔记').run()
     assert not app.exception
     fresh=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
     assert not fresh.exception
-    fresh.radio[0].set_value('学习笔记').run()
+    fresh.radio(key='_space_nav').set_value('学习笔记').run()
     fresh.button(key='open_note_reports').click().run()
     assert any('笔记关注需求文档' in m.value for m in fresh.markdown)
 

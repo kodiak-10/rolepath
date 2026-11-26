@@ -97,6 +97,37 @@ def all_plans(conn):
     return list(conn.execute('SELECT * FROM plans ORDER BY created_at DESC, rowid DESC'))
 
 
+def ensure_practice(conn):
+    conn.execute('''CREATE TABLE IF NOT EXISTS practice_attempts (
+        id TEXT PRIMARY KEY, practice_id TEXT NOT NULL, created_at TEXT NOT NULL,
+        submission TEXT NOT NULL, feedback TEXT NOT NULL)''')
+
+
+def save_practice_attempt(conn, practice_id, submission, feedback):
+    if getattr(conn, 'cloud', False):
+        return conn.save_practice_attempt(practice_id, submission, feedback)
+    from datetime import datetime
+    ensure_practice(conn)
+    attempt_id = str(uuid.uuid4())
+    with conn:
+        conn.execute('INSERT INTO practice_attempts(id,practice_id,created_at,submission,feedback) VALUES(?,?,?,?,?)',
+            (attempt_id, practice_id, datetime.now().strftime('%Y-%m-%d %H:%M'),
+             json.dumps(submission, ensure_ascii=False), json.dumps(feedback, ensure_ascii=False)))
+    return attempt_id
+
+
+def latest_practice_attempt(conn, practice_id):
+    if getattr(conn, 'cloud', False):
+        return conn.latest_practice_attempt(practice_id)
+    ensure_practice(conn)
+    row = conn.execute('SELECT * FROM practice_attempts WHERE practice_id=? ORDER BY created_at DESC, rowid DESC LIMIT 1',
+        (practice_id,)).fetchone()
+    if not row:
+        return None
+    return dict(id=row['id'], practice_id=row['practice_id'], created_at=row['created_at'],
+                submission=json.loads(row['submission']), feedback=json.loads(row['feedback']))
+
+
 def history_logs(conn):
     """Read actual check-ins across plans for the account calendar."""
     if getattr(conn, 'cloud', False):

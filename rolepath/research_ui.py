@@ -1,10 +1,12 @@
-"""Job-specific live research, with an explicit choice of material for a plan."""
+"""Job-specific live research, auto-run from the current role, skills and stage."""
+import logging
 import streamlit as st
 from .i18n import t as tr,label,language
-from .cloud_settings import managed_ai
+from .cloud_settings import cloud_mode
 from .credits import run_ai_task,task_notice
 from .llm import is_configured
 from .matching import learning_requirements
+from .db import connect, recent_plan, tasks_for
 from .resource_research import research_resources,scope_for,planning_materials
 
 KINDS={'course':'课程','reference':'专业资料','practice':'平台练习','company_bank':'作者标注的企业题目（未经企业确认）','interview_recollection':'用户回忆面经（非官方真题）'}
@@ -13,7 +15,7 @@ KINDS={'course':'课程','reference':'专业资料','practice':'平台练习','c
 def saved_research(scope):
     current=st.session_state.get('_resource_research')
     if current and current['scope']==scope:return current
-    if managed_ai():
+    if cloud_mode() and st.session_state.get('_account_client'):
         client=st.session_state['_account_client']
         rows=client.table('rp_ai_runs').select('result').eq('user_id',st.session_state['_account_id']).eq('task','resources').eq('status','succeeded').order('created_at',desc=True).limit(10).execute().data
         for row in rows:
@@ -30,26 +32,51 @@ def selected_materials(parsed):
     return planning_materials(result,selected)
 
 
+def _learning_stage():
+    conn = connect()
+    try:
+        plan = recent_plan(conn)
+        if not plan:
+            return '入门准备：尚未生成学习计划'
+        tasks = tasks_for(conn, plan['id'])
+        done = sum(t['status'] == '已完成' for t in tasks)
+        if not done:
+            return '计划已生成，尚未开始执行'
+        return f'计划执行中：已完成 {done}/{len(tasks)} 个任务'
+    finally:
+        conn.close()
+
+
 def render_research(parsed):
     scope=scope_for(parsed)
     result=saved_research(scope)
-    default=parsed.get('orientation',{}).get('role_name','') if parsed else ''
-    st.write(tr('从任何行业的岗位开始，查找适合你的课程、专业资料和面试练习。'))
-    topic=st.text_input(tr('岗位或学习方向'),value=result['topic'] if result else default,max_chars=200,key='research_topic_'+scope[:12],placeholder=tr('例如：机械设计实习、财务助理、酒店前厅服务、新媒体运营…'))
-    requirements=learning_requirements(parsed) if parsed else []
-    st.caption(tr('仅将岗位方向和能力名称用于联网检索；不会发送你的学习笔记。'))
-    task_notice()
-    if st.button(tr('联网查找学习资源'),type='primary',disabled=not is_configured() or len(topic.strip())<2,key='research_resources'):
-        try:
-            with st.status(tr('正在理解岗位并查找资料…'),expanded=True) as status:
-                def progress(stage,count):
-                    status.write(tr('正在搜索公开来源…') if stage=='search' else tr('正在读取具体网页…') if stage=='read' else tr('正在筛选内容并核对出处…'))
-                result=run_ai_task('resources',lambda:research_resources(topic,requirements,scope,language(),progress))
-                st.session_state['_resource_research']=result
-                status.update(label=tr('已找到可查看出处的学习资料'),state='complete',expanded=False)
-        except Exception as exc:
-            st.error(tr('本次联网查找未完成：{0}',label(str(exc))))
-            return
+    if not parsed:
+        st.info(tr('先载入或解析一份 JD，AI 才会按岗位自动查找资料。'))
+        return
+    role=(parsed.get('orientation') or {}).get('role_name') or parsed['raw'].splitlines()[0][:40]
+    requirements=learning_requirements(parsed)
+    st.caption(tr('进入资料区后 AI 会按当前岗位、技能与学习阶段自动查找；仅发送岗位方向和能力名称，不会发送你的学习笔记。'))
+    err_key='_research_error_'+scope[:12]
+    if result is None and not st.session_state.get(err_key):
+        if not is_configured():
+            logging.getLogger('rolepath.research').warning('auto research skipped: LLM not configured')
+            st.info(tr('AI 暂时不可用，请稍后重试'))
+        else:
+            try:
+                with st.status(tr('正在自动查找适合你的资料…'),expanded=True) as status:
+                    def progress(stage,count):
+                        status.write(tr('正在搜索公开来源…') if stage=='search' else tr('正在读取具体网页…') if stage=='read' else tr('正在筛选内容并核对出处…'))
+                    result=run_ai_task('resources',lambda:research_resources(role,requirements,scope,language(),progress,_learning_stage()))
+                    st.session_state['_resource_research']=result
+                    status.update(label=tr('已找到可查看出处的学习资料'),state='complete',expanded=False)
+            except Exception as exc:
+                logging.getLogger('rolepath.research').warning('auto research failed: %s', exc)
+                st.session_state[err_key]=True
+    if result is None and st.session_state.get(err_key):
+        st.error(tr('AI 暂时不可用，请稍后重试'))
+        if st.button(tr('重试查找'),key='research_retry'):
+            st.session_state.pop(err_key,None)
+            st.rerun()
     if not result:return
     st.write(result['overview'])
     st.caption(tr('检索于 {0} · {1} 次搜索 · {2} 次网页读取',result['created_at'][:10],result['trace']['search_calls'],result['trace']['read_calls']))
@@ -57,10 +84,11 @@ def render_research(parsed):
         st.caption(tr('本轮已达到检索步数上限，结果只包含已读取的资料。'))
     choices=st.session_state.setdefault('_research_selected',{})
     chosen=choices.setdefault(result['created_at'],[])
-    for item in result['items']:
-        with st.container(border=True):
+    for i, item in enumerate(result['items']):
+        with st.container(border=True, key=f'rp_resource_{i}'):
             st.caption(label(KINDS[item['kind']])+' · '+item['creator'])
             st.link_button(item['title'],item['url'],use_container_width=True)
+            st.markdown(tr('**为什么推荐给我**'))
             st.write(item['reason'])
             if item.get('date_evidence'):
                 st.caption(tr('原文中的时间信息（请结合上下文核对）：'))

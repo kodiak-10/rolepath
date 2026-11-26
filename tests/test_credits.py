@@ -77,19 +77,19 @@ def test_unserializable_result_is_refunded():
         execute_task(ledger,'u','jd',lambda:{'bad':set()},50,'one')
     assert ledger.balance==1
 
-def test_managed_mode_never_uses_visitor_key(monkeypatch):
+def test_contest_never_enables_managed_wallet(monkeypatch):
     from rolepath import cloud_settings
     monkeypatch.setenv('ROLEPATH_CLOUD','1')
     monkeypatch.setenv('ROLEPATH_AI_MODE','managed')
     monkeypatch.setenv('LLM_API_KEY','server-test-key')
-    assert cloud_settings.model_setting('LLM_API_KEY')=='server-test-key'
+    assert cloud_settings.managed_ai() is False
+    assert cloud_settings.server_setting('LLM_API_KEY')=='server-test-key'
 
-def test_managed_provider_call_requires_reservation(monkeypatch):
-    from rolepath import llm
+def test_contest_ai_task_runs_without_ledger_or_login(monkeypatch):
+    from rolepath.credits import run_ai_task
     monkeypatch.setenv('ROLEPATH_CLOUD','1')
     monkeypatch.setenv('ROLEPATH_AI_MODE','managed')
-    with pytest.raises(RuntimeError,match='reserved task'):
-        llm._message('x','y')
+    assert run_ai_task('tutor', lambda: {'answer':'free'}) == {'answer':'free'}
 
 
 def test_unlimited_account_runs_with_zero_balance_and_keeps_history():

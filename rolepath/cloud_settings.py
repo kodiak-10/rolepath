@@ -17,13 +17,36 @@ def server_setting(name):
             return ''
     return ''
 
+def server_model_configured():
+    """Server-provided model availability, decoupled from membership and wallet.
+
+    Local previews read the launch environment; cloud deployments read deploy-side
+    secrets (or an explicit managed-mode env injection). Never exposed to widgets.
+    """
+    if not cloud_mode():
+        return bool(os.getenv('LLM_API_KEY', '').strip() and os.getenv('LLM_MODEL', '').strip())
+    import streamlit as st
+    try:
+        secrets = st.secrets
+    except FileNotFoundError:
+        secrets = {}
+    if str(secrets.get('LLM_API_KEY', '')).strip() and str(secrets.get('LLM_MODEL', '')).strip():
+        return True
+    return (server_setting('ROLEPATH_AI_MODE') == 'managed'
+            and bool(os.getenv('LLM_API_KEY', '').strip() and os.getenv('LLM_MODEL', '').strip()))
+
 def managed_ai():
-    return cloud_mode() and server_setting('ROLEPATH_AI_MODE') == 'managed'
+    """Server-provided model path. Contest edition: no wallet, no membership gating."""
+    return server_model_configured()
+
+def wallet_enabled():
+    """Contest edition never charges credits or gates AI behind membership."""
+    return False
 
 def model_setting(name):
     if not cloud_mode():
         return os.getenv(name, '')
-    if managed_ai():
+    if server_model_configured():
         return server_setting(name)
     import streamlit as st
     return st.session_state.get('visitor_' + name, '')
@@ -34,11 +57,10 @@ def valid_model_endpoint(value):
 
 def render_model_settings():
     from .i18n import t as tr
-    if managed_ai():
-        from .credits import render_credits
-        render_credits()
-        return
     import streamlit as st
+    if server_model_configured():
+        st.caption(tr('AI：由服务端配置（参赛版免费，无需会员或自备 Key）'))
+        return
     configured = bool(model_setting('LLM_API_KEY'))
     st.caption(tr('AI：已配置（当前会话）') if configured else tr('AI：当前会话尚未配置'))
     with st.expander(tr('我的 AI 配置')):
