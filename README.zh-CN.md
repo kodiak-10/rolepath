@@ -34,9 +34,9 @@ RolePath 区分三件事：**岗位要求什么、用户有哪些能力证据、
 
 ### 岗位分析
 
-对照岗位原文查看识别出的要求；图中展示的是覆盖有限的关键词初筛。
+对照岗位原文查看识别出的要求，并核对每条要求的证据。
 
-![机械设计实习岗位的示例分析](docs/screenshots/job-analysis.png)
+![转化漏斗实习岗位的示例分析](docs/screenshots/job-analysis.png)
 
 ### 查找学习资源
 
@@ -52,9 +52,9 @@ RolePath 区分三件事：**岗位要求什么、用户有哪些能力证据、
 
 ### AI 学习助手
 
-对笔记提问、梳理知识，或请求简历修改建议。
+上传简历、建立结构化简历记忆，再按当前 JD 逐项优化。
 
-![学习助手中的简历建议示例](docs/screenshots/assistant.png)
+![狗蛋助手的结构化简历记忆与 JD 优化建议](docs/screenshots/assistant.png)
 
 ## 从岗位到行动
 

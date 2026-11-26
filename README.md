@@ -34,9 +34,9 @@ The following screenshots show RolePath's interface with fictional demonstration
 
 ### Job analysis
 
-Review extracted requirements alongside the original job description. The image shows the limited keyword preview.
+Review extracted requirements alongside their source text in the original job description.
 
-![Job analysis using a fictional mechanical design internship](docs/screenshots/job-analysis.png)
+![Job analysis for a fictional conversion-funnel internship](docs/screenshots/job-analysis.png)
 
 ### Learning resources
 
@@ -52,9 +52,9 @@ Break preparation into tasks that fit a chosen time budget.
 
 ### AI learning assistant
 
-Ask for explanations, note summaries, or suggestions for improving a resume.
+Upload a resume, build structured resume memory, and optimize it against the current JD.
 
-![Illustrative resume feedback in the learning assistant](docs/screenshots/assistant.png)
+![狗蛋 assistant with structured resume memory and JD-specific feedback](docs/screenshots/assistant.png)
 
 ## The learning journey
 
