@@ -24,7 +24,7 @@ A job description tells a student what an employer expects. It rarely explains w
 
 RolePath connects those steps in one workspace. Users can explore example roles, analyze a real job description, review source-linked courses and practice material, create a time-budgeted learning plan, and keep notes and progress records. A note assistant accepts natural-language instructions to summarize, explain, compare or ask questions about selected learning materials.
 
-The product is designed primarily for first-time internship applicants and first- and second-year university students. Its intended scope spans job families rather than a single employer or specialist role. The contest build combines a small reviewed course catalog with skill-specific Bilibili search entry points; search results are not individually verified recommendations.
+The product is designed primarily for first-time internship applicants and first- and second-year university students. Its intended scope spans job families rather than a single employer or specialist role. The contest build uses identifiable official documentation, institutional courses and reviewed course chapters. Where no suitable resource is available, it shows the gap and assigns an original role-specific exercise instead of a generic search page.
 
 RolePath separates three things that are easy to confuse: **what a role asks for, what a learner has evidence of, and what the learner has marked complete.** A checked task is a progress record, not a certification of competence.
 
@@ -40,7 +40,7 @@ Review extracted requirements alongside their source text in the original job de
 
 ### Learning resources
 
-Explore matched courses and open skill-specific searches where no reviewed course is available.
+Explore concrete matched resources, their quality basis, and role-specific exercises for uncovered skills.
 
 ![Learning resources for the example role](docs/screenshots/resources.png)
 
@@ -80,7 +80,7 @@ Without an API key, a limited keyword scan is available. It is explicitly presen
 
 ### Courses and practice with identifiable sources
 
-Course matching uses the requirements extracted from the job description. Reviewed catalog links are used when a skill matches; otherwise the app creates a clearly labelled Bilibili course-search entry. Community experience posts are not automatically recommended because access and content quality cannot be controlled. Search pages are starting points, not claims that a specific course has been reviewed.
+Course matching uses the requirements extracted from the job description. Each recommendation identifies the creator, source type, focus and quality basis. Links point to concrete official documentation, institutional courses, reviewed chapters or signed practitioner articles—never generic search-result pages. If the catalog has no suitable course, the app says so and gives an original, assessable role-specific exercise. Community experience posts are not automatically recommended because access and content quality cannot be controlled.
 
 Matched course links feed the time-budgeted planner. Practice materials remain separate and distinguish original question sources, public interview recollections and learning exercises. An interview recollection is not represented as an official or current company exam.
 
@@ -275,9 +275,9 @@ The current monthly plan is CNY 12.90 with unlimited AI use. The owner reviews a
 
 ## Resource matching in the contest build
 
-After JD analysis, **Courses & practice** immediately matches every extracted ability to a course or reference entry. Reviewed links are used where available; other course links open Bilibili search results for the specific skill. The planner reuses the same matched course links.
+After JD analysis, **Courses & practice** matches every extracted ability to a concrete, identifiable resource. Each card explains what to study and why the source is suitable. Uncovered skills show an explicit resource gap and an original role-specific exercise; the planner uses the same sources and exercises.
 
-The contest build does not call paid web-search APIs. Search-result pages are clearly labelled as entry points rather than verified individual recommendations, and community experience posts are not forced into the learning flow. The production Streamlit app keeps its separate live-research implementation and larger reviewed catalog; see [live research implementation and deployment](deploy/RESOURCE_RESEARCH.md).
+The contest build does not call paid web-search APIs or generate generic course-search links. A catalog check is not a full teaching-quality review, so the interface states each source's review basis. Community experience posts are not forced into the learning flow. The production Streamlit app keeps its separate live-research implementation and larger reviewed catalog; see [live research implementation and deployment](deploy/RESOURCE_RESEARCH.md).
 
 ## Production catalog: domestic learning sources and question provenance
 

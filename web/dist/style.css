@@ -105,6 +105,10 @@ button{font-family:inherit}
 .resource-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
 .resource-actions a{display:inline-flex;align-items:center;min-height:42px;padding:9px 15px;border:1px solid var(--rp-hair-strong);border-radius:12px;color:var(--rp-ink);text-decoration:none;background:rgba(255,255,255,.05);font-weight:600}
 .resource-actions a:hover{border-color:var(--rp-amber);color:var(--rp-amber);background:rgba(226,167,95,.08)}
+.resource-quality{margin:12px 0 16px;padding:10px 14px;border-left:2px solid var(--rp-teal);background:rgba(92,191,164,.06);color:var(--rp-body);font-size:13px}
+.resource-gap{margin:14px 0 18px;padding:16px;border:1px dashed var(--rp-hair-strong);border-radius:14px;background:rgba(255,255,255,.035)}
+.resource-gap p{margin:8px 0 0;color:var(--rp-body)}
+.resource-card details p{margin:10px 0 0}
 
 /* 表格（实底） */
 .table-wrap{overflow-x:auto;margin:0 0 12px;background:var(--rp-panel-solid);border:1px solid var(--rp-hair);border-radius:16px}

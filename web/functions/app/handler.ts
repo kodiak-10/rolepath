@@ -91,6 +91,7 @@ async function chat(content: string, system: string, maxTokens: number, timeoutM
     temperature: 0,
     messages: [{ role: 'system', content: system }, { role: 'user', content: content }],
     max_tokens: maxTokens,
+    enable_thinking: false,
   };
   if (responseFormat) body.response_format = responseFormat;
   const res = await upstream('/chat/completions', body, timeoutMs);

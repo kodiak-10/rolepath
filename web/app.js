@@ -17,50 +17,93 @@ const SKILL_ALIASES = {
 };
 
 const RESOURCES = {
-  '运营指标': { id: 'bili003', title: '产品经理基础：产品运营', url: 'https://www.bilibili.com/video/BV1QL411A7q6/', creator: '黑马产品经理', minutes: 71, focus: '09.活跃的定义&指标；11.留存的定义和流失的定义' },
-  'Excel': { id: 'res006', title: 'Microsoft Excel 帮助与学习', url: 'https://support.microsoft.com/zh-cn/excel', creator: '官方资料/原发布方', minutes: 45, focus: 'Excel 公式、筛选、表格、数据透视表。' },
-  'SQL': { id: 'cn001', title: 'MySQL数据库入门到大牛，mysql安装到优化，百科全书级，全网天花板', url: 'https://www.bilibili.com/video/BV1iq4y1u7vj/', creator: '尚硅谷', minutes: 110, focus: 'SELECT 基础、常用聚合函数与 GROUP BY；按需求选择章节，不要求刷完整套。' },
-  '数据分析': { id: 'cn003', title: '【莫烦Python】Numpy & Pandas (数据处理教程)', url: 'https://www.bilibili.com/video/BV1Ex411L7oT/', creator: '莫烦Python', minutes: 40, focus: 'Pandas 缺失值处理与数据导入导出。' },
+  '运营指标': { id: 'res012', title: 'Google Analytics 帮助中心', url: 'https://support.google.com/analytics/', creator: 'Google', kind: '官方文档', minutes: 40, focus: '事件、转化、流量来源与指标口径；为注册流程画一张指标树。', reason: 'JD 涉及指标、转化或留存，先统一口径，再练习从数据得出结论。', quality: '官方公开文档，出处和指标定义可核对。', verified: true },
+  'Excel': { id: 'res006', title: 'Microsoft Excel 帮助与学习', url: 'https://support.microsoft.com/zh-cn/excel', creator: 'Microsoft', kind: '官方文档', minutes: 45, focus: '公式、筛选、表格与数据透视表；用订单表完成月度汇总。', reason: 'JD 明确提到 Excel、表格或数据透视表，优先练公式、清洗和汇总。', quality: '官方公开文档，按功能查阅，不必通读。', verified: true },
+  'SQL': { id: 'res003', title: 'SQLBolt 交互式 SQL 练习', url: 'https://sqlbolt.com/', creator: 'SQLBolt', kind: '交互练习', minutes: 45, focus: 'SELECT、过滤、JOIN 与聚合；完成分组统计并保存可运行 SQL。', reason: 'JD 需要数据库查询或取数，先用交互练习建立可验证的基础。', quality: '练习可在浏览器中完成，题目与结果直接可核对。', verified: true },
+  '数据分析': { id: 'res004', title: 'Pandas 官方入门教程', url: 'https://pandas.pydata.org/docs/getting_started/intro_tutorials/index.html', creator: 'Pandas', kind: '官方教程', minutes: 50, focus: 'DataFrame、读取文件、分组与缺失值；输出三条业务观察。', reason: 'JD 强调数据处理或业务分析，先练清洗、计算和结论表达。', quality: '项目官方教程，示例与 API 可核对。', verified: true },
+  '项目管理': { id: 'bili001-p25', title: '产品经理快速入门 · 项目管理是什么', url: 'https://www.bilibili.com/video/BV1nv411e7zd/?p=25', creator: '黑马程序员', kind: '已核对章节', minutes: 30, focus: '目标、任务、节点与协作边界；产出一页项目推进表。', reason: 'JD 要求推进项目执行与交付，先建立可检查的任务和节点。', quality: '已核对发布者与章节；未逐集试听，只安排该章节。', verified: true },
+  '视频剪辑': { id: 'bili005-p26', title: 'Coze 实战 · 利用剪映生成最终视频', url: 'https://www.bilibili.com/video/BV12omoB4ExF/?p=26', creator: '黑马程序员', kind: '已核对章节', minutes: 35, focus: '理解素材到成片的流程并完成导出；再用一条 30–60 秒作品练节奏与字幕。', reason: 'JD 把视频剪辑列为作品或加分项，先用一个完整短作品证明基础。', quality: '已核对发布者与章节；这是 AI 视频工作流中的成片章节，不是完整剪辑课。', verified: true },
+  '内容运营': { id: 'ref023', title: 'HubSpot Academy：内容营销', url: 'https://academy.hubspot.com/courses/content-marketing', creator: 'HubSpot Academy', kind: '官方课程', minutes: 50, focus: '受众、内容目标、选题与分发；完成一篇模拟笔记和复盘指标。', reason: 'JD 提到内容、账号运营或创意，先补内容策略与可复用方法。', quality: '原机构公开课程，含学习内容与测验；不代表小红书平台规则。', verified: true },
+  'AI工具': { id: 'cn005', title: '阿里云百炼：文生文 Prompt 指南', url: 'https://help.aliyun.com/zh/model-studio/prompt-engineering-guide', creator: '阿里云百炼', kind: '官方文档', minutes: 40, focus: '指令、上下文、输出格式与结果核验；记录同一任务的两版 Prompt。', reason: 'JD 强调 AI 实际用法，重点是完成任务、核验结果并说明过程。', quality: '模型平台官方文档，方法与当前接口以原站为准。', verified: true },
+  '用户研究': { id: 'res013', title: 'Nielsen Norman Group：User Research', url: 'https://www.nngroup.com/articles/which-ux-research-methods/', creator: 'Nielsen Norman Group', kind: '研究指南', minutes: 45, focus: '按问题选择访谈、问卷或可用性测试；写五条中立访谈问题。', reason: 'JD 涉及用户洞察或调研，先学会提出问题并区分事实与推测。', quality: '专业研究机构公开指南，方法论和适用范围可核对。', verified: true },
+  '产品能力': { id: 'res007', title: 'Atlassian：Product requirements document', url: 'https://www.atlassian.com/agile/product-management/requirements', creator: 'Atlassian', kind: '实践指南', minutes: 50, focus: '需求背景、范围、用户故事与验收标准；写一页 PRD。', reason: 'JD 提到产品思维或需求分析，需要从用户问题推进到可交付方案。', quality: '专业协作工具的公开指南，模板与方法可核对。', verified: true },
+  '市场营销': { id: 'ref023', title: 'HubSpot Academy：内容营销', url: 'https://academy.hubspot.com/courses/content-marketing', creator: 'HubSpot Academy', kind: '官方课程', minutes: 45, focus: '目标用户、内容、渠道与转化；做一个微型活动方案。', reason: 'JD 涉及市场、品牌或投放，先理解用户、渠道和转化之间的关系。', quality: '原机构公开课程；范围偏内容营销，不作为完整市场营销体系。', verified: true },
+  '财务分析': { id: 'res006', title: 'Microsoft Excel 帮助与学习', url: 'https://support.microsoft.com/zh-cn/excel', creator: 'Microsoft', kind: '官方文档', minutes: 45, focus: '用表格整理收入、成本和预算，解释口径、差异与待验证假设。', reason: 'JD 提到财务、预算或经营分析，先用可复算的数据建立分析习惯。', quality: '官方工具文档；不替代会计或财务专业课程。', verified: true },
 };
 
-function courseSearchUrl(query) {
-  return 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(String(query || '').trim());
-}
-
-function searchResource(key, title, query, minutes, focus, reason) {
-  return { id: 'search-' + key, title, url: courseSearchUrl(query), creator: 'B站课程搜索', minutes, focus, reason, verified: false };
-}
+const SUPPLEMENTS = {
+  '运营指标': [
+    { title: '产品运营 · 活跃的定义与指标', url: 'https://www.bilibili.com/video/BV1QL411A7q6/?p=9', creator: '黑马产品经理', kind: '已核对章节' },
+    { title: '产品运营 · 留存与流失的定义', url: 'https://www.bilibili.com/video/BV1QL411A7q6/?p=11', creator: '黑马产品经理', kind: '已核对章节' },
+  ],
+  'SQL': [
+    { title: 'MySQL 8.4 官方参考手册', url: 'https://dev.mysql.com/doc/refman/8.4/en/', creator: 'MySQL', kind: '官方文档' },
+    { title: '尚硅谷 · 最基本 SELECT 查询', url: 'https://www.bilibili.com/video/BV1iq4y1u7vj/?p=14', creator: '尚硅谷', kind: '已核对章节' },
+  ],
+  '数据分析': [
+    { title: 'Pandas GroupBy 用户指南', url: 'https://pandas.pydata.org/docs/user_guide/groupby.html', creator: 'Pandas', kind: '官方文档' },
+  ],
+  '项目管理': [
+    { title: 'Atlassian：User stories', url: 'https://www.atlassian.com/agile/project-management/user-stories', creator: 'Atlassian', kind: '实践指南' },
+    { title: '产品经理快速入门 · 需求评审会', url: 'https://www.bilibili.com/video/BV1nv411e7zd/?p=51', creator: '黑马程序员', kind: '已核对章节' },
+  ],
+  '视频剪辑': [
+    { title: 'Coze 实战 · 根据提示词及图片制作视频', url: 'https://www.bilibili.com/video/BV12omoB4ExF/?p=22', creator: '黑马程序员', kind: '已核对章节' },
+  ],
+  '内容运营': [
+    { title: '产品运营 · 社区化和内容运营', url: 'https://www.bilibili.com/video/BV1QL411A7q6/?p=10', creator: '黑马产品经理', kind: '已核对章节' },
+  ],
+  'AI工具': [
+    { title: '扣子官方：低代码工作流入门', url: 'https://docs.coze.cn/guides_workflow', creator: '扣子官方', kind: '官方文档 · 部分节点可能收费' },
+    { title: '李宏毅：生成式人工智能导论', url: 'https://www.bilibili.com/video/BV1BJ4m1e7g8/', creator: '李宏毅 / 啥都会一点的研究生', kind: '已核对课程' },
+  ],
+  '用户研究': [
+    { title: '用户研究与市场、竞品分析的关系', url: 'https://www.woshipm.com/user-research/5184902.html', creator: '用研那些事儿 / 人人都是产品经理', kind: '署名实践文章' },
+  ],
+  '产品能力': [
+    { title: '产品经理快速入门 · 需求池讲解', url: 'https://www.bilibili.com/video/BV1nv411e7zd/?p=42', creator: '黑马程序员', kind: '已核对章节' },
+    { title: 'Atlassian：User stories', url: 'https://www.atlassian.com/agile/project-management/user-stories', creator: 'Atlassian', kind: '实践指南' },
+  ],
+};
 
 const RESOURCE_RULES = [
-  { key: '运营指标', aliases: SKILL_ALIASES['运营指标'], resource: { ...RESOURCES['运营指标'], reason: 'JD 涉及指标、转化、留存或复盘，先统一口径，再练习从数据得出结论。', verified: true } },
-  { key: 'Excel', aliases: SKILL_ALIASES.Excel, resource: { ...RESOURCES.Excel, reason: 'JD 明确提到 Excel、表格或数据透视表，优先练公式、清洗和汇总。', verified: true } },
-  { key: 'SQL', aliases: SKILL_ALIASES.SQL, resource: { ...RESOURCES.SQL, reason: 'JD 需要数据库查询或取数，先掌握 SELECT、筛选、关联与聚合。', verified: true } },
-  { key: '数据分析', aliases: SKILL_ALIASES['数据分析'], resource: { ...RESOURCES['数据分析'], reason: 'JD 强调数据处理或业务分析，先练清洗、计算、可视化和结论表达。', verified: true } },
-  { key: '项目管理', aliases: SKILL_ALIASES['项目管理'], resource: searchResource('project', '项目管理与活动落地入门课程', '项目管理 活动落地 入门 教程', 45, '任务拆解、进度跟踪、风险清单和复盘；产出一页项目推进表。', 'JD 要求推进项目执行与交付，需要把目标拆成可检查的任务和节点。') },
-  { key: '人力资源', aliases: SKILL_ALIASES['人力资源'], resource: searchResource('hr', '人力资源与组织发展入门课程', '人力资源 组织发展 人才培养 入门 教程', 50, '招聘流程、人才培养项目、组织发展基础；结合一个校招或培训项目写方案。', 'JD 明确提到人力资源、组织发展或人才培养经验，优先补项目运营与人才发展基础。') },
-  { key: '视频剪辑', aliases: ['视频剪辑', '剪辑', '视频制作', '剪映', 'Premiere', 'PR'], resource: searchResource('video', '视频剪辑与作品集入门课程', '剪映 视频剪辑 入门 教程', 40, '素材整理、节奏、字幕和导出；完成一条 30–60 秒作品。', 'JD 把视频剪辑列为作品或加分项，先用一个完整短作品证明基础能力。') },
-  { key: '内容运营', aliases: SKILL_ALIASES['内容运营'], resource: searchResource('content', '小红书内容与账号运营入门课程', '小红书 内容运营 账号运营 入门 教程', 45, '选题、标题、正文结构、评论区运营和数据复盘；完成一篇模拟笔记。', 'JD 提到关注小红书、琢磨创意或账号运营，适合补内容选题与作品集方法。') },
-  { key: 'AI工具', aliases: SKILL_ALIASES.AI工具, resource: searchResource('ai', 'AI 工具实战入门课程', 'AI工具 大模型 提示词 入门 教程', 35, '选一个真实任务，练习提示词、结果核验和流程记录；避免只收藏工具。', 'JD 强调 AI native 和实际用法，重点是能用工具完成具体任务并说明过程。') },
-  { key: '实习准备', aliases: ['实习经验', '实习准备', '互联网实习', '求职准备'], resource: searchResource('internship', '互联网实习准备与作品集课程', '互联网 实习 作品集 准备 入门 教程', 35, '拆解岗位、准备作品集、模拟面试和复盘；把一个学习成果整理成可展示案例。', 'JD 把相关实习经验列为加分项，可以用完整作品集和可复现项目补足经验缺口。') },
-  { key: '沟通协作', aliases: SKILL_ALIASES['沟通协作'], resource: searchResource('communication', '沟通协作与结构化表达课程', '沟通协作 结构化表达 入门 教程', 30, '结论先行、证据支撑、会议纪要和反馈；准备一段 3 分钟汇报。', 'JD 重视沟通、共情或协作，需要把想法说清楚并推动他人配合。') },
-  { key: '用户研究', aliases: ['用户研究', '用户调研', '访谈', '问卷', '消费者洞察', '用户体验'], resource: searchResource('research', '用户研究与访谈入门课程', '用户研究 访谈 问卷 入门 教程', 45, '研究问题、样本选择、访谈提纲和结论边界；完成一次模拟访谈。', 'JD 涉及用户洞察或调研，先学会提出问题和区分事实与推测。') },
-  { key: '产品能力', aliases: ['产品思维', '需求分析', '产品设计', '原型', '产品经理', '需求文档'], resource: searchResource('product', '产品分析与需求入门课程', '产品经理 需求分析 入门 教程', 45, '用户问题、需求优先级、原型和验收标准；写一页需求说明。', 'JD 提到产品思维或需求分析，需要从用户问题推进到可交付方案。') },
-  { key: '市场营销', aliases: ['市场', '营销', '品牌', '投放', '广告', '增长'], resource: searchResource('marketing', '市场营销与品牌入门课程', '市场营销 品牌 投放 入门 教程', 40, '目标用户、渠道、内容、转化和复盘；做一个微型活动方案。', 'JD 涉及市场、品牌或投放，先理解用户、渠道和转化之间的关系。') },
-  { key: '客户与销售', aliases: ['销售', '客户成功', '商务', '谈判', '客户沟通'], resource: searchResource('sales', '销售与客户沟通入门课程', '销售 客户成功 沟通 入门 教程', 35, '客户需求、价值表达、异议处理和复盘；模拟一次客户沟通。', 'JD 涉及销售或客户成功，重点是理解需求并清楚表达方案价值。') },
-  { key: '财务分析', aliases: ['财务', '会计', '预算', '成本', '经营分析'], resource: searchResource('finance', '财务与经营分析入门课程', '财务分析 预算 成本 入门 教程', 45, '三张表基础、预算和成本分析；解释一组模拟经营数据。', 'JD 提到财务、预算或经营分析，先掌握基本口径和分析框架。') },
-  { key: '培训与教学', aliases: ['培训', '教学', '课程设计', '讲师', '教研', '人才培养'], resource: searchResource('training', '培训设计与课程开发入门课程', '培训 课程设计 入门 教程', 40, '学习目标、课程结构、练习和反馈；设计一节 20 分钟微课。', 'JD 涉及培训或课程设计，需要把知识拆成可学习、可练习的课程。') },
+  { key: '运营指标', aliases: SKILL_ALIASES['运营指标'] },
+  { key: 'Excel', aliases: SKILL_ALIASES.Excel },
+  { key: 'SQL', aliases: SKILL_ALIASES.SQL },
+  { key: '数据分析', aliases: SKILL_ALIASES['数据分析'] },
+  { key: '项目管理', aliases: SKILL_ALIASES['项目管理'] },
+  { key: '人力资源', aliases: SKILL_ALIASES['人力资源'] },
+  { key: '视频剪辑', aliases: ['视频剪辑', '剪辑', '视频制作', '剪映', 'Premiere', 'PR'] },
+  { key: '内容运营', aliases: SKILL_ALIASES['内容运营'] },
+  { key: 'AI工具', aliases: SKILL_ALIASES.AI工具 },
+  { key: '实习准备', aliases: ['实习经验', '实习准备', '互联网实习', '求职准备'] },
+  { key: '沟通协作', aliases: SKILL_ALIASES['沟通协作'] },
+  { key: '用户研究', aliases: ['用户研究', '用户调研', '访谈', '问卷', '消费者洞察', '用户体验'] },
+  { key: '产品能力', aliases: ['产品思维', '需求分析', '产品设计', '原型', '产品经理', '需求文档'] },
+  { key: '市场营销', aliases: ['市场', '营销', '品牌', '投放', '广告', '增长'] },
+  { key: '客户与销售', aliases: ['销售', '客户成功', '商务', '谈判', '客户沟通'] },
+  { key: '财务分析', aliases: ['财务', '会计', '预算', '成本', '经营分析'] },
+  { key: '培训与教学', aliases: ['培训', '教学', '课程设计', '讲师', '教研'] },
 ];
+
+const DELIVERABLES = { '数据分析': '用明确标注为模拟的数据计算活跃与留存指标，写出计算口径和结论边界。' };
+const PRACTICES = {
+  '人力资源': '选一个校招或人才培养项目，写出目标、对象、流程、分工、风险与复盘指标，形成一页项目方案。',
+  '实习准备': '把当前 JD 拆成五项能力，为每项补一个可展示作品或证据，整理成一页作品集目录。',
+  '沟通协作': '用“结论—证据—请求”写一段 3 分钟汇报，并列出两种反对意见及回应。',
+  '客户与销售': '模拟一次客户沟通，写出需求澄清问题、方案价值、异议处理与下一步行动。',
+  '培训与教学': '设计一节 20 分钟微课，包含学习目标、讲解、练习、反馈与验收标准。',
+};
+
+function practiceFor(skill, evidence) {
+  return DELIVERABLES[skill] || PRACTICES[skill] || `围绕 JD 原文“${evidence}”完成一个小成果，列出假设、执行过程和验证方式。`;
+}
 
 function resourceFor(skill) {
   const name = String(skill || '').trim();
   const normalized = name.toLowerCase();
   const rule = RESOURCE_RULES.find((item) => item.aliases.some((alias) => hasAlias(normalized, alias)));
-  if (rule) return { ...rule.resource, key: rule.key };
-  return {
-    id: 'search-' + hashText(name), title: `${name} 入门课程搜索`, url: courseSearchUrl(`${name} 入门 教程`),
-    creator: 'B站课程搜索', minutes: 30, focus: '先看基础概念和完整案例，再按 JD 原文完成一个小成果。',
-    reason: '该能力直接来自当前 JD；先补基础，再找可复现的实践案例。', verified: false, key: name,
-  };
+  return rule && RESOURCES[rule.key] ? { ...RESOURCES[rule.key], key: rule.key } : null;
 }
 
 function matchedResources(reqs) {
@@ -68,12 +111,12 @@ function matchedResources(reqs) {
     const course = resourceFor(item.skill);
     return {
       skill: item.skill, priority: item.priority, evidence: item.evidence, detail: item.detail || item.evidence,
-      course, reason: course.reason,
+      course, supplements: course ? (SUPPLEMENTS[course.key] || []) : [],
+      reason: course ? course.reason : '暂未收录与这项能力直接对应、且出处可核对的具体课程；先用岗位专项练习建立成果。',
+      practice: course ? '' : practiceFor(item.skill, item.detail || item.evidence),
     };
   });
 }
-
-const DELIVERABLES = { '数据分析': '用明确标注为模拟的数据计算活跃与留存指标，写出计算口径和结论边界。' };
 
 const QUESTIONS = {
   'SQL': { id: 'q005', title: '超过经理收入的员工', kind: 'SQL笔试练习', minutes: 35, deliverable: '在原站阅读表结构、独立编写 SQL 并测试，记录关联条件。', url: 'https://leetcode.cn/problems/employees-earning-more-than-their-managers/', source: '力扣 LeetCode' },
@@ -176,7 +219,7 @@ function extractSkills(text) {
   return [...found.values()];
 }
 
-/* ---------- 计划生成（保留原有排程，支持 AI 查找资料覆盖目录） ---------- */
+/* ---------- 计划生成（沿用时间预算，匹配可核对资料或岗位实践） ---------- */
 
 function isoDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -200,7 +243,7 @@ function planTasks(requirements, hoursPerWeek, days, live) {
     }
     candidates.push(question
       ? { kind: question.kind, title: question.title, minutes: question.minutes, acceptance: question.deliverable, question }
-      : { kind: '成果练习（非真题）', title: `${skill}：提交学习成果`, minutes: 35, acceptance: (DELIVERABLES[skill] || `围绕 JD 原文“${item.evidence}”，应用所学提交一个例子，列出假设与验证方式。`) + ' 这是学习作业，不是企业真题。' });
+      : { kind: '成果练习（非真题）', title: `${skill}：提交学习成果`, minutes: 35, acceptance: practiceFor(skill, item.evidence) + ' 这是学习作业，不是企业真题。' });
     for (const candidate of candidates) {
       let todo = candidate.minutes;
       if (todo > daily.reduce((a, b) => a + b, 0)) break;
@@ -217,8 +260,8 @@ function planTasks(requirements, hoursPerWeek, days, live) {
       }
       if (candidate.question) usedQuestions.add(candidate.question.id);
       const reason = primary
-        ? `${primary.verified ? '人工核验课程目录' : '课程搜索入口'}匹配「${skill}」；对应 JD 原文：${item.evidence}`
-        : `暂无核验过的匹配资料，安排成果练习；对应 JD 原文：${item.evidence}`;
+        ? `已核对资料「${primary.title}」匹配「${skill}」；对应 JD 原文：${item.evidence}`
+        : `暂无合适的可核对课程，安排岗位实践；对应 JD 原文：${item.evidence}`;
       tasks.push({
         skill, kind: candidate.kind, title: candidate.title, minutes: candidate.minutes,
         due: sessions[sessions.length - 1].date, acceptance: candidate.acceptance, question: candidate.question || null,
@@ -640,30 +683,32 @@ function prepCoursesHtml() {
     return html;
   }
   const matches = matchedResources(reqs);
-  const verifiedCount = matches.filter((item) => item.course.verified).length;
+  const curatedCount = matches.filter((item) => item.course).length;
+  const practiceCount = matches.length - curatedCount;
   html += `<div class="card solid resource-intro">
-    <p class="kicker">JD 驱动 · 即时匹配 · 不调用付费搜索</p>
-    <p>已按当前岗位的 <strong>${matches.length}</strong> 项能力匹配学习入口：${verifiedCount} 项来自人工核验课程目录，其余使用课程搜索。</p>
-    <p class="muted">不自动推荐社区经验贴，避免登录门槛和内容质量不可控。请优先完成可检查的学习成果，而不是收藏“速成”内容。</p>
+    <p class="kicker">具体出处 · 按需学习 · 不用搜索页凑数</p>
+    <p>已按当前岗位的 <strong>${matches.length}</strong> 项能力整理：${curatedCount} 项有出处可核对的具体资料，${practiceCount} 项暂无合适课程，改为岗位专项实践。</p>
+    <p class="muted">这里只使用官方文档、机构课程或已核对发布者与章节的视频；目录核查不等于完整教学质量评审。社区经验贴和泛搜索页不会自动加入。</p>
   </div>`;
   for (const match of matches) {
     const course = match.course;
-    const question = QUESTIONS[course.key] || null;
+    const question = course ? (QUESTIONS[course.key] || null) : null;
     html += `<div class="card resource-card">
-      <p class="resource-kicker">${esc(match.priority)} · ${course.verified ? '人工核验课程/资料' : '课程搜索入口'}</p>
+      <p class="resource-kicker">${esc(match.priority)} · ${course ? esc(course.kind) : '原创岗位实践'}</p>
       <h2>${esc(match.skill)}</h2>
       <p>${esc(match.reason)}</p>
-      <p class="resource-actions">
-        ${linkHtml(course.url, course.verified ? `打开课程：${course.title}` : `搜索课程：${course.title}`)}
-      </p>
-      <p><strong>先学什么：</strong>${esc(course.focus)}</p>
-      <p class="muted">${esc(course.creator)} · 建议本次投入 ${course.minutes} 分钟；这是学习预算，不是整课时长。</p>
+      ${course ? `<p class="resource-actions">${linkHtml(course.url, `打开资料：${course.title}`)}</p>
+        <p><strong>先学什么：</strong>${esc(course.focus)}</p>
+        <p class="muted">${esc(course.creator)} · 建议本次投入 ${course.minutes} 分钟；这是学习预算，不是整课时长。</p>
+        <p class="resource-quality"><strong>质量依据：</strong>${esc(course.quality)}</p>
+        ${match.supplements.length ? `<details><summary>补充资料（${match.supplements.length}）</summary>${match.supplements.map((item) => `<p>${linkHtml(item.url, item.title)}<br><span class="muted">${esc(item.creator)} · ${esc(item.kind)}</span></p>`).join('')}</details>` : ''}`
+        : `<div class="resource-gap"><strong>暂不推荐来源不明的课程</strong><p>${esc(match.practice)}</p></div>`}
       ${question ? `<p><strong>配套练习：</strong>${linkHtml(question.url, question.title)}<br><span class="muted">${esc(question.source)} · ${question.minutes} 分钟</span></p>` : ''}
       <details><summary>匹配依据：当前 JD 原文</summary><p class="evidence">${esc(match.evidence || match.detail)}</p></details>
     </div>`;
   }
   html += `<details><summary>资源使用说明</summary>
-    <p>课程搜索只负责缩小查找范围，不等于对单条结果的质量背书。打开原站后，优先选择章节完整、案例具体、作者信息清楚的内容；遇到收费或登录要求请先确认，再决定是否学习。</p></details>`;
+    <p>官方资料用于查准概念，机构课程用于建立方法，已核对章节只学标注部分。遇到收费、登录或地区限制请先确认；没有合适课程时，直接完成可检查的岗位实践，不收藏低质搜索页。</p></details>`;
   return html;
 }
 
@@ -811,7 +856,9 @@ function buildContext() {
   }
   if (Array.isArray(state.jd.requirements) && state.jd.requirements.length) {
     const resources = matchedResources(state.jd.requirements).slice(0, 8);
-    parts.push('匹配学习入口：' + resources.map((item) => `${item.skill} → ${item.course.title}`).join('；'));
+    parts.push('匹配学习安排：' + resources.map((item) => item.course
+      ? `${item.skill} → 已核对资料《${item.course.title}》`
+      : `${item.skill} → 暂无合适课程，岗位实践：${item.practice}`).join('；'));
   }
   if (dollNote) parts.push(`笔记《${dollNote.title}》：${dollNote.body}`);
   return parts.join('\n').slice(0, 12000);
