@@ -98,6 +98,14 @@ button{font-family:inherit}
 .activity li:last-child{border-bottom:0}
 .activity .muted{margin-right:10px}
 .evidence{white-space:pre-wrap;font-size:13px;color:var(--rp-body)}
+.resource-intro{padding:20px 24px}
+.resource-intro .kicker{margin:0 0 10px;color:var(--rp-teal)}
+.resource-kicker{margin:0 0 8px;color:var(--rp-teal);font-size:12px;letter-spacing:.08em}
+.resource-card h2{margin:0 0 10px}
+.resource-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.resource-actions a{display:inline-flex;align-items:center;min-height:42px;padding:9px 15px;border:1px solid var(--rp-hair-strong);border-radius:12px;color:var(--rp-ink);text-decoration:none;background:rgba(255,255,255,.05);font-weight:600}
+.resource-actions a:hover{border-color:var(--rp-amber);color:var(--rp-amber);background:rgba(226,167,95,.08)}
+.resource-actions a:last-child{border-color:rgba(92,191,164,.35);color:var(--rp-teal);background:rgba(92,191,164,.08)}
 
 /* 表格（实底） */
 .table-wrap{overflow-x:auto;margin:0 0 12px;background:var(--rp-panel-solid);border:1px solid var(--rp-hair);border-radius:16px}

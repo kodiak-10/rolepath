@@ -5,10 +5,15 @@
 const JD_TEXT = '转化漏斗分析实习生（教学演示JD，非真实招聘）：1. 负责注册与活动转化漏斗的日常监控，计算各环节转化率与流失率；2. 熟练使用 Excel 进行数据整理，了解 SQL 取数；3. 具备基础数据分析能力，能输出结论与验证建议；4. 有漏斗分析或运营指标复盘经验优先。';
 
 const SKILL_ALIASES = {
-  '运营指标': ['运营指标', '转化率', '留存率', '用户增长', '漏斗分析'],
-  'Excel': ['excel', '数据透视表', '电子表格'],
-  'SQL': ['sql', 'mysql', '数据库查询'],
-  '数据分析': ['数据分析', '数据处理', '业务分析', '数据复盘', '产品数据'],
+  '运营指标': ['运营指标', '转化率', '留存率', '用户增长', '漏斗分析', '活跃', 'A/B', 'AB实验'],
+  'Excel': ['excel', '数据透视表', '电子表格', 'vlookup'],
+  'SQL': ['sql', 'mysql', '数据库查询', '取数'],
+  '数据分析': ['数据分析', '数据处理', '业务分析', '数据复盘', '产品数据', 'numpy', 'pandas'],
+  '项目管理': ['项目执行', '项目交付', '项目管理', '进度管理', '活动落地', '跨部门'],
+  '人力资源': ['人力资源', '组织发展', '人才发展', '人才培养', '招聘', '校招', 'HR'],
+  '内容运营': ['内容运营', '小红书', '账号运营', '内容策划', '创意', '选题', '文案'],
+  'AI工具': ['AI', '人工智能', '大模型', '提示词', 'AIGC'],
+  '沟通协作': ['沟通', '协作', '共情', '感知力', '表达', '汇报'],
 };
 
 const RESOURCES = {
@@ -18,13 +23,68 @@ const RESOURCES = {
   '数据分析': { id: 'cn003', title: '【莫烦Python】Numpy & Pandas (数据处理教程)', url: 'https://www.bilibili.com/video/BV1Ex411L7oT/', creator: '莫烦Python', minutes: 40, focus: 'Pandas 缺失值处理与数据导入导出。' },
 };
 
+function courseSearchUrl(query) {
+  return 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(String(query || '').trim());
+}
+
+function xhsSearchUrl(skill) {
+  const role = String(state.jd && state.jd.raw ? state.jd.raw.split('\n')[0] : '').replace(/\s+/g, ' ').slice(0, 32);
+  const query = [role, String(skill || '').slice(0, 42), '实习', '经验'].filter(Boolean).join(' ');
+  return 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(query);
+}
+
+function searchResource(key, title, query, minutes, focus, reason) {
+  return { id: 'search-' + key, title, url: courseSearchUrl(query), creator: 'B站课程搜索', minutes, focus, reason, verified: false };
+}
+
+const RESOURCE_RULES = [
+  { key: '运营指标', aliases: SKILL_ALIASES['运营指标'], resource: { ...RESOURCES['运营指标'], reason: 'JD 涉及指标、转化、留存或复盘，先统一口径，再练习从数据得出结论。', verified: true } },
+  { key: 'Excel', aliases: SKILL_ALIASES.Excel, resource: { ...RESOURCES.Excel, reason: 'JD 明确提到 Excel、表格或数据透视表，优先练公式、清洗和汇总。', verified: true } },
+  { key: 'SQL', aliases: SKILL_ALIASES.SQL, resource: { ...RESOURCES.SQL, reason: 'JD 需要数据库查询或取数，先掌握 SELECT、筛选、关联与聚合。', verified: true } },
+  { key: '数据分析', aliases: SKILL_ALIASES['数据分析'], resource: { ...RESOURCES['数据分析'], reason: 'JD 强调数据处理或业务分析，先练清洗、计算、可视化和结论表达。', verified: true } },
+  { key: '项目管理', aliases: SKILL_ALIASES['项目管理'], resource: searchResource('project', '项目管理与活动落地入门课程', '项目管理 活动落地 入门 教程', 45, '任务拆解、进度跟踪、风险清单和复盘；产出一页项目推进表。', 'JD 要求推进项目执行与交付，需要把目标拆成可检查的任务和节点。') },
+  { key: '人力资源', aliases: SKILL_ALIASES['人力资源'], resource: searchResource('hr', '人力资源与组织发展入门课程', '人力资源 组织发展 人才培养 入门 教程', 50, '招聘流程、人才培养项目、组织发展基础；结合一个校招或培训项目写方案。', 'JD 明确提到人力资源、组织发展或人才培养经验，优先补项目运营与人才发展基础。') },
+  { key: '视频剪辑', aliases: ['视频剪辑', '剪辑', '视频制作', '剪映', 'Premiere', 'PR'], resource: searchResource('video', '视频剪辑与作品集入门课程', '剪映 视频剪辑 入门 教程', 40, '素材整理、节奏、字幕和导出；完成一条 30–60 秒作品。', 'JD 把视频剪辑列为作品或加分项，先用一个完整短作品证明基础能力。') },
+  { key: '内容运营', aliases: SKILL_ALIASES['内容运营'], resource: searchResource('content', '小红书内容与账号运营入门课程', '小红书 内容运营 账号运营 入门 教程', 45, '选题、标题、正文结构、评论区运营和数据复盘；完成一篇模拟笔记。', 'JD 提到关注小红书、琢磨创意或账号运营，适合补内容选题与作品集方法。') },
+  { key: 'AI工具', aliases: SKILL_ALIASES.AI工具, resource: searchResource('ai', 'AI 工具实战入门课程', 'AI工具 大模型 提示词 入门 教程', 35, '选一个真实任务，练习提示词、结果核验和流程记录；避免只收藏工具。', 'JD 强调 AI native 和实际用法，重点是能用工具完成具体任务并说明过程。') },
+  { key: '实习准备', aliases: ['实习经验', '实习准备', '互联网实习', '求职准备'], resource: searchResource('internship', '互联网实习准备与作品集课程', '互联网 实习 作品集 准备 入门 教程', 35, '拆解岗位、准备作品集、模拟面试和复盘；把一个学习成果整理成可展示案例。', 'JD 把相关实习经验列为加分项，可以用完整作品集和可复现项目补足经验缺口。') },
+  { key: '沟通协作', aliases: SKILL_ALIASES['沟通协作'], resource: searchResource('communication', '沟通协作与结构化表达课程', '沟通协作 结构化表达 入门 教程', 30, '结论先行、证据支撑、会议纪要和反馈；准备一段 3 分钟汇报。', 'JD 重视沟通、共情或协作，需要把想法说清楚并推动他人配合。') },
+  { key: '用户研究', aliases: ['用户研究', '用户调研', '访谈', '问卷', '消费者洞察', '用户体验'], resource: searchResource('research', '用户研究与访谈入门课程', '用户研究 访谈 问卷 入门 教程', 45, '研究问题、样本选择、访谈提纲和结论边界；完成一次模拟访谈。', 'JD 涉及用户洞察或调研，先学会提出问题和区分事实与推测。') },
+  { key: '产品能力', aliases: ['产品思维', '需求分析', '产品设计', '原型', '产品经理', '需求文档'], resource: searchResource('product', '产品分析与需求入门课程', '产品经理 需求分析 入门 教程', 45, '用户问题、需求优先级、原型和验收标准；写一页需求说明。', 'JD 提到产品思维或需求分析，需要从用户问题推进到可交付方案。') },
+  { key: '市场营销', aliases: ['市场', '营销', '品牌', '投放', '广告', '增长'], resource: searchResource('marketing', '市场营销与品牌入门课程', '市场营销 品牌 投放 入门 教程', 40, '目标用户、渠道、内容、转化和复盘；做一个微型活动方案。', 'JD 涉及市场、品牌或投放，先理解用户、渠道和转化之间的关系。') },
+  { key: '客户与销售', aliases: ['销售', '客户成功', '商务', '谈判', '客户沟通'], resource: searchResource('sales', '销售与客户沟通入门课程', '销售 客户成功 沟通 入门 教程', 35, '客户需求、价值表达、异议处理和复盘；模拟一次客户沟通。', 'JD 涉及销售或客户成功，重点是理解需求并清楚表达方案价值。') },
+  { key: '财务分析', aliases: ['财务', '会计', '预算', '成本', '经营分析'], resource: searchResource('finance', '财务与经营分析入门课程', '财务分析 预算 成本 入门 教程', 45, '三张表基础、预算和成本分析；解释一组模拟经营数据。', 'JD 提到财务、预算或经营分析，先掌握基本口径和分析框架。') },
+  { key: '培训与教学', aliases: ['培训', '教学', '课程设计', '讲师', '教研', '人才培养'], resource: searchResource('training', '培训设计与课程开发入门课程', '培训 课程设计 入门 教程', 40, '学习目标、课程结构、练习和反馈；设计一节 20 分钟微课。', 'JD 涉及培训或课程设计，需要把知识拆成可学习、可练习的课程。') },
+];
+
+function resourceFor(skill) {
+  const name = String(skill || '').trim();
+  const normalized = name.toLowerCase();
+  const rule = RESOURCE_RULES.find((item) => item.aliases.some((alias) => hasAlias(normalized, alias)));
+  if (rule) return { ...rule.resource, key: rule.key };
+  return {
+    id: 'search-' + hashText(name), title: `${name} 入门课程搜索`, url: courseSearchUrl(`${name} 入门 教程`),
+    creator: 'B站课程搜索', minutes: 30, focus: '先看基础概念和完整案例，再按 JD 原文完成一个小成果。',
+    reason: '该能力直接来自当前 JD；先补基础，再找可复现的实践案例。', verified: false, key: name,
+  };
+}
+
+function matchedResources(reqs) {
+  return reqs.map((item) => {
+    const course = resourceFor(item.skill);
+    return {
+      skill: item.skill, priority: item.priority, evidence: item.evidence, detail: item.detail || item.evidence,
+      course, reason: course.reason,
+      xhs: { title: `${item.skill} 实习经验贴`, url: xhsSearchUrl(item.skill), creator: '小红书搜索结果' },
+    };
+  });
+}
+
 const DELIVERABLES = { '数据分析': '用明确标注为模拟的数据计算活跃与留存指标，写出计算口径和结论边界。' };
 
 const QUESTIONS = {
   'SQL': { id: 'q005', title: '超过经理收入的员工', kind: 'SQL笔试练习', minutes: 35, deliverable: '在原站阅读表结构、独立编写 SQL 并测试，记录关联条件。', url: 'https://leetcode.cn/problems/employees-earning-more-than-their-managers/', source: '力扣 LeetCode' },
 };
-
-const KINDS = { course: '课程', reference: '专业资料', practice: '平台练习', company_bank: '作者标注的企业题目（未经企业确认）', interview_recollection: '用户回忆面经（非官方真题）' };
 
 const STAGES = ['落地页访问', '点击注册', '完成手机验证', '填写资料', '注册成功'];
 const CHANNELS = { '渠道 A · 应用商店': [8000, 3600, 2700, 2160, 1900], '渠道 B · 信息流广告': [6000, 3000, 900, 720, 630] };
@@ -138,7 +198,7 @@ function planTasks(requirements, hoursPerWeek, days, live) {
   const usedQuestions = new Set();
   for (const item of requirements) {
     const skill = item.skill;
-    const primary = live.resources[skill] || RESOURCES[skill] || null;
+    const primary = live.resources[skill] || resourceFor(skill) || null;
     const qsrc = live.questions[skill] || QUESTIONS[skill] || null;
     const question = qsrc && !usedQuestions.has(qsrc.id) ? qsrc : null;
     const candidates = [];
@@ -164,7 +224,7 @@ function planTasks(requirements, hoursPerWeek, days, live) {
       }
       if (candidate.question) usedQuestions.add(candidate.question.id);
       const reason = primary
-        ? (primary.fromAI ? `AI 查找资料（出处见「课程与题目」）；对应 JD 原文：${item.evidence}` : `资源目录标注覆盖「${skill}」；对应 JD 原文：${item.evidence}`)
+        ? `${primary.verified ? '人工核验课程目录' : '课程搜索入口'}匹配「${skill}」；对应 JD 原文：${item.evidence}`
         : `暂无核验过的匹配资料，安排成果练习；对应 JD 原文：${item.evidence}`;
       tasks.push({
         skill, kind: candidate.kind, title: candidate.title, minutes: candidate.minutes,
@@ -189,7 +249,6 @@ function defaultState() {
     jd: { raw: '', draft: '', requirements: null, mode: null },
     sliders: { hours: 8, days: 14 },
     plan: null, attempts: [], notes: [],
-    research: { scope: null, result: null, failed: false, disabled: false },
     practiceDraft: { step: 0, rate_b: 0, rate_a: 0, cause: '', verification: '' },
     doll: { open: false, messages: [], draft: '', mode: 'chat' },
     feedbackIndex: 0,
@@ -206,7 +265,6 @@ try {
       state = Object.assign(base, saved);
       state.jd = Object.assign(base.jd, saved.jd || {});
       state.sliders = Object.assign(base.sliders, saved.sliders || {});
-      state.research = Object.assign(base.research, saved.research || {});
       state.practiceDraft = Object.assign(base.practiceDraft, saved.practiceDraft || {});
       state.doll = Object.assign(base.doll, saved.doll || {});
       if (!Array.isArray(state.attempts)) state.attempts = [];
@@ -223,7 +281,6 @@ function save() {
 
 /* 瞬态（不持久化）：请求进行中、提示、笔记编辑等 */
 let jdBusy = false, jdError = '';
-let researchBusy = false, researchPhase = 'search';
 let dollBusy = false, dollNote = null;
 let dollResume = { target: '', text: '', memory: null, sourceName: '' };
 let planMsg = '', workError = false, noteError = '', editingNoteId = null;
@@ -243,10 +300,6 @@ function hashText(s) {
 function nowStamp() {
   const d = new Date();
   return `${isoDate(d)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
-function jdScope() {
-  return state.jd && state.jd.raw ? hashText(state.jd.raw) : null;
 }
 
 function linkHtml(url, text) {
@@ -287,50 +340,6 @@ function normalizeRequirements(rows) {
     detail: isStr(r.detail) && r.detail ? r.detail : (isStr(r.evidence) ? r.evidence : ''),
     importance: isStr(r.importance) ? r.importance : '',
   }));
-}
-
-function validSearchPayload(data) {
-  return !!data && data.ok === true && Array.isArray(data.sources)
-    && data.sources.every((s) => s && typeof s === 'object' && isStr(s.url) && isStr(s.title) && s.paragraphs && typeof s.paragraphs === 'object');
-}
-
-function validSelectPayload(data) {
-  return !!data && data.ok === true && isStr(data.overview) && Array.isArray(data.items) && Array.isArray(data.gaps);
-}
-
-function normalizeItems(items) {
-  return items.filter((it) => it && typeof it === 'object' && isStr(it.title) && it.title.trim()).map((it) => ({
-    url: isStr(it.url) ? it.url : '',
-    kind: KINDS[it.kind] ? it.kind : 'reference',
-    title: it.title,
-    creator: isStr(it.creator) && it.creator ? it.creator : '见原站',
-    skills: Array.isArray(it.skills) ? it.skills.filter(isStr) : [],
-    reason: isStr(it.reason) ? it.reason : '',
-    learn: isStr(it.learn) ? it.learn : '',
-    access_note: isStr(it.access_note) ? it.access_note : '',
-    minutes: Number.isFinite(Number(it.minutes)) && Number(it.minutes) > 0 ? Math.round(Number(it.minutes)) : 30,
-    evidence: isStr(it.evidence) ? it.evidence : '',
-  }));
-}
-
-/* AI 查找结果 → 计划可用资料（覆盖本地目录） */
-function liveMaterials() {
-  const live = { resources: {}, questions: {} };
-  const result = state.research && state.research.result;
-  if (!result || state.research.scope !== jdScope()) return live;
-  for (const it of result.items || []) {
-    for (const skill of it.skills) {
-      if ((it.kind === 'course' || it.kind === 'reference') && !live.resources[skill]) {
-        live.resources[skill] = { id: 'web-' + hashText(it.url), title: it.title, url: it.url, creator: it.creator, minutes: it.minutes, focus: it.learn || it.title, fromAI: true };
-      } else if (it.kind !== 'course' && it.kind !== 'reference' && !live.questions[skill]) {
-        live.questions[skill] = {
-          id: 'web-' + hashText(it.url), title: it.title, url: it.url, kind: KINDS[it.kind], minutes: it.minutes, source: it.creator,
-          deliverable: '打开原始来源，选择一道对应能力的题目作答；记录题号或问题原文、自己的答案和订正。不要将题库入口当作已经完成一道题。',
-        };
-      }
-    }
-  }
-  return live;
 }
 
 /* ---------- 通用渲染 ---------- */
@@ -391,7 +400,6 @@ function activityLines() {
   if (state.plan) rows.push({ time: state.plan.created_at, text: `学习计划 · ${state.plan.tasks.length} 个任务 · ${state.plan.hours} 小时/周 × ${state.plan.days} 天` });
   for (const a of state.attempts.slice(0, 5)) rows.push({ time: a.created_at, text: `岗位练习 · 得分 ${a.feedback.score}/100 · ${a.submission.step_label}` });
   for (const n of state.notes.slice(0, 5)) rows.push({ time: n.updated_at || n.created_at, text: `学习笔记 · ${n.title}` });
-  if (state.research && state.research.result) rows.push({ time: state.research.result.created_at, text: `AI 查找资料 · ${state.research.result.items.length} 条推荐` });
   return rows.sort((a, b) => String(b.time).localeCompare(String(a.time))).slice(0, 6);
 }
 
@@ -530,7 +538,6 @@ function renderPrep() {
   else if (nav === '课程与题目') html += prepCoursesHtml();
   else html += prepTasksHtml();
   $('prep-body').innerHTML = html;
-  if (nav === '课程与题目') maybeStartResearch();
 }
 
 function practiceEntryHtml() {
@@ -629,121 +636,43 @@ function prepTasksHtml() {
     <p class="muted">资源链接指向原站；是否需登录、付费及地区限制以原站为准。计划保存在本浏览器。</p></div>`;
 }
 
-/* ---------- 课程与题目（AI 自动查找） ---------- */
-
-function researchStage() {
-  if (state.attempts.length) return '已提交练习';
-  if (state.plan) return '计划已生成';
-  return '未生成计划';
-}
+/* ---------- 课程与题目（按当前 JD 自动匹配） ---------- */
 
 function prepCoursesHtml() {
-  let html = `<h1>为目标岗位寻找学习资源</h1>`;
   const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : null;
-  if (!reqs) {
-    html += `<p class="info">先载入或解析一份 JD，AI 才会按岗位自动查找资料。</p>
+  let html = `<h1>为目标岗位寻找学习资源</h1>`;
+  if (!reqs || !reqs.length) {
+    html += `<p class="info">先载入或解析一份 JD。这里会按每项能力自动匹配课程/资料，并生成对应的小红书经验贴搜索。</p>
       <button type="button" class="primary" data-go="jd">去看岗位 →</button>`;
-    return html + catalogHtml();
+    return html;
   }
-  html += `<p class="muted">进入资料区后 AI 会按当前岗位、技能与学习阶段自动查找；仅发送岗位方向和能力名称，不会发送你的学习笔记。</p>`;
-  const scope = jdScope();
-  if (!state.research || state.research.scope !== scope) {
-    state.research = { scope, result: null, failed: false, disabled: false };
-    save();
-  }
-  const result = state.research.result;
-  if (researchBusy) {
-    html += `<div class="card"><p class="searching">正在自动查找适合你的资料…</p>
-      <p class="muted">${researchPhase === 'search' ? '正在搜索公开来源…' : '正在筛选内容并核对出处…'}</p>
-      <div class="skeleton" aria-hidden="true"><span class="skel-line"></span><span class="skel-line"></span><span class="skel-line short"></span><span class="skel-line"></span></div></div>`;
-  } else if (result) {
-    html += researchResultHtml(result);
-  } else if (state.research.disabled) {
-    html += `<p class="info">联网 AI 查找已停用（控制 API 费用），以下为你精选的本地资源目录。</p>`;
-  } else if (state.research.failed) {
-    html += `<p class="error">${esc(AI_NOTICE)}</p>
-      <button type="button" class="primary" data-action="research-retry">重试查找</button>`;
-  }
-  return html + catalogHtml(!!(state.research && state.research.disabled));
-}
-
-function researchResultHtml(result) {
-  let html = `<div class="card"><p>${esc(result.overview)}</p>
-    <p class="muted">检索于 ${esc(String(result.created_at).slice(0, 10))} · 结果带出处摘录，请自行核对原站。</p>
-    <button type="button" data-action="research-again">重新查找</button></div>`;
-  for (const it of result.items) {
+  const matches = matchedResources(reqs);
+  const verifiedCount = matches.filter((item) => item.course.verified).length;
+  html += `<div class="card solid resource-intro">
+    <p class="kicker">JD 驱动 · 即时匹配 · 不调用付费搜索</p>
+    <p>已按当前岗位的 <strong>${matches.length}</strong> 项能力匹配学习入口：${verifiedCount} 项来自人工核验课程目录，其余使用课程搜索；每项都附小红书经验贴搜索。</p>
+    <p class="muted">搜索结果不是单篇推荐，也不代表原站内容已经核验。优先选择有完整过程、具体作品和可复现细节的帖子；软广、转载和“保过”内容请直接跳过。</p>
+  </div>`;
+  for (const match of matches) {
+    const course = match.course;
+    const question = QUESTIONS[course.key] || null;
     html += `<div class="card resource-card">
-      <p class="muted">${esc(KINDS[it.kind] || '专业资料')} · ${esc(it.creator)}</p>
-      <h2>${linkHtml(it.url, it.title)}</h2>
-      <p>${it.skills.map((s) => `<span class="rp-chip">${esc(s)}</span>`).join('')}</p>
-      <h3>为什么推荐给我</h3>
-      <p>${esc(it.reason)}</p>
-      ${it.learn ? `<p>先学什么：${esc(it.learn)}</p>` : ''}
-      <p class="muted">建议本次投入 ${it.minutes} 分钟；这是学习预算，不是整课时长。</p>
-      ${it.access_note ? `<p class="muted">访问说明：${esc(it.access_note)}</p>` : ''}
-      ${it.evidence ? `<details><summary>推荐依据（原文摘录）</summary><p class="evidence">${esc(it.evidence)}</p><p class="muted">访问权限和是否免费请以原站当前页面为准。</p></details>` : ''}
+      <p class="resource-kicker">${esc(match.priority)} · ${course.verified ? '人工核验课程/资料' : '课程搜索入口'}</p>
+      <h2>${esc(match.skill)}</h2>
+      <p>${esc(match.reason)}</p>
+      <p class="resource-actions">
+        ${linkHtml(course.url, course.verified ? `打开课程：${course.title}` : `搜索课程：${course.title}`)}
+        ${linkHtml(match.xhs.url, '查看小红书经验贴 →')}
+      </p>
+      <p><strong>先学什么：</strong>${esc(course.focus)}</p>
+      <p class="muted">${esc(course.creator)} · 建议本次投入 ${course.minutes} 分钟；这是学习预算，不是整课时长。</p>
+      ${question ? `<p><strong>配套练习：</strong>${linkHtml(question.url, question.title)}<br><span class="muted">${esc(question.source)} · ${question.minutes} 分钟</span></p>` : ''}
+      <details><summary>匹配依据：当前 JD 原文</summary><p class="evidence">${esc(match.evidence || match.detail)}</p></details>
     </div>`;
   }
-  if (result.gaps.length) {
-    html += `<details><summary>还缺哪些资料</summary>${result.gaps.map((g) => `<p>${esc(g)}</p>`).join('')}</details>`;
-  }
+  html += `<details><summary>怎么筛选小红书经验贴</summary>
+    <p>优先看作者是否展示了完整过程、实际作品、数据或反馈；只有“必看”“速成”标题但没有细节的帖子，参考价值有限。把帖子当作案例，不当成企业官方结论。</p></details>`;
   return html;
-}
-
-function catalogHtml(open) {
-  return `<details class="catalog"${open ? ' open' : ''}><summary>本地资源目录（非 AI 联网查找）</summary>
-    ${Object.entries(RESOURCES).map(([skill, r]) => `<p><strong>${esc(skill)}</strong> · ${linkHtml(r.url, r.title)}<br>
-      <span class="muted">${esc(r.creator)} · 本次学习预算约 ${r.minutes} 分钟 · ${esc(r.focus)}</span></p>`).join('')}
-    ${Object.entries(QUESTIONS).map(([skill, q]) => `<p><strong>${esc(skill)} 练习</strong> · ${linkHtml(q.url, q.title)}<br>
-      <span class="muted">${esc(q.kind)} · ${esc(q.source)} · ${q.minutes} 分钟</span></p>`).join('')}
-    <p class="muted">目录资源经过人工核验；AI 查找结果以原站出处为准。</p></details>`;
-}
-
-function maybeStartResearch() {
-  const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : null;
-  if (!reqs || researchBusy) return;
-  if (state.research.scope !== jdScope()) return;
-  if (state.research.result || state.research.failed || state.research.disabled) return;
-  setTimeout(startResearch, 0);
-}
-
-async function startResearch() {
-  if (researchBusy) return;
-  const reqs = state.jd.requirements;
-  if (!Array.isArray(reqs)) return;
-  researchBusy = true;
-  researchPhase = 'search';
-  render();
-  const target = (state.jd.raw.split('\n')[0] || '').slice(0, 40) || JD_TEXT.slice(0, 40);
-  const skills = [...new Set(reqs.map((r) => r.skill))];
-  const stage = researchStage();
-  const scope = jdScope();
-  const search = await post('research/search', { target, skills, stage });
-  if (search && search.error === 'research_disabled') {
-    state.research = { scope, result: null, failed: false, disabled: true };
-    researchBusy = false;
-    save();
-    render();
-    return;
-  }
-  let result = null;
-  if (validSearchPayload(search)) {
-    researchPhase = 'select';
-    render();
-    const select = await post('research/select', { target, skills, sources: search.sources });
-    if (validSelectPayload(select)) {
-      result = {
-        overview: select.overview,
-        items: normalizeItems(select.items).slice(0, 4),
-        gaps: select.gaps.filter(isStr),
-        created_at: nowStamp(),
-      };
-    }
-  }
-  state.research = { scope, result, failed: !result };
-  researchBusy = false;
-  save();
-  render();
 }
 
 /* ---------- 岗位实操 ---------- */
@@ -888,8 +817,9 @@ function buildContext() {
     parts.push('需要修正：' + fixes.join('；'));
     parts.push('下一步建议：' + attempt.feedback.next_steps.map((c) => NEXT_STEP_TEXTS[c]).join('；'));
   }
-  if (state.research && state.research.result) {
-    parts.push('推荐资料：' + state.research.result.items.map((it) => it.title).join('、'));
+  if (Array.isArray(state.jd.requirements) && state.jd.requirements.length) {
+    const resources = matchedResources(state.jd.requirements).slice(0, 8);
+    parts.push('匹配学习入口：' + resources.map((item) => `${item.skill} → ${item.course.title}；小红书搜索：${item.xhs.title}`).join('；'));
   }
   if (dollNote) parts.push(`笔记《${dollNote.title}》：${dollNote.body}`);
   return parts.join('\n').slice(0, 12000);
@@ -1034,16 +964,12 @@ document.addEventListener('click', (e) => {
     if (!Array.isArray(reqs) || !reqs.length) { planMsg = '先在「看岗位」解析一份 JD。'; render(); return; }
     const hours = Number(state.sliders.hours) || 8;
     const days = Number(state.sliders.days) || 14;
-    const { tasks, summary } = planTasks(reqs, hours, days, liveMaterials());
+    const { tasks, summary } = planTasks(reqs, hours, days);
     if (!tasks.length) { planMsg = '没有可安排的任务：请检查课程缺口或增加时间预算。未覆盖原有计划。'; }
     else {
       state.plan = { hours, days, tasks, summary, created_at: nowStamp() };
       planMsg = `已保存 ${tasks.length} 个任务。`;
     }
-    save(); render();
-  }
-  else if (action === 'research-retry' || action === 'research-again') {
-    state.research = { scope: jdScope(), result: null, failed: false, disabled: false };
     save(); render();
   }
   else if (action === 'note-save') {

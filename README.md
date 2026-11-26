@@ -24,7 +24,7 @@ A job description tells a student what an employer expects. It rarely explains w
 
 RolePath connects those steps in one workspace. Users can explore example roles, analyze a real job description, review source-linked courses and practice material, create a time-budgeted learning plan, and keep notes and progress records. A note assistant accepts natural-language instructions to summarize, explain, compare or ask questions about selected learning materials.
 
-The product is designed primarily for first-time internship applicants and first- and second-year university students. Its intended scope spans job families rather than a single employer or specialist role. The current resource catalog is finite: accepting a job description does **not** mean every requirement has a matching course.
+The product is designed primarily for first-time internship applicants and first- and second-year university students. Its intended scope spans job families rather than a single employer or specialist role. The contest build combines a small reviewed course catalog with role-specific Bilibili and Xiaohongshu search entry points; search results are not individually verified recommendations.
 
 RolePath separates three things that are easy to confuse: **what a role asks for, what a learner has evidence of, and what the learner has marked complete.** A checked task is a progress record, not a certification of competence.
 
@@ -40,7 +40,7 @@ Review extracted requirements alongside their source text in the original job de
 
 ### Learning resources
 
-Explore relevant courses and check where each resource comes from.
+Explore matched courses and open role-specific Xiaohongshu experience searches for each extracted ability.
 
 ![Learning resources for the example role](docs/screenshots/resources.png)
 
@@ -72,7 +72,7 @@ Upload a resume, build structured resume memory, and optimize it against the cur
 
 ### Job analysis with traceable evidence
 
-JD analysis requests strict JSON Schema output from the configured text model, including required interview-assessment text, field types and length limits. The model must support this mode (for example, Qwen3.7-Plus). Local validation still checks source references and duplicate skills; invalid results fail explicitly without being saved or consuming a RolePath credit. There are no automatic retries or fabricated replacement fields.
+JD analysis asks the configured text model for JSON and then validates evidence line IDs, allowed labels, duplicate skills and non-empty output. The contest endpoint uses a lightweight response contract to avoid long strict-schema generation; invalid results fail explicitly rather than being saved or silently replaced.
 
 Users can paste a job description or upload a supported text document. In the hosted app, photos go through the photo note assistant for review before their text is used as a JD. AI-assisted extraction identifies explicit requirements and connects them to the source text. The interface separates skill requirements from conditions such as education or internship availability, and supports manual additions grounded in an exact source excerpt.
 
@@ -80,11 +80,9 @@ Without an API key, a limited keyword scan is available. It is explicitly presen
 
 ### Courses and practice with identifiable sources
 
-Course matching uses the requirements extracted from the job description and the metadata of resources already in the catalog. Where available, recommendations point to specific chapters and provide creator, publication, study-time and verification information.
+Course matching uses the requirements extracted from the job description. Reviewed catalog links are used when a skill matches; otherwise the app creates a clearly labelled Bilibili course-search entry. Every ability also gets a Xiaohongshu search scoped to the role, skill and internship experience. These search pages are starting points, not claims that a specific post or course has been reviewed.
 
-Bilibili can be preferred when relevance is equal. Creators do not receive a universal ranking bonus. Practice materials distinguish original question sources, public interview recollections and learning exercises. An interview recollection is not represented as an official or current company exam.
-
-The catalog is not a live search engine. Missing matches are shown as gaps; the planner does not invent course URLs to fill them. Catalog and provenance checks also do not imply that every lesson has received an independent quality review.
+Matched course links feed the time-budgeted planner. Practice materials remain separate and distinguish original question sources, public interview recollections and learning exercises. An interview recollection is not represented as an official or current company exam.
 
 ### Role foundations for broad job descriptions
 
@@ -275,15 +273,13 @@ and refreshing the page preserved the login.
 
 The current monthly plan is CNY 12.90 with unlimited AI use. The owner reviews actual WeChat receipts before activating a calendar month of access. No automated payment gateway or recurring billing is used. Functional checks are not a cost benchmark or a full security audit. See [membership operations](deploy/MEMBERSHIPS.md).
 
-## Live research across industries
+## Resource matching in the contest build
 
-Enter a target role or learning goal in **Courses & practice**. Qwen searches public websites, reads resource pages, selects relevant courses and practice material, and explains the learning order. Only links present in actual tool output are accepted. Evidence uses source paragraph IDs so citations are copied from retrieved content instead of rewritten by the model. Users can select these materials for a time-budgeted study plan.
+After JD analysis, **Courses & practice** immediately matches every extracted ability to a course or reference entry and a Xiaohongshu experience search. Reviewed links are used where available; other course links open Bilibili search results for the specific skill. The planner reuses the same matched course links.
 
-The existing collection remains available in a secondary section. It no longer limits role preparation or the range of resources the model can find. Search is designed for roles across industries, with domestic and Chinese sources preferred where appropriate. Sources that cannot be read are not presented as verified courses. Company-labelled material is attributed to its original author/platform and is not a claim of company confirmation.
+The contest build does not call paid web-search APIs. Search-result pages are clearly labelled as entry points rather than verified individual recommendations, and the UI explains how to reject promotional or low-detail posts. The production Streamlit app keeps its separate live-research implementation and larger reviewed catalog; see [live research implementation and deployment](deploy/RESOURCE_RESEARCH.md).
 
-See [live research implementation and deployment](deploy/RESOURCE_RESEARCH.md).
-
-## Domestic learning sources and question provenance
+## Production catalog: domestic learning sources and question provenance
 
 The catalogue currently contains 33 learning resources and 12 question entries. The default preference ranks reviewed domestic-platform sources first **within an explicitly matched skill scope**, then uses content relevance. This preference also applies to newly generated study plans and can be turned off. It does not assign a creator or popularity bonus. Foreign references are identified as supplementary when no reviewed domestic source is available.
 
