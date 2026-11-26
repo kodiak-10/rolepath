@@ -10,7 +10,7 @@
 
 **理解岗位 · 找到资源 · 制定计划 · 积累证据**
 
-[体验产品](https://rolepath-kodiak.streamlit.app/?embed=true&lang=zh) · [English](README.md) · [产品能力](#产品能力) · [部署说明](#部署说明)
+[体验产品](https://rolepath-practice-0k9njso9yf2.qoder.zone) · [English](README.md) · [产品能力](#产品能力) · [部署说明](#部署说明)
 
 持续开发中的 MVP · 中英文界面 · 平台提供千问免费体验 · 可选自建 BYOK
 

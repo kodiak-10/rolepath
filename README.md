@@ -10,7 +10,7 @@ An AI-assisted career exploration and learning workspace for students preparing 
 
 **Understand the role · Find relevant resources · Build a plan · Learn with evidence**
 
-[Launch RolePath](https://rolepath-kodiak.streamlit.app/?embed=true) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
+[Launch RolePath](https://rolepath-practice-0k9njso9yf2.qoder.zone) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
 
 **Status:** actively developed MVP · **Interface:** English / 简体中文 · **AI access:** managed Qwen trial; optional self-hosted BYOK
 
@@ -259,7 +259,7 @@ Use the repository's [Issues](https://github.com/kodiak-10/rolepath/issues) to r
 
 **RolePath** — Understand the work. Build the evidence. Take the next step.
 
-[Open the workspace](https://rolepath-kodiak.streamlit.app/?embed=true) · [阅读中文版](README.zh-CN.md)
+[Open the workspace](https://rolepath-practice-0k9njso9yf2.qoder.zone) · [阅读中文版](README.zh-CN.md)
 
 </div>
 
