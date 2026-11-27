@@ -110,6 +110,57 @@ button{font-family:inherit}
 .resource-gap p{margin:8px 0 0;color:var(--rp-body)}
 .resource-card details p{margin:10px 0 0}
 
+/* 岗位说明书、技能理解与第一周行动 */
+.jd-input-card{margin:0 0 24px;padding:16px 20px}
+.jd-input-card>summary{font-size:15px}
+.jd-input-card>label{margin-top:18px}
+.demo-details{margin-top:16px;background:transparent}
+.role-guide{margin:8px 0 34px}
+.guide-heading{max-width:820px;margin:0 0 20px}
+.guide-heading .kicker,.section-heading .kicker{color:var(--rp-teal)}
+.guide-summary{font-size:16px;line-height:1.9;color:var(--rp-body);margin:0}
+.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.guide-label{margin:0 0 6px;color:var(--rp-teal);font-size:12px;font-weight:600;letter-spacing:.12em}
+.guide-list{margin:0;padding-left:22px}
+.guide-list li{padding:5px 0}
+.guide-note{margin-top:18px}
+.guide-first{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--rp-hair);color:var(--rp-body)}
+.guide-first strong{color:var(--rp-amber)}
+.section-heading{max-width:820px;margin:30px 0 20px}
+.section-heading h1{font-size:clamp(26px,3.4vw,34px)}
+.section-heading p:last-child{margin:0;color:var(--rp-muted)}
+.skill-understanding{scroll-margin-top:96px}
+.skill-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.skill-title-row h2{margin:0}
+.skill-state{flex:0 0 auto;border:1px solid rgba(92,191,164,.28);background:rgba(92,191,164,.08);color:var(--rp-teal);border-radius:999px;padding:4px 10px;font-size:12px;white-space:nowrap}
+.explain-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:16px 0}
+.explain-grid h3{margin:0 0 6px;color:var(--rp-amber)}
+.explain-grid p{margin:0}
+.self-check{margin-top:16px;padding-top:14px;border-top:1px solid var(--rp-hair)}
+.level-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.level-buttons button{min-height:38px;padding:7px 13px;font-size:13px}
+.level-buttons button[aria-pressed="true"]{background:rgba(226,167,95,.16);border-color:rgba(226,167,95,.55);color:var(--rp-amber)}
+.sticky-next{display:flex;align-items:center;justify-content:space-between;gap:20px;position:sticky;bottom:16px;z-index:10;background:rgba(12,14,18,.94)}
+.sticky-next p{margin:4px 0 0}
+.gap-metrics{margin-top:18px}
+.gap-row{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.gap-main{min-width:0;flex:1}
+.gap-main p{margin:6px 0 0}
+.level-buttons.compact{flex:0 0 auto;margin:0;max-width:330px}
+.week-progress{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.week-progress p{margin:2px 0 0}
+.week-progress progress{width:min(320px,42%);height:10px;accent-color:var(--rp-teal)}
+.week-list{display:flex;flex-direction:column;gap:12px}
+.week-row{display:flex;align-items:flex-start;gap:16px;margin:0}
+.week-row.is-done{opacity:.62}
+.week-row.is-done h2{text-decoration:line-through;text-decoration-color:var(--rp-teal)}
+.week-check{flex:0 0 auto;width:42px;height:42px;min-height:42px;padding:0;border-radius:50%;color:var(--rp-amber);font-weight:700}
+.week-check[aria-pressed="true"]{background:rgba(92,191,164,.16);border-color:rgba(92,191,164,.5);color:var(--rp-teal)}
+.week-main{min-width:0}
+.week-main h2{margin:0 0 6px}
+.week-main p{margin:0 0 6px}
+.week-main .resource-kicker{margin:0 0 4px}
+
 /* 表格（实底） */
 .table-wrap{overflow-x:auto;margin:0 0 12px;background:var(--rp-panel-solid);border:1px solid var(--rp-hair);border-radius:16px}
 table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
@@ -235,6 +286,12 @@ footer{max-width:1080px;margin:0 auto;padding:0 24px 34px;text-align:center}
   .tabs button{padding:8px 11px}
   .controls{gap:12px}
   .metrics{grid-template-columns:1fr}
+  .guide-grid,.explain-grid{grid-template-columns:1fr;gap:12px}
+  .sticky-next,.gap-row,.week-progress{align-items:flex-start;flex-direction:column;gap:12px}
+  .sticky-next{position:static}
+  .level-buttons.compact{max-width:none}
+  .week-progress progress{width:100%}
+  .skill-title-row{gap:10px}
   footer{padding:0 16px 130px}
   .doll-launcher{right:14px;bottom:calc(34px + env(safe-area-inset-bottom))}
   .doll-panel{left:10px;right:10px;bottom:calc(108px + env(safe-area-inset-bottom));width:auto;max-width:none;max-height:62dvh;border-radius:22px}

@@ -71,7 +71,7 @@ const RESOURCE_RULES = [
   { key: 'Excel', aliases: SKILL_ALIASES.Excel },
   { key: 'SQL', aliases: SKILL_ALIASES.SQL },
   { key: '数据分析', aliases: SKILL_ALIASES['数据分析'] },
-  { key: '项目管理', aliases: SKILL_ALIASES['项目管理'] },
+  { key: '项目管理', aliases: ['项目管理', '进度管理', '活动落地', '跨部门'] },
   { key: '人力资源', aliases: SKILL_ALIASES['人力资源'] },
   { key: '视频剪辑', aliases: ['视频剪辑', '剪辑', '视频制作', '剪映', 'Premiere', 'PR'] },
   { key: '内容运营', aliases: SKILL_ALIASES['内容运营'] },
@@ -97,6 +97,28 @@ const PRACTICES = {
 
 function practiceFor(skill, evidence) {
   return DELIVERABLES[skill] || PRACTICES[skill] || `围绕 JD 原文“${evidence}”完成一个小成果，列出假设、执行过程和验证方式。`;
+}
+
+function fallbackGuide(raw, requirements) {
+  const role = (raw.split('\n')[0] || '目标岗位').replace(/[（(].*$/, '').trim();
+  const duties = raw.split('\n').map((s) => s.trim()).filter((s) => /负责|协助|参与|完成|支持|推进|输出|整理|分析|设计|制作/.test(s)).slice(0, 3);
+  return {
+    summary: `${role}的核心是运用岗位相关技能完成具体工作并交付成果。零经验先不用追求“全会”，先看懂每项要求在工作里解决什么问题，再用小成果证明自己理解。`,
+    daily: duties.length ? duties : ['阅读岗位资料，理解当前任务的目标与要求。', '在指导下完成基础执行，记录过程与问题。', '整理结果，向同伴或导师说明结论与下一步。'],
+    outputs: requirements.length ? requirements.slice(0, 3).map((r) => `${r.skill}的入门练习成果与说明`) : ['一份符合岗位目标的入门成果，附上任务说明与个人做法。'],
+    realities: ['JD 中的“熟练”“优先”并不都要求零经验者入职前全部掌握，先区分常规要求与加分项。', '入门练习不是企业真题，也不能替代学历、地点、毕业年份等硬性条件核对。'],
+    first_step: '先读一遍岗位日常与成果，再选一项最感兴趣的能力完成 30 分钟入门练习。',
+  };
+}
+
+function requirementGuide(item) {
+  const resource = resourceFor(item.skill);
+  return {
+    meaning: item.meaning || (resource ? resource.reason : `这项要求指向“${item.skill}”。先理解它在岗位任务中的具体动作，再决定如何练习。`),
+    use: item.use || (resource ? resource.focus : item.detail || item.evidence || '把它放进一个具体任务里练习，并说明自己如何完成。'),
+    starter_task: item.starter_task || practiceFor(item.skill, item.detail || item.evidence),
+    proof: item.proof || `一份${item.skill}入门成果，附上任务说明、个人做法和反思。`,
+  };
 }
 
 function resourceFor(skill) {
@@ -187,9 +209,9 @@ function gradeJdPractice(submission) {
 }
 
 const AI_NOTICE = 'AI 暂时不可用，请稍后重试';
-const VIEW_LABELS = { space: '我的空间', jd: '看岗位', prep: '准备学习', work: '岗位实操', feedback: '查看反馈' };
+const VIEW_LABELS = { space: '我的空间', jd: '看岗位', prep: '我的准备', work: '岗位实操', feedback: '练习记录' };
 const SPACE_NAVS = ['概览', '学习笔记', '历史记录'];
-const PREP_NAVS = ['计划与行动', '课程与题目', '学习任务'];
+const PREP_NAVS = ['差距诊断', '第一周行动', '课程与题目', '完整学习计划'];
 
 /* ---------- 规则评分（保留原有实现） ---------- */
 
@@ -325,10 +347,10 @@ let storageOk = true;
 
 function defaultState() {
   return {
-    view: 'space', spaceNav: '概览', prepNav: '计划与行动',
-    jd: { raw: '', draft: '', requirements: null, mode: null },
+    view: 'space', spaceNav: '概览', prepNav: '差距诊断',
+    jd: { raw: '', draft: '', requirements: null, guide: null, mode: null },
     sliders: { hours: 8, days: 14 },
-    plan: null, attempts: [], notes: [], practiceSkill: '',
+    plan: null, attempts: [], notes: [], practiceSkill: '', gapAnswers: {}, weekProgress: {},
     practiceDraft: { step: 0, rate_b: 0, rate_a: 0, deliverable: '', cause: '', verification: '' },
     doll: { open: false, messages: [], draft: '', mode: 'chat' },
     feedbackIndex: 0,
@@ -419,7 +441,27 @@ function normalizeRequirements(rows) {
     evidence: isStr(r.evidence) ? r.evidence : '',
     detail: isStr(r.detail) && r.detail ? r.detail : (isStr(r.evidence) ? r.evidence : ''),
     importance: isStr(r.importance) ? r.importance : '',
+    meaning: isStr(r.meaning) ? r.meaning : '',
+    use: isStr(r.use) ? r.use : '',
+    starter_task: isStr(r.starter_task) ? r.starter_task : '',
+    proof: isStr(r.proof) ? r.proof : '',
   }));
+}
+
+function normalizeGuide(value, raw, requirements) {
+  const fallback = fallbackGuide(raw, requirements);
+  if (!value || typeof value !== 'object' || Array.isArray(value) || !isStr(value.summary) || !value.summary.trim()) return fallback;
+  const list = (v, max) => Array.isArray(v) ? v.filter(isStr).map((s) => s.trim()).filter(Boolean).slice(0, max) : [];
+  const daily = list(value.daily, 3);
+  const outputs = list(value.outputs, 3);
+  const realities = list(value.realities, 2);
+  return {
+    summary: value.summary.trim(),
+    daily: daily.length ? daily : fallback.daily,
+    outputs: outputs.length ? outputs : fallback.outputs,
+    realities: realities.length ? realities : fallback.realities,
+    first_step: isStr(value.first_step) && value.first_step.trim() ? value.first_step.trim() : fallback.first_step,
+  };
 }
 
 /* ---------- 通用渲染 ---------- */
@@ -441,7 +483,7 @@ function renderNav() {
     work: state.attempts.length > 0,
     feedback: state.attempts.length > 0,
   };
-  const labels = { space: '我的空间', jd: '1 看岗位', prep: '2 准备学习', work: '3 岗位实操', feedback: '4 查看反馈' };
+  const labels = { space: '我的空间', jd: '1 看岗位', prep: '2 差距与行动', work: '3 岗位实操', feedback: '4 练习记录' };
   for (const btn of document.querySelectorAll('#page-nav button')) {
     const view = btn.dataset.go;
     btn.textContent = labels[view] + (done[view] ? ' ' : '');
@@ -501,9 +543,8 @@ function spaceOverviewHtml() {
       <p>探索感兴趣的工作，拆解真实岗位要求。把想去的方向，变成今天可以完成的一小步。</p>
     </div>
     <div class="hero-actions">
-      <button type="button" class="primary" data-action="demo-load">体验岗位任务 →</button>
-      <button type="button" data-go="jd">分析我的 JD →</button>
-      <button type="button" data-go="prep" data-prep="${state.plan ? '学习任务' : '计划与行动'}">${state.plan ? '继续学习 →' : '制定学习计划 →'}</button>
+      <button type="button" class="primary" data-go="jd">开始岗位解读 →</button>
+      <button type="button" data-go="prep" data-prep="第一周行动">查看第一周行动 →</button>
     </div>
     <div class="metrics">
       <div class="metric"><span>计划任务</span><b>${taskCount}</b></div>
@@ -561,34 +602,55 @@ function requirementsTableHtml(reqs) {
     <tbody>${reqs.map((r) => `<tr><td>${esc(r.skill)}</td><td>${esc(r.priority)}</td><td>${esc(r.evidence)}</td><td>${esc(r.detail || r.evidence)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
+function activeGuide() {
+  const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : [];
+  return normalizeGuide(state.jd.guide, String(state.jd.raw || ''), reqs);
+}
+
+function roleGuideHtml(guide) {
+  return `<section class="role-guide" aria-labelledby="role-guide-title">
+    <div class="guide-heading"><p class="kicker">先读懂岗位，再决定怎么学</p><h1 id="role-guide-title">这个岗位每天在做什么？</h1><p class="guide-summary">${esc(guide.summary)}</p></div>
+    <div class="guide-grid">
+      <article class="card solid"><p class="guide-label">典型日常</p><h2>你可能会做这些事</h2><ol class="guide-list">${guide.daily.map((s) => `<li>${esc(s)}</li>`).join('')}</ol></article>
+      <article class="card solid"><p class="guide-label">工作成果</p><h2>你要交出什么</h2><ul class="guide-list">${guide.outputs.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></article>
+    </div>
+    <div class="card guide-note"><h2>零经验先知道</h2><ul class="guide-list">${guide.realities.map((s) => `<li>${esc(s)}</li>`).join('')}</ul><p class="guide-first"><strong>今天先做：</strong>${esc(guide.first_step)}</p></div>
+  </section>`;
+}
+
+function skillUnderstandingHtml(item) {
+  const info = requirementGuide(item);
+  const level = state.gapAnswers[item.skill];
+  return `<article class="card skill-understanding" id="skill-${esc(item.skill)}">
+    <div class="skill-title-row"><div><p class="resource-kicker">${esc(item.priority)}${item.importance === '原文明示重点' ? ' · 原文明示重点' : ''}</p><h2>${esc(item.skill)}</h2></div><span class="skill-state">${level === undefined ? '待自评' : ['从零开始', '了解概念', '做过练习'][level]}</span></div>
+    <div class="explain-grid"><div><h3>这项技能是什么</h3><p>${esc(info.meaning)}</p></div><div><h3>在这个岗位里用它做什么</h3><p>${esc(info.use)}</p></div></div>
+    <details><summary>对照 JD 原文</summary><p class="evidence">${esc(item.evidence)}</p></details>
+    <div class="self-check"><strong>我目前的状态</strong><div class="level-buttons" role="group" aria-label="${esc(item.skill)}自评">
+      ${['没接触过', '知道是什么', '做过小练习'].map((label, i) => `<button type="button" data-action="gap-level" data-skill="${esc(item.skill)}" data-level="${i}" aria-pressed="${level === i}">${label}</button>`).join('')}
+    </div></div>
+  </article>`;
+}
+
 function renderJd() {
   const parsed = Array.isArray(state.jd.requirements) ? state.jd : null;
-  let html = `<p class="kicker">教学演示 JD · 非真实招聘</p>
-    <h1>把目标 JD 变成可检查的能力要求</h1>
-    <p class="lede">粘贴 JD 原文，解析结果会保留原文证据。也可以先载入教学演示 JD 体验完整流程。</p>
-    <div class="card">
-      <h2>教学演示 JD</h2>
-      <pre class="jd-raw">${esc(JD_TEXT)}</pre>
-      <button type="button" data-action="demo-load" ${jdBusy ? 'disabled' : ''}>载入并解析教学 JD →</button>
-    </div>
-    <div class="card solid">
+  let html = `<p class="kicker">零经验实习入门</p>
+    <h1>先看懂岗位，再迈出第一步</h1>
+    <p class="lede">粘贴一份 JD，先了解岗位日常、工作成果和技能含义，再判断自己从哪里开始。课程和练习会在后面按需出现。</p>
+    <details class="jd-input-card" ${parsed ? '' : 'open'}><summary>${parsed ? '更换或重新解析 JD' : '粘贴目标岗位 JD'}</summary>
       <label>自定义 JD 原文
         <textarea id="jd-input" rows="7" maxlength="20000" placeholder="粘贴岗位名称、职责、任职要求、优先条件和实习时间…">${esc(state.jd.draft || '')}</textarea>
       </label>
       ${jdError ? `<p class="error">${esc(jdError)}</p>` : ''}
-      <button type="button" class="primary" data-action="jd-parse" ${jdBusy ? 'disabled' : ''}>解析岗位要求</button>
+      <button type="button" class="primary" data-action="jd-parse" ${jdBusy ? 'disabled' : ''}>解析并生成岗位说明书 →</button>
       ${jdBusy ? '<p class="searching">正在解析岗位要求…</p><div class="skeleton" aria-hidden="true"><span class="skel-line"></span><span class="skel-line"></span><span class="skel-line short"></span></div>' : ''}
-    </div>`;
+      <details class="demo-details"><summary>没有 JD？先体验教学演示</summary><pre class="jd-raw">${esc(JD_TEXT)}</pre><button type="button" data-action="demo-load" ${jdBusy ? 'disabled' : ''}>载入并解析教学 JD →</button></details>
+    </details>`;
   if (parsed) {
     const llm = parsed.mode === 'llm';
-    html += `<div class="card">
-      <h2>能力要求</h2>
-      <p class="muted">解析方式：${llm ? 'LLM 抽取（带原文验证，仍需逐条核对）' : '关键词预览（非 AI，不代表完整岗位分析）'}</p>
-      ${llm ? '' : `<p class="warn">${esc(AI_NOTICE)}；已降级为关键词预览，请逐条核对 JD 原文。</p>`}
-      ${parsed.requirements.length ? requirementsTableHtml(parsed.requirements) : '<p class="warn">未发现可识别的技能，请核查 JD 原文；关键词词库并不覆盖所有岗位要求。</p>'}
-      <p class="info">学历、毕业年份、地点与实习时间请先自行确认；学习计划不能替代这些条件。</p>
-      <button type="button" class="primary" data-go="prep" data-prep="计划与行动">生成学习计划 →</button>
-    </div>`;
+    html += `${llm ? '' : `<p class="warn">${esc(AI_NOTICE)}；当前为关键词预览，岗位说明仅根据 JD 职责做保守整理，请逐条核对原文。</p>`}${roleGuideHtml(activeGuide())}
+      <div class="section-heading"><p class="kicker">把 JD 翻译成初学者能懂的话</p><h1>这份岗位需要哪些技能？</h1><p>先理解“是什么”和“用在哪里”，再在每项技能下选择你目前的状态。没有标准答案，诚实自评才能排出先后。</p></div>
+      ${parsed.requirements.length ? parsed.requirements.map(skillUnderstandingHtml).join('') : '<p class="warn">未发现可识别的技能，请核查 JD 原文。</p>'}
+      <div class="sticky-next card solid"><div><strong>下一步：看看我和岗位的差距</strong><p class="muted">根据你的自评，区分从零入门、需要练习和需要作品证明的内容。</p></div><button type="button" class="primary" data-go="prep" data-prep="差距诊断">生成我的差距清单 →</button></div>`;
   }
   $('jd-body').innerHTML = html;
 }
@@ -600,11 +662,20 @@ async function parseJd(text) {
   jdBusy = true;
   render();
   const data = await post('jd', { text });
-  let requirements, mode;
-  if (validJdPayload(data)) { requirements = normalizeRequirements(data.requirements); mode = 'llm'; }
-  else { requirements = extractSkills(text); mode = 'keyword'; }
-  state.jd = { raw: text, draft: text, requirements, mode };
+  let requirements, mode, guide;
+  if (validJdPayload(data)) {
+    requirements = normalizeRequirements(data.requirements);
+    guide = normalizeGuide(data.guide, text, requirements);
+    mode = 'llm';
+  } else {
+    requirements = extractSkills(text);
+    guide = fallbackGuide(text, requirements);
+    mode = 'keyword';
+  }
+  state.jd = { raw: text, draft: text, requirements, guide, mode };
   state.practiceSkill = '';
+  state.gapAnswers = {};
+  state.weekProgress = {};
   state.practiceDraft = defaultState().practiceDraft;
   jdBusy = false;
   save();
@@ -614,12 +685,73 @@ async function parseJd(text) {
 /* ---------- 准备学习 ---------- */
 
 function renderPrep() {
-  const nav = PREP_NAVS.includes(state.prepNav) ? state.prepNav : '计划与行动';
+  const nav = PREP_NAVS.includes(state.prepNav) ? state.prepNav : '差距诊断';
   let html = subnavHtml(PREP_NAVS, nav, 'prep-nav');
-  if (nav === '计划与行动') html += prepPlanHtml();
+  if (nav === '差距诊断') html += prepGapHtml();
+  else if (nav === '第一周行动') html += prepWeekHtml();
   else if (nav === '课程与题目') html += prepCoursesHtml();
-  else html += prepTasksHtml();
+  else html += prepPlanHtml();
   $('prep-body').innerHTML = html;
+}
+
+function orderedRequirements() {
+  const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : [];
+  return [...reqs].sort((a, b) => (a.priority === '常规要求' ? 0 : 1) - (b.priority === '常规要求' ? 0 : 1));
+}
+
+function gapMeta(item) {
+  const level = state.gapAnswers[item.skill];
+  if (level === undefined) return { level: null, label: '还未自评', action: '先选择当前状态' };
+  if (level === 0) return { level, label: '从零入门', action: '先理解概念，再完成一个最小练习' };
+  if (level === 1) return { level, label: '需要练习', action: '做岗位场景练习，补齐方法与作品' };
+  return { level, label: '需要作品证明', action: '整理已有练习，补成可展示成果' };
+}
+
+function prepGapHtml() {
+  const reqs = orderedRequirements();
+  if (!reqs.length) return `<h1>我的岗位差距</h1><p class="info">先在「看岗位」解析一份 JD，并完成技能自评。</p><button type="button" class="primary" data-go="jd">去看岗位 →</button>`;
+  const answered = reqs.filter((r) => state.gapAnswers[r.skill] !== undefined).length;
+  const counts = [0, 1, 2].map((level) => reqs.filter((r) => state.gapAnswers[r.skill] === level).length);
+  const first = reqs.find((r) => state.gapAnswers[r.skill] === 0) || reqs.find((r) => state.gapAnswers[r.skill] === 1) || reqs.find((r) => state.gapAnswers[r.skill] === undefined) || reqs[0];
+  return `<div class="section-heading"><p class="kicker">不是和别人比，是看清下一步</p><h1>我和这个岗位差在哪里？</h1><p>自评只用于安排学习顺序，不是能力鉴定。常规要求优先，加分项可以在主线稳定后再补。</p></div>
+    <div class="metrics gap-metrics"><div class="metric"><span>从零入门</span><b>${counts[0]}</b></div><div class="metric"><span>需要练习</span><b>${counts[1]}</b></div><div class="metric"><span>需要作品证明</span><b>${counts[2]}</b></div></div>
+    ${answered < reqs.length ? `<p class="info">已完成 ${answered} / ${reqs.length} 项自评。建议先全部选择，再生成第一周行动。</p>` : '<p class="info">自评已完成。下面按“常规要求优先、基础缺口优先”排出行动顺序。</p>'}
+    <div class="gap-list">${reqs.map((item) => {
+      const meta = gapMeta(item);
+      return `<article class="card gap-row"><div class="gap-main"><div class="skill-title-row"><h2>${esc(item.skill)}</h2><span class="skill-state">${esc(item.priority)}</span></div><p><strong>${esc(meta.label)}：</strong>${esc(meta.action)}</p><p class="muted">${esc(requirementGuide(item).proof)}</p></div><div class="level-buttons compact" role="group" aria-label="${esc(item.skill)}差距状态">${['没接触过', '知道是什么', '做过小练习'].map((label, i) => `<button type="button" data-action="gap-level" data-skill="${esc(item.skill)}" data-level="${i}" aria-pressed="${meta.level === i}">${label}</button>`).join('')}</div></article>`;
+    }).join('')}</div>
+    <div class="sticky-next card solid"><div><strong>建议先攻：${esc(first.skill)}</strong><p class="muted">${esc(gapMeta(first).action)}。第一周只聚焦少量能力，不追求一次学完。</p></div><button type="button" class="primary" data-go="prep" data-prep="第一周行动">生成第一周行动 →</button></div>`;
+}
+
+function weekActions() {
+  const reqs = orderedRequirements();
+  const focus = reqs.filter((r) => state.gapAnswers[r.skill] !== 2).slice(0, 3);
+  const chosen = focus.length ? focus : reqs.slice(0, 3);
+  const info = chosen.map((item) => ({ item, ...requirementGuide(item) }));
+  const actions = [
+    { day: 1, title: '看懂岗位与成果', detail: `阅读岗位说明书，用自己的话说清「${activeGuide().outputs[0] || '这个岗位的成果'}」是什么，再列出 3 个不懂的问题。`, minutes: 30 },
+    { day: 2, title: `理解${info[0]?.item.skill || '第一项能力'}`, detail: info[0] ? `${info[0].meaning} 重点弄清楚它解决什么问题。` : '阅读 JD 中第一项常规要求，写下它解决的问题。', minutes: 35, skill: info[0]?.item.skill },
+    { day: 3, title: `完成${info[0]?.item.skill || '第一项能力'}最小练习`, detail: info[0]?.starter_task || '完成一个与第一项能力相关的小练习，并记录过程。', minutes: 45, skill: info[0]?.item.skill },
+    { day: 4, title: `理解${info[1]?.item.skill || '第二项能力'}`, detail: info[1] ? `${info[1].meaning} 找出它和第一项能力如何配合。` : '阅读第二项 JD 要求，写下它对应的岗位动作。', minutes: 35, skill: info[1]?.item.skill },
+    { day: 5, title: `完成${info[1]?.item.skill || '第二项能力'}最小练习`, detail: info[1]?.starter_task || '完成一个与第二项能力相关的小练习，并记录过程。', minutes: 45, skill: info[1]?.item.skill },
+    { day: 6, title: '整理第一份入门作品', detail: '把练习整理成一页：任务目标、我的做法、成果、问题和下一步。至少放入一项可展示成果。', minutes: 40 },
+    { day: 7, title: '模拟一次岗位汇报', detail: '用 3 分钟向同学或狗蛋介绍：这个岗位做什么、我练了什么、还有哪些差距。根据反馈修改作品。', minutes: 30 },
+  ];
+  return actions;
+}
+
+function prepWeekHtml() {
+  const reqs = orderedRequirements();
+  if (!reqs.length) return `<h1>我的第一周</h1><p class="info">先解析 JD 并完成技能自评，才能生成适合你的第一周行动。</p><button type="button" class="primary" data-go="jd">去看岗位 →</button>`;
+  const actions = weekActions();
+  const done = actions.filter((a) => state.weekProgress[a.day]).length;
+  return `<div class="section-heading"><p class="kicker">第一周不求学完，只求真正开始</p><h1>我的第一周行动</h1><p>每天一个小步骤，先理解岗位，再做出能展示的东西。时间可上下浮动，完成后打勾即可。</p></div>
+    <div class="week-progress card solid"><div><strong>本周进度</strong><p class="muted">已完成 ${done} / ${actions.length} 天</p></div><progress max="${actions.length}" value="${done}"></progress></div>
+    <div class="week-list">${actions.map((a) => {
+      const resource = a.skill ? resourceFor(a.skill) : null;
+      return `<article class="card week-row ${state.weekProgress[a.day] ? 'is-done' : ''}"><button type="button" class="week-check" data-action="week-toggle" data-day="${a.day}" aria-label="标记第${a.day}天${state.weekProgress[a.day] ? '未完成' : '已完成'}" aria-pressed="${!!state.weekProgress[a.day]}">${state.weekProgress[a.day] ? '✓' : a.day}</button><div class="week-main"><p class="resource-kicker">第 ${a.day} 天 · 建议 ${a.minutes} 分钟</p><h2>${esc(a.title)}</h2><p>${esc(a.detail)}</p>${resource ? `<p class="muted">需要时查资料：${linkHtml(resource.url, resource.title)} · ${esc(resource.creator)}</p>` : ''}</div></article>`;
+    }).join('')}</div>
+    <div class="sticky-next card solid"><div><strong>想把第一项能力练得更深入？</strong><p class="muted">进入岗位实操，提交具体成果并获得规则反馈。</p></div><button type="button" class="primary" data-go="work">去岗位实操 →</button></div>`;
 }
 
 function practiceEntryHtml(practice) {
@@ -650,7 +782,7 @@ function prepPlanHtml() {
   const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : null;
   if (!reqs || !reqs.length) {
     return `<h1>能力证据与个性化学习计划</h1>
-      <p class="info">先在「看岗位」载入或解析一份 JD，再制定学习计划。</p>
+      <p class="info">先在「看岗位」载入或解析一份 JD，再查看完整学习计划。</p>
       <button type="button" class="primary" data-go="jd">去看岗位 →</button>
       ${practiceRecordHtml()}`;
   }
@@ -706,8 +838,8 @@ function prepPlanHtml() {
 
 function prepTasksHtml() {
   if (!state.plan) {
-    return `<h1>执行任务</h1><p class="info">目前还没有学习计划。去「计划与行动」创建。</p>
-      <button type="button" class="primary" data-go="prep" data-prep="计划与行动">去计划与行动 →</button>`;
+    return `<h1>执行任务</h1><p class="info">目前还没有完整学习计划。去「完整学习计划」创建。</p>
+      <button type="button" class="primary" data-go="prep" data-prep="完整学习计划">去完整学习计划 →</button>`;
   }
   const { tasks } = state.plan;
   return `<h1>执行任务</h1>
@@ -832,7 +964,7 @@ function renderWork() {
     ${formHtml}
     <div id="feedback">${attempt
       ? feedbackCardHtml(attempt) + `<p class="muted">重新提交会保存为新的练习记录。</p>
-        <div class="row-buttons"><button type="button" data-go="prep" data-prep="计划与行动">返回学习计划 →</button>
+        <div class="row-buttons"><button type="button" data-go="prep" data-prep="完整学习计划">返回学习计划 →</button>
         <button type="button" class="primary" data-go="feedback">查看反馈 →</button></div>`
       : '<p class="info">提交后这里会显示导师反馈。</p>'}</div>`;
 }
@@ -904,7 +1036,7 @@ function renderFeedbackPage() {
     ${idx > 0 ? `<p class="muted">正在查看第 ${idx + 1} 条历史记录（共 ${state.attempts.length} 条）。</p>` : ''}
     ${feedbackCardHtml(attempt)}
     <div class="row-buttons">
-      <button type="button" class="primary" data-go="prep" data-prep="计划与行动">返回学习计划 →</button>
+      <button type="button" class="primary" data-go="prep" data-prep="完整学习计划">返回学习计划 →</button>
       <button type="button" data-go="work">继续练习 →</button>
     </div>`;
 }
@@ -916,6 +1048,14 @@ function buildContext() {
   if (state.jd && state.jd.raw) {
     parts.push('岗位：' + (state.jd.raw.split('\n')[0] || '').slice(0, 60));
     if (Array.isArray(state.jd.requirements)) parts.push('JD 能力要求：' + state.jd.requirements.map((r) => r.skill).join('、'));
+    if (state.jd.guide) {
+      const guide = activeGuide();
+      parts.push('岗位日常：' + guide.daily.join('；'));
+      parts.push('岗位成果：' + guide.outputs.join('；'));
+      parts.push('入门提醒：' + guide.realities.join('；'));
+    }
+    const answered = Object.entries(state.gapAnswers || {});
+    if (answered.length) parts.push('用户自评：' + answered.map(([skill, level]) => `${skill}=${['没接触过','知道是什么','做过小练习'][level]}`).join('；'));
   }
   if (state.plan && state.plan.tasks.length) {
     parts.push('计划任务：' + state.plan.tasks.slice(0, 8).map((t) => `${t.due} ${t.title}（${t.minutes}分钟）`).join('；'));
@@ -1087,6 +1227,15 @@ document.addEventListener('click', (e) => {
   else if (action === 'jd-parse') { parseJd(state.jd.draft); }
   else if (action === 'select-practice') {
     state.practiceSkill = String(btn.dataset.skill || '');
+    save(); render();
+  }
+  else if (action === 'gap-level') {
+    state.gapAnswers[btn.dataset.skill] = Number(btn.dataset.level);
+    save(); render();
+  }
+  else if (action === 'week-toggle') {
+    const day = Number(btn.dataset.day);
+    state.weekProgress[day] = !state.weekProgress[day];
     save(); render();
   }
   else if (action === 'make-plan') {

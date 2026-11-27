@@ -8,7 +8,7 @@
 
 An AI-assisted career exploration and learning workspace for students preparing for their first internship.
 
-**Understand the role · Find relevant resources · Build a plan · Learn with evidence**
+**Understand the role · Know your gap · Act in week one · Find relevant resources**
 
 [Launch RolePath](https://rolepath-practice-0k9njso9yf2.qoder.zone) · [简体中文](README.zh-CN.md) · [Capabilities](#product-capabilities) · [Architecture](#architecture) · [Deployment](#deployment)
 
@@ -22,7 +22,7 @@ An AI-assisted career exploration and learning workspace for students preparing 
 
 A job description tells a student what an employer expects. It rarely explains where to begin, which learning resources are relevant, or what a useful first project should demonstrate.
 
-RolePath connects those steps in one workspace. Users can explore example roles, analyze a real job description, review source-linked courses and practice material, create a time-budgeted learning plan, and keep notes and progress records. A note assistant accepts natural-language instructions to summarize, explain, compare or ask questions about selected learning materials.
+RolePath connects those steps in one workspace. Users can paste a job description to understand the role's daily work and outputs, learn what each required skill means, assess their current level, and receive a concrete first-week action plan. Source-linked courses and the full time-budgeted learning plan remain available as supporting material, while notes and practice records preserve evidence of progress.
 
 The product is designed primarily for first-time internship applicants and first- and second-year university students. Its intended scope spans job families rather than a single employer or specialist role. The contest build uses identifiable official documentation, institutional courses and reviewed course chapters. Where no suitable resource is available, it shows the gap and assigns an original role-specific exercise instead of a generic search page.
 
@@ -34,9 +34,9 @@ The following screenshots show RolePath's interface with fictional demonstration
 
 ### Job analysis
 
-Review extracted requirements alongside their source text in the original job description.
+Start with a beginner-friendly role guide: typical daily work, visible outputs, beginner realities and a first step. Each skill then explains what it means, how this role uses it, and offers a three-level self-assessment.
 
-![Job analysis for a fictional conversion-funnel internship](docs/screenshots/job-analysis.png)
+![Beginner-friendly job guide, skill explanations and self-assessment](docs/screenshots/job-analysis.png)
 
 ### Learning resources
 
@@ -61,7 +61,9 @@ Upload a resume, build structured resume memory, and optimize it against the cur
 | Stage | User action | Result |
 | --- | --- | --- |
 | Explore | Review example roles or bring a real vacancy | A starting direction grounded in actual work |
-| Understand | Paste or upload the job description | Requirements with source evidence and eligibility constraints |
+| Understand | Paste a job description | A role guide covering daily work, outputs and what each skill means |
+| Assess | Select current ability for each skill | A gap list separating beginner, practice and portfolio-proof needs |
+| Act | Follow the suggested seven-day sequence | A concrete first-week checklist with saved progress |
 | Find resources | Review matched lessons and practice sources | Relevant material, provenance and visible coverage gaps |
 | Plan | Describe prior experience and choose a time budget | A saved sequence of learning, review and practice tasks |
 | Learn | Complete tasks, record study time and upload notes | Check-ins, reflections and accumulated learning material |
