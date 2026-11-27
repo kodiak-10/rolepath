@@ -140,7 +140,51 @@ const NEXT_STEP_TEXTS = {
   design_test: '为假设设计一个对照验证：如分渠道对比验证码发送成功率日志，或小流量 A/B 实验。',
   write_recap: '把本次结论整理成一页复盘，并尝试用 SQL 从事件明细复算漏斗，巩固取数口径。',
   extend_window: '尝试更换时间窗口或增加渠道数据，检查结论是否稳定，再写进你的作品集。',
+  complete_deliverable: '补充具体成果：写清问题、目标对象和约束，避免只列概念。',
+  add_actions: '把方案落到可执行步骤，说明每步产出以及如何检查质量。',
+  add_validation: '补充验证方式与改进动作，说明用什么反馈判断成果是否达标。',
+  recap_jd: '把本次成果整理成一页作品说明，补上 JD 对应关系、关键取舍和验证结果。',
 };
+
+function currentPractice(skill) {
+  const raw = String(state.jd && state.jd.raw || '');
+  const role = (raw.split('\n')[0] || '目标岗位').replace(/[（(].*$/, '').trim().slice(0, 40) || '目标岗位';
+  const reqs = Array.isArray(state.jd.requirements) ? state.jd.requirements : [];
+  const tasks = state.plan && Array.isArray(state.plan.tasks) ? state.plan.tasks : [];
+  const task = skill ? tasks.find((t) => t.skill === skill && t.kind !== '学习') || tasks.find((t) => t.skill === skill) : null;
+  const requirement = reqs.find((r) => r.skill === skill) || reqs[0];
+  const selectedSkill = skill || (task && task.skill) || (requirement && requirement.skill) || '';
+  const evidence = (requirement && (requirement.detail || requirement.evidence)) || (task && task.acceptance) || raw.slice(0, 240);
+  const isDemo = /教学演示\s*JD/.test(raw) && /漏斗/.test(raw);
+  const key = `${role}|${selectedSkill}`;
+  if (isDemo) return { kind: 'funnel', key: 'funnel-demo', role, skill: selectedSkill, title: '转化漏斗分析' };
+  return {
+    kind: 'jd', key, role, skill: selectedSkill,
+    title: selectedSkill ? `${selectedSkill}专项练习` : '岗位专项练习',
+    task: practiceFor(selectedSkill, evidence),
+    evidence,
+    next: task || null,
+  };
+}
+
+function gradeJdPractice(submission) {
+  const deliverable = String(submission.deliverable || '').trim();
+  const cause = String(submission.cause || '').trim();
+  const verification = String(submission.verification || '').trim();
+  const deliverableOk = deliverable.length >= 40;
+  const causeOk = cause.length >= 25;
+  const verificationOk = verification.length >= 25;
+  const nextSteps = [];
+  if (!deliverableOk) nextSteps.push('complete_deliverable');
+  if (!causeOk) nextSteps.push('add_actions');
+  if (!verificationOk) nextSteps.push('add_validation');
+  nextSteps.push('recap_jd');
+  return {
+    score: 40 * deliverableOk + 30 * causeOk + 30 * verificationOk,
+    deliverable_ok: deliverableOk, cause_ok: causeOk, verification_ok: verificationOk,
+    next_steps: [...new Set(nextSteps)],
+  };
+}
 
 const AI_NOTICE = 'AI 暂时不可用，请稍后重试';
 const VIEW_LABELS = { space: '我的空间', jd: '看岗位', prep: '准备学习', work: '岗位实操', feedback: '查看反馈' };
@@ -284,8 +328,8 @@ function defaultState() {
     view: 'space', spaceNav: '概览', prepNav: '计划与行动',
     jd: { raw: '', draft: '', requirements: null, mode: null },
     sliders: { hours: 8, days: 14 },
-    plan: null, attempts: [], notes: [],
-    practiceDraft: { step: 0, rate_b: 0, rate_a: 0, cause: '', verification: '' },
+    plan: null, attempts: [], notes: [], practiceSkill: '',
+    practiceDraft: { step: 0, rate_b: 0, rate_a: 0, deliverable: '', cause: '', verification: '' },
     doll: { open: false, messages: [], draft: '', mode: 'chat' },
     feedbackIndex: 0,
   };
@@ -434,7 +478,7 @@ function render() {
 function activityLines() {
   const rows = [];
   if (state.plan) rows.push({ time: state.plan.created_at, text: `学习计划 · ${state.plan.tasks.length} 个任务 · ${state.plan.hours} 小时/周 × ${state.plan.days} 天` });
-  for (const a of state.attempts.slice(0, 5)) rows.push({ time: a.created_at, text: `岗位练习 · 得分 ${a.feedback.score}/100 · ${a.submission.step_label}` });
+  for (const a of state.attempts.slice(0, 5)) rows.push({ time: a.created_at, text: `岗位练习 · 得分 ${a.feedback.score}/100 · ${a.practice_title || a.submission.step_label || '岗位专项练习'}` });
   for (const n of state.notes.slice(0, 5)) rows.push({ time: n.updated_at || n.created_at, text: `学习笔记 · ${n.title}` });
   return rows.sort((a, b) => String(b.time).localeCompare(String(a.time))).slice(0, 6);
 }
@@ -560,6 +604,8 @@ async function parseJd(text) {
   if (validJdPayload(data)) { requirements = normalizeRequirements(data.requirements); mode = 'llm'; }
   else { requirements = extractSkills(text); mode = 'keyword'; }
   state.jd = { raw: text, draft: text, requirements, mode };
+  state.practiceSkill = '';
+  state.practiceDraft = defaultState().practiceDraft;
   jdBusy = false;
   save();
   render();
@@ -576,24 +622,27 @@ function renderPrep() {
   $('prep-body').innerHTML = html;
 }
 
-function practiceEntryHtml() {
+function practiceEntryHtml(practice) {
   const attempt = latestAttempt();
-  const next = state.plan && state.plan.tasks.length ? state.plan.tasks[0] : null;
+  const next = practice.next || (state.plan && state.plan.tasks.length ? state.plan.tasks[0] : null);
   return `<div class="practice-entry">
-    <h2>岗位练习 · 转化漏斗分析</h2>
-    <p>以数据分析实习生身份完成一个模拟导师任务：对比渠道注册漏斗，定位流失环节并提交分析结论，获得规则点评。</p>
+    <h2>岗位练习 · ${esc(practice.title)}</h2>
+    <p>${practice.kind === 'funnel'
+      ? '以数据分析实习生身份完成一个模拟导师任务：对比渠道注册漏斗，定位流失环节并提交分析结论，获得规则点评。'
+      : `围绕「${esc(practice.role)}」的${practice.skill ? `「${esc(practice.skill)}」要求` : '岗位要求'}完成专项练习：${esc(practice.task)}`}</p>
     ${next ? `<p class="muted">当前应做：${esc(next.title)} · ${esc(next.due)} 截止 · ${next.minutes} 分钟</p>` : ''}
     <button type="button" class="primary" data-go="work">进入实习工作台 →</button>
-    ${attempt ? `<p class="muted">最近提交：${esc(attempt.created_at)} · 得分 ${attempt.feedback.score}/100<br>下一步建议：${esc(NEXT_STEP_TEXTS[attempt.feedback.next_steps[0]])}</p>` : ''}
+    ${attempt && attempt.practice_key === practice.key ? `<p class="muted">最近提交：${esc(attempt.created_at)} · 得分 ${attempt.feedback.score}/100<br>下一步建议：${esc(NEXT_STEP_TEXTS[attempt.feedback.next_steps[0]])}</p>` : ''}
   </div>`;
 }
 
 function practiceRecordHtml() {
   const attempt = latestAttempt();
   if (!attempt) return '';
-  return `<div class="card"><h2>岗位练习记录 · 转化漏斗分析</h2>
+  const title = attempt.practice_title || (attempt.submission && attempt.submission.kind !== 'jd' ? '转化漏斗分析' : '岗位专项练习');
+  return `<div class="card"><h2>岗位练习记录 · ${esc(title)}</h2>
     <p>最近提交：${esc(attempt.created_at)} · 得分 ${attempt.feedback.score}/100</p>
-    <p>下一步建议：${esc(NEXT_STEP_TEXTS[attempt.feedback.next_steps[0]])}</p>
+    <p>下一步建议：${esc(NEXT_STEP_TEXTS[attempt.feedback.next_steps[0]] || '')}</p>
     <button type="button" data-go="work">继续练习 →</button></div>`;
 }
 
@@ -638,7 +687,7 @@ function prepPlanHtml() {
     ${tasks.length ? `<div class="rp-now"><strong>当前推荐行动</strong> ${esc(tasks[0].title)}</div>` : ''}
     <h2>按技能准备：资料 · 题目 · 实操</h2>`;
   const skills = [...new Set(tasks.map((t) => t.skill))];
-  const practiceSkill = skills.includes('运营指标') ? '运营指标' : skills[0];
+  if (!skills.includes(state.practiceSkill)) state.practiceSkill = skills.includes('运营指标') ? '运营指标' : skills[0];
   for (const skill of skills) {
     const group = tasks.filter((t) => t.skill === skill);
     const withResource = group.find((t) => t.resource_url);
@@ -649,7 +698,7 @@ function prepPlanHtml() {
       <details><summary>任务验收标准</summary>
         ${group.map((t) => `<p><strong>${esc(t.title)}</strong><br>${esc(t.acceptance)}<br><span class="muted">${esc(t.matching_reason)}</span></p>`).join('')}
       </details>
-      ${skill === practiceSkill ? practiceEntryHtml() : ''}
+      ${skill === state.practiceSkill ? practiceEntryHtml(currentPractice(skill)) : `<button type="button" data-action="select-practice" data-skill="${esc(skill)}">练习这项能力 →</button>`}
     </div>`;
   }
   return html;
@@ -727,24 +776,10 @@ function funnelTableHtml() {
 
 function renderWork() {
   const d = state.practiceDraft;
-  const planTask = state.plan && state.plan.tasks.length
-    ? (state.plan.tasks.find((t) => t.kind !== '学习') || state.plan.tasks[0]) : null;
-  const attempt = latestAttempt();
-  $('work-body').innerHTML = `<p class="kicker">教学演示 · 导师、任务与数据均为模拟</p>
-    <h1>实习工作台 · 转化漏斗分析</h1>
-    <p class="muted">教学演示：导师、任务与数据均为模拟，不代表真实企业或真实用户数据。</p>
-    <div class="card solid mentor-card">
-      <h2>导师任务</h2>
-      <p>你是增长团队的数据分析实习生。请对比两个获客渠道近一周的注册漏斗，找出渠道 B 相对渠道 A 流失异常严重的环节，计算该环节两个渠道的转化率，并提出可能原因与验证方法。</p>
-      <p class="muted">交付要求：定位一个环节；给出两个转化率数字；把原因写成可检验的假设；给出至少一种验证方法。</p>
-      ${planTask ? `<p class="muted">来自当前计划：${esc(planTask.title)}（${esc(planTask.due)} 截止）</p>` : ''}
-    </div>
-    <div class="card">
-      <h2>练习数据 · 近一周注册漏斗（模拟数据）</h2>
-      ${funnelTableHtml()}
-      <p class="muted">口径提示：环节转化率 = 下一环节人数 ÷ 上一环节人数 × 100%。请逐环节自行计算，不要除以最初访问量。</p>
-    </div>
-    <form class="card solid" id="submission">
+  const practice = currentPractice(state.practiceSkill);
+  const planTask = practice.next;
+  const attempt = state.attempts.find((a) => a.practice_key === practice.key) || null;
+  const formHtml = practice.kind === 'funnel' ? `<form class="card solid" id="submission">
       <label>渠道 B 流失异常严重的环节
         <select id="step">${STEPS.map((s, i) => `<option value="${i}" ${Number(d.step) === i ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
       </label>
@@ -764,7 +799,37 @@ function renderWork() {
       </label>
       ${workError ? '<p class="error" id="form-error">请填写可能原因和验证方法后再提交。</p>' : ''}
       <button type="submit" class="primary">提交分析结论</button>
-    </form>
+    </form>` : `<form class="card solid" id="submission">
+      <label>练习成果（至少 40 字，写出具体内容而非学习计划）
+        <textarea id="deliverable" maxlength="4000" rows="6" placeholder="提交你的方案、文案、分析或其他练习成果…">${esc(d.deliverable)}</textarea>
+      </label>
+      <label>执行步骤与取舍（至少 25 字）
+        <textarea id="cause" maxlength="2000" rows="4" placeholder="说明如何完成、关键步骤以及为什么这样处理…">${esc(d.cause)}</textarea>
+      </label>
+      <label>验证方式与改进（至少 25 字）
+        <textarea id="verification" maxlength="2000" rows="4" placeholder="说明如何检查成果、收集反馈以及下一步改进…">${esc(d.verification)}</textarea>
+      </label>
+      ${workError ? '<p class="error" id="form-error">请完整填写练习成果、执行步骤与验证方式后再提交。</p>' : ''}
+      <button type="submit" class="primary">提交练习成果</button>
+    </form>`;
+  $('work-body').innerHTML = `<p class="kicker">${practice.kind === 'funnel' ? '教学演示 · 导师、任务与数据均为模拟' : '岗位专项练习 · 按当前 JD 生成'}</p>
+    <h1>实习工作台 · ${esc(practice.title)}</h1>
+    <p class="muted">${practice.kind === 'funnel' ? '教学演示：导师、任务与数据均为模拟，不代表真实企业或真实用户数据。' : `目标岗位：${esc(practice.role)}${practice.skill ? ` · 当前能力：${esc(practice.skill)}` : ''}。导师任务为规则生成，点评仅检查提交完整度，不替代真人评审。`}</p>
+    <div class="card solid mentor-card">
+      <h2>导师任务</h2>
+      <p>${practice.kind === 'funnel'
+        ? '你是增长团队的数据分析实习生。请对比两个获客渠道近一周的注册漏斗，找出渠道 B 相对渠道 A 流失异常严重的环节，计算该环节两个渠道的转化率，并提出可能原因与验证方法。'
+        : esc(practice.task)}</p>
+      <p class="muted">交付要求：${practice.kind === 'funnel' ? '定位一个环节；给出两个转化率数字；把原因写成可检验的假设；给出至少一种验证方法。' : '提交具体练习成果；说明执行步骤与取舍；给出验证方式和改进动作。'}</p>
+      ${practice.kind === 'jd' && practice.evidence ? `<details><summary>对应 JD 要求</summary><p class="evidence">${esc(practice.evidence)}</p></details>` : ''}
+      ${planTask ? `<p class="muted">来自当前计划：${esc(planTask.title)}（${esc(planTask.due)} 截止）</p>` : ''}
+    </div>
+    ${practice.kind === 'funnel' ? `<div class="card">
+      <h2>练习数据 · 近一周注册漏斗（模拟数据）</h2>
+      ${funnelTableHtml()}
+      <p class="muted">口径提示：环节转化率 = 下一环节人数 ÷ 上一环节人数 × 100%。请逐环节自行计算，不要除以最初访问量。</p>
+    </div>` : ''}
+    ${formHtml}
     <div id="feedback">${attempt
       ? feedbackCardHtml(attempt) + `<p class="muted">重新提交会保存为新的练习记录。</p>
         <div class="row-buttons"><button type="button" data-go="prep" data-prep="计划与行动">返回学习计划 →</button>
@@ -775,31 +840,48 @@ function renderWork() {
 function feedbackCardHtml(attempt) {
   const fb = attempt.feedback;
   const sub = attempt.submission;
-  const [strengths, fixes] = feedbackPoints(fb);
-  return `<div class="card solid feedback-card"><h2>导师反馈（规则点评，非 AI 生成）</h2>
+  const isJd = sub.kind === 'jd';
+  const [strengths, fixes] = isJd ? jdFeedbackPoints(fb) : feedbackPoints(fb);
+  return `<div class="card solid feedback-card"><h2>${esc(attempt.practice_title || '导师反馈')}（${isJd ? '完整度规则点评，非 AI 生成' : '规则点评，非 AI 生成'}）</h2>
     <p class="muted">本次得分</p><div class="score">${fb.score} / 100</div>
     ${strengths.length ? `<h2>做得好的地方</h2><ul class="points good">${strengths.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
     ${fixes.length ? `<h2>需要修正</h2><ul class="points fixes">${fixes.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
-    <h2>下一步建议</h2><ul class="points">${fb.next_steps.map((c) => `<li>${esc(NEXT_STEP_TEXTS[c])}</li>`).join('')}</ul>
+    <h2>下一步建议</h2><ul class="points">${fb.next_steps.map((c) => `<li>${esc(NEXT_STEP_TEXTS[c] || c)}</li>`).join('')}</ul>
     <details><summary>查看本次提交</summary>
-      <p>环节：${esc(sub.step_label)}</p>
-      <p>渠道 B 转化率：${esc(sub.rate_b)}% · 渠道 A 转化率：${esc(sub.rate_a)}%</p>
-      <p>可能原因：${esc(sub.cause)}</p>
-      <p>验证方法：${esc(sub.verification)}</p>
+      ${isJd ? `<p>练习成果：${esc(sub.deliverable)}</p><p>执行步骤与取舍：${esc(sub.cause)}</p><p>验证方式与改进：${esc(sub.verification)}</p>`
+        : `<p>环节：${esc(sub.step_label)}</p><p>渠道 B 转化率：${esc(sub.rate_b)}% · 渠道 A 转化率：${esc(sub.rate_a)}%</p><p>可能原因：${esc(sub.cause)}</p><p>验证方法：${esc(sub.verification)}</p>`}
     </details>
     <p class="muted">提交时间：${esc(attempt.created_at)}</p></div>`;
 }
 
+function jdFeedbackPoints(fb) {
+  const strengths = [], fixes = [];
+  if (fb.deliverable_ok) strengths.push('练习成果达到基本完整度，提交了具体内容。');
+  else fixes.push('练习成果不足 40 字，请补全问题、对象、方案或作品内容。');
+  if (fb.cause_ok) strengths.push('执行步骤与取舍说明完整。');
+  else fixes.push('执行步骤不足 25 字，请补上具体做法和关键取舍。');
+  if (fb.verification_ok) strengths.push('包含验证方式与改进动作。');
+  else fixes.push('验证方式不足 25 字，请说明如何检查效果并继续改进。');
+  return [strengths, fixes];
+}
+
 function submitPractice() {
   const d = state.practiceDraft;
+  const practice = currentPractice(state.practiceSkill);
   const cause = String(d.cause || '').trim();
   const verification = String(d.verification || '').trim();
-  if (!cause || !verification) { workError = true; render(); return; }
+  if (practice.kind === 'funnel') {
+    if (!cause || !verification) { workError = true; render(); return; }
+    const step = Number(d.step) || 0;
+    const submission = { step, step_label: STEPS[step], rate_b: Number(d.rate_b) || 0, rate_a: Number(d.rate_a) || 0, cause, verification };
+    state.attempts.unshift({ created_at: nowStamp(), practice_key: practice.key, practice_title: `导师反馈 · ${practice.title}`, submission, feedback: grade(submission) });
+  } else {
+    const deliverable = String(d.deliverable || '').trim();
+    if (!deliverable || !cause || !verification) { workError = true; render(); return; }
+    const submission = { kind: 'jd', deliverable, cause, verification };
+    state.attempts.unshift({ created_at: nowStamp(), practice_key: practice.key, practice_title: `导师反馈 · ${practice.title}`, submission, feedback: gradeJdPractice(submission) });
+  }
   workError = false;
-  const step = Number(d.step) || 0;
-  const submission = { step, step_label: STEPS[step], rate_b: Number(d.rate_b) || 0, rate_a: Number(d.rate_a) || 0, cause, verification };
-  const feedback = grade(submission);
-  state.attempts.unshift({ created_at: nowStamp(), submission, feedback });
   state.feedbackIndex = 0;
   save();
   render();
@@ -841,9 +923,14 @@ function buildContext() {
   }
   const attempt = latestAttempt();
   if (state.view === 'work' || attempt) {
-    parts.push('练习数据（模拟）：' + JSON.stringify(funnelRows().map(([name, counts]) => ({ 渠道: name, ...Object.fromEntries(STAGES.map((s, i) => [s, counts[i]])) }))));
-    parts.push('环节列表：' + STEPS.join('；'));
-    parts.push('口径：环节转化率 = 下一环节人数 ÷ 上一环节人数 × 100%');
+    const practice = currentPractice(state.practiceSkill);
+    if (practice.kind === 'funnel') {
+      parts.push('练习数据（模拟）：' + JSON.stringify(funnelRows().map(([name, counts]) => ({ 渠道: name, ...Object.fromEntries(STAGES.map((s, i) => [s, counts[i]])) }))));
+      parts.push('环节列表：' + STEPS.join('；'));
+      parts.push('口径：环节转化率 = 下一环节人数 ÷ 上一环节人数 × 100%');
+    } else {
+      parts.push('当前岗位练习：' + practice.title + '；任务：' + practice.task + '；JD要求：' + practice.evidence);
+    }
   }
   if (attempt) {
     parts.push('最近提交：' + JSON.stringify(attempt.submission));
@@ -998,6 +1085,10 @@ document.addEventListener('click', (e) => {
   else if (action === 'prep-nav') { state.prepNav = btn.dataset.nav; save(); render(); }
   else if (action === 'demo-load') { state.jd.draft = JD_TEXT; navigate('jd'); parseJd(JD_TEXT); }
   else if (action === 'jd-parse') { parseJd(state.jd.draft); }
+  else if (action === 'select-practice') {
+    state.practiceSkill = String(btn.dataset.skill || '');
+    save(); render();
+  }
   else if (action === 'make-plan') {
     const reqs = state.jd.requirements;
     if (!Array.isArray(reqs) || !reqs.length) { planMsg = '先在「看岗位」解析一份 JD。'; render(); return; }
@@ -1066,6 +1157,7 @@ function syncDraftInput(el) {
   else if (id === 'step') { state.practiceDraft.step = Number(el.value); save(); }
   else if (id === 'rate-b') { state.practiceDraft.rate_b = el.value; save(); }
   else if (id === 'rate-a') { state.practiceDraft.rate_a = el.value; save(); }
+  else if (id === 'deliverable') { state.practiceDraft.deliverable = el.value; save(); }
   else if (id === 'cause') { state.practiceDraft.cause = el.value; save(); }
   else if (id === 'verification') { state.practiceDraft.verification = el.value; save(); }
   else if (id === 'doll-input') { state.doll.draft = el.value; save(); }
