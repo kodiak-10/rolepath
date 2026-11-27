@@ -19,7 +19,7 @@
   </nav>
 </header>
 <main>
-  <p id="storage-warning" class="warn" hidden>浏览器不允许保存本地记录；本次练习记录在关闭页面后不会保留。</p>
+  <p id="storage-warning" class="warn" hidden>浏览器不允许在标签页内暂存记录；刷新或关闭页面后，本次练习记录不会保留。</p>
   <section id="view-space" aria-label="我的空间"><div id="space-body"></div></section>
   <section id="view-jd" aria-label="看岗位" hidden><div id="jd-body"></div></section>
   <section id="view-prep" aria-label="准备学习" hidden><div id="prep-body"></div></section>
@@ -27,8 +27,8 @@
   <section id="view-feedback" aria-label="查看反馈" hidden><div id="feedback-body"></div></section>
 </main>
 <footer class="muted">
-  <div class="foot-chips"><span class="foot-chip">记录仅存本浏览器</span><span class="foot-chip">localStorage</span><span class="foot-chip">免登录演示</span></div>
-  <p class="foot-line">RolePath 参赛演示 · 练习记录仅保存在本浏览器（localStorage），不代表能力认证。</p>
+  <div class="foot-chips"><span class="foot-chip">记录仅存当前标签页</span><span class="foot-chip">sessionStorage</span><span class="foot-chip">免登录演示</span><button type="button" class="foot-chip foot-clear" data-action="clear-session">清除本次记录</button></div>
+  <p class="foot-line">RolePath 参赛演示 · 练习记录仅暂存在当前标签页（sessionStorage），关闭后自动清除，不代表能力认证。</p>
 </footer>
 
 <button type="button" id="doll-launcher" class="doll-launcher" aria-label="狗蛋助手" aria-expanded="false"></button>

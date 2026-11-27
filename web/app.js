@@ -342,7 +342,8 @@ function planTasks(requirements, hoursPerWeek, days, live) {
 
 /* ---------- 状态与持久化 ---------- */
 
-const STORAGE_KEY = 'rolepath_web_practice_v2';
+const STORAGE_KEY = 'rolepath_web_practice_session_v3';
+const LEGACY_STORAGE_KEY = 'rolepath_web_practice_v2';
 let storageOk = true;
 
 function defaultState() {
@@ -357,9 +358,10 @@ function defaultState() {
   };
 }
 
+try { localStorage.removeItem(LEGACY_STORAGE_KEY); } catch (e) {}
 let state = defaultState();
 try {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = sessionStorage.getItem(STORAGE_KEY);
   if (raw) {
     const saved = JSON.parse(raw);
     if (saved && typeof saved === 'object') {
@@ -377,8 +379,30 @@ try {
 } catch (e) { storageOk = false; }
 
 function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   catch (e) { storageOk = false; const el = document.getElementById('storage-warning'); if (el) el.hidden = false; }
+}
+
+function clearSession() {
+  if (jdBusy || dollBusy) {
+    window.alert('请等待当前任务完成后再清除记录。');
+    return;
+  }
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  try { localStorage.removeItem(LEGACY_STORAGE_KEY); } catch (e) {}
+  state = defaultState();
+  jdError = '';
+  dollNote = null;
+  dollResume = { target: '', text: '', memory: null, sourceName: '' };
+  planMsg = '';
+  workError = false;
+  noteError = '';
+  editingNoteId = null;
+  storageOk = true;
+  const warning = document.getElementById('storage-warning');
+  if (warning) warning.hidden = true;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* 瞬态（不持久化）：请求进行中、提示、笔记编辑等 */
@@ -592,7 +616,7 @@ function spaceHistoryHtml() {
     <div class="table-wrap"><table><thead><tr><th>提交时间</th><th>得分</th><th>定位环节</th><th></th></tr></thead>
     <tbody>${state.attempts.map((a, i) => `<tr><td>${esc(a.created_at)}</td><td class="num">${a.feedback.score} / 100</td><td>${esc(a.submission.step_label)}</td>
       <td><button type="button" data-action="history-view" data-index="${i}">查看这次反馈 →</button></td></tr>`).join('')}</tbody></table></div>
-    <p class="muted">记录保存在本浏览器；重新提交会保存为新的练习记录。</p></div>`;
+    <p class="muted">记录保存在当前标签页；重新提交会保存为新的练习记录。</p></div>`;
 }
 
 /* ---------- 看岗位 ---------- */
@@ -850,7 +874,7 @@ function prepTasksHtml() {
     <details><summary>任务验收标准与匹配依据</summary>
       ${tasks.map((t) => `<p><strong>${esc(t.title)}</strong><br>${esc(t.acceptance)}${t.question ? `<br>${linkHtml(t.question.url, `原题：${t.question.title}（${t.question.source || ''}）`)}` : ''}<br><span class="muted">${esc(t.matching_reason)}</span></p>`).join('')}
     </details>
-    <p class="muted">资源链接指向原站；是否需登录、付费及地区限制以原站为准。计划保存在本浏览器。</p></div>`;
+    <p class="muted">资源链接指向原站；是否需登录、付费及地区限制以原站为准。计划保存在当前标签页。</p></div>`;
 }
 
 /* ---------- 课程与题目（按当前 JD 自动匹配） ---------- */
@@ -1222,6 +1246,7 @@ document.addEventListener('click', (e) => {
   if (!btn) return;
   const action = btn.dataset.action;
   if (action === 'space-nav') { state.spaceNav = btn.dataset.nav; save(); render(); }
+  else if (action === 'clear-session') { clearSession(); }
   else if (action === 'prep-nav') { state.prepNav = btn.dataset.nav; save(); render(); }
   else if (action === 'demo-load') { state.jd.draft = JD_TEXT; navigate('jd'); parseJd(JD_TEXT); }
   else if (action === 'jd-parse') { parseJd(state.jd.draft); }

@@ -226,6 +226,8 @@ summary:hover{color:var(--rp-amber)}
 footer{max-width:1080px;margin:0 auto;padding:0 24px 34px;text-align:center}
 .foot-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 10px}
 .foot-chip{font-size:12px;color:var(--rp-kicker);background:rgba(255,255,255,.04);border:1px solid var(--rp-hair);border-radius:8px;padding:3px 10px;box-shadow:var(--rp-inset)}
+.foot-clear{cursor:pointer;transition:color .16s ease,border-color .16s ease,background .16s ease}
+.foot-clear:hover{color:var(--rp-amber);border-color:rgba(226,167,95,.45);background:rgba(226,167,95,.08)}
 .foot-line{margin:0}
 
 /* 狗蛋：暗玻璃启动钮 + 浮动导师面板（移动端为底部抽屉） */
